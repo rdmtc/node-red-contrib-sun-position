@@ -15,6 +15,11 @@ Install of a specific Version in Redmatic (on a Homematic):
 
 This can be also used to go back to an older Version.
 
+### 2.0.11: maintenance release
+
+- general
+  - Fixed bug with wrong default values for Input type in blind-control and within-time-switch node, added console error in case it occurs again.
+
 ### 2.0.10: maintenance release
 
 - rerelease, no changed

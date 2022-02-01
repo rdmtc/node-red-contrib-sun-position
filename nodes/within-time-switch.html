@@ -172,7 +172,7 @@
                     }
                 },
                 startTimeAltType: {
-                    value: 'none'
+                    value: 'entered'
                 },
                 startOffsetAlt: {
                     value: 0,
@@ -237,7 +237,7 @@
                     }
                 },
                 endTimeAltType: {
-                    value: 'none'
+                    value: 'entered'
                 },
                 endOffsetAlt: {
                     value: 0,
@@ -376,8 +376,8 @@
                         typeProp: 'startTimeType',
                         valueProp: 'startTime',
                         width: 'calc(100% - 110px)',
-                        defaultType: node.startTimeType || types.TimeEntered.value,
-                        defaultValue: node.startTime || '',
+                        defaultType: types.TimeEntered.value,
+                        defaultValue: '',
                         types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             const plVType = $('#node-input-startTime').typedInput('type');
@@ -437,8 +437,8 @@
                         typeProp: 'timeRestrictionsType',
                         valueProp: 'timeRestrictions',
                         width: 'calc(100% - 255px)',
-                        defaultType: node.timeRestrictionsType || types.Undefined.value,
-                        defaultValue: node.timeRestrictions || '',
+                        defaultType: types.Undefined.value,
+                        defaultValue: '',
                         types: [
                             {
                                 value: types.Undefined.value,
@@ -506,8 +506,8 @@
                         typeProp: 'endTimeType',
                         valueProp: 'endTime',
                         width: 'calc(100% - 110px)',
-                        defaultType: node.endTimeType || types.TimeEntered.value,
-                        defaultValue: node.endTime || '',
+                        defaultType: types.TimeEntered.value,
+                        defaultValue: '',
                         types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             const plVType = $('#node-input-endTime').typedInput('type');
@@ -568,8 +568,8 @@
                         typeProp: 'propertyStartType',
                         valueProp: 'propertyStart',
                         width: 'calc(100% - 110px)',
-                        defaultType: node.propertyStartType  || types.Undefined.value,
-                        defaultValue: node.propertyStartValue || '' ,
+                        defaultType: types.Undefined.value,
+                        defaultValue: '' ,
                         types: [types.Undefined,
                             'msg',
                             'flow',
@@ -650,8 +650,8 @@
                         typeProp: 'startTimeAltType',
                         valueProp: 'startTimeAlt',
                         width: 'calc(100% - 110px)',
-                        defaultType: node.startTimeAltType || types.TimeEntered.value,
-                        defaultValue: node.startTimeAlt || '',
+                        defaultType: types.TimeEntered.value,
+                        defaultValue: '',
                         types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
@@ -706,8 +706,8 @@
                         typeProp: 'propertyEndType',
                         valueProp: 'propertyEnd',
                         width: 'calc(100% - 110px)',
-                        defaultType: node.propertyEndType  || types.Undefined.value,
-                        defaultValue: node.propertyEndValue || '' ,
+                        defaultType: types.Undefined.value,
+                        defaultValue: '' ,
                         types: [types.Undefined,
                             'msg',
                             'flow',
@@ -789,8 +789,8 @@
                         typeProp: 'endTimeAltType',
                         valueProp: 'endTimeAlt',
                         width: 'calc(100% - 110px)',
-                        defaultType: node.endTimeAltType || types.TimeEntered.value,
-                        defaultValue: node.endTimeAlt || '',
+                        defaultType: types.TimeEntered.value,
+                        defaultValue: '',
                         types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
                         onFocus(_type, _value) {
                             if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
@@ -848,7 +848,7 @@
                         typeProp: 'withinTimeValueType',
                         valueProp: 'withinTimeValue',
                         width: 'calc(100% - 110px)',
-                        defaultType: node.withinTimeValueType  || types.MsgInput.value,
+                        defaultType: types.MsgInput.value,
                         defaultValue: node.withinTimeValue,
                         types: [
                             types.MsgInput,
@@ -897,7 +897,7 @@
                         typeProp: 'outOfTimeValueType',
                         valueProp: 'outOfTimeValue',
                         width: 'calc(100% - 110px)',
-                        defaultType: node.outOfTimeValueType  || types.MsgInput.value,
+                        defaultType: types.MsgInput.value,
                         defaultValue: node.outOfTimeValue,
                         types: [
                             types.MsgInput,
