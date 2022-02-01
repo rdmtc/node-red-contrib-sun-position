@@ -284,7 +284,14 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
-
+        if (!this.positionConfig) {
+            node.status({
+                fill: 'red',
+                shape: 'dot',
+                text: 'Node not properly configured!!'
+            });
+            return null;
+        }
         this.timeStart = {
             type: config.startTimeType,
             value : config.startTime,

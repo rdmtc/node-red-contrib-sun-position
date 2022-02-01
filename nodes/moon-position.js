@@ -21,6 +21,14 @@ module.exports = function (RED) {
         this.rules = config.rules || [];
         this.azimuthPos = {};
         const node = this;
+        if (!this.positionConfig) {
+            node.status({
+                fill: 'red',
+                shape: 'dot',
+                text: 'Node not properly configured!!'
+            });
+            return;
+        }
 
         this.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined

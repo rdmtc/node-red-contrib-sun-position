@@ -19,6 +19,7 @@ This can be also used to go back to an older Version.
 
 - general
   - Fixed bug with wrong default values for Input type in blind-control and within-time-switch node, added console error in case it occurs again.
+  -  additional check for missing position configuration
 
 ### 2.0.10: maintenance release
 

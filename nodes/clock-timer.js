@@ -312,6 +312,14 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
         const node = this;
+        if (!this.positionConfig) {
+            node.status({
+                fill: 'red',
+                shape: 'dot',
+                text: 'Node not properly configured!!'
+            });
+            return;
+        }
 
         if (!Array.isArray(config.results)) {
             config.results = [{
