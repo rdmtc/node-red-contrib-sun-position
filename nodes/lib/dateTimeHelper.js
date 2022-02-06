@@ -2113,9 +2113,9 @@ function topicReplace(topic, topicAttrs) {
             const key = v.substr(2, v.length - 3);
             const rx = new RegExp('\\${' + key + '}', 'g');
             const rkey = key.toLowerCase();
-            topic = topic.replace(rx, topicAttrsLower[rkey] || '');
+            const res = Object.prototype.hasOwnProperty.call(topicAttrsLower, rkey) ? topicAttrsLower[rkey] : '';
+            topic = topic.replace(rx, res);
         });
     }
-
     return topic;
 }
