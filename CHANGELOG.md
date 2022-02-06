@@ -18,7 +18,7 @@ This can be also used to go back to an older Version.
 ### 2.0.13: bug fixes
 
 - general
-  - Fixed bug with  string with placeholder, if value is 0 it was replaced with an empty string #400
+  - Fixed bug with string with placeholder, if value is 0 it was replaced with an empty string #400
 
 ### 2.0.12: bug fixes
 
