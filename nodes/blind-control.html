@@ -1,4 +1,25 @@
 <!DOCTYPE HTML>
+<!--
+This code is licensed under the Apache License Version 2.0.
+
+Copyright (c) 2022 Robert Gester
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+-->
 
 <script type="text/javascript">
     (function() {
@@ -840,7 +861,7 @@
                                     result += ' - ' +msToTime(osmillis * -1);
                                 }
                             } else {
-                                result += ' offset <var>' + RED.nodes.getType('position-config').getValueLabel(node, t, v) + '</var>';
+                                result += ' offset <var>' + RED.nodes.getType('position-config').getRDGNodeValLbl(node, t, v) + '</var>';
                                 // result += ' * ' + data.multiplier/1000 + 's';
                             }
                         }
@@ -940,11 +961,11 @@
                                     } else if (cond.valueType === 'pdmPhaseCheck') {
                                         result += 'Moon phase is <var>' + cond.value + '</var>';
                                     } else {
-                                        result += '<var>' + RED.nodes.getType('position-config').getValueLabel(node, cond.valueType, cond.value, null, length) + '</var>';
+                                        result += '<var>' + RED.nodes.getType('position-config').getRDGNodeValLbl(node, cond.valueType, cond.value, null, null, null, length) + '</var>';
                                         result += ' ' + cond.operatorText;
                                         const oc = getOperandCount(selFields, cond.operator);
                                         if (oc > 1) {
-                                            const ttext = RED.nodes.getType('position-config').getValueLabel(node, cond.thresholdType, cond.threshold, null, length);
+                                            const ttext = RED.nodes.getType('position-config').getRDGNodeValLbl(node, cond.thresholdType, cond.threshold, null, null, null, length);
                                             result += ' ';
                                             result += ttext;
                                             if (enh && enh.cond && enh.cond[i] && enh.cond[i].operand) {
@@ -973,7 +994,7 @@
                                     result += '<div>';
                                     result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
                                     result += data.time.operatorText;
-                                    result += ' <var>' + RED.nodes.getType('position-config').getValueLabel(node, data.time.type, data.time.value, null, length) + '</var>';
+                                    result += ' <var>' + RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.time.type, data.time.value, null, null, null, length) + '</var>';
                                     result += _getOffsetText(node, data.time.offsetType, data.time.offset, data.time.multiplier);
                                     if (enh && enh.timeReg && enh.timeReg.text) {
                                         result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.timeReg.text + '</code>]</span>';
@@ -983,7 +1004,7 @@
                                         result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin');
                                         result += '</span> <var>';
-                                        result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMin.type, data.timeMin.value, null, length);
+                                        result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.timeMin.type, data.timeMin.value, null, null, null, length);
                                         result += '</var>';
                                         result += _getOffsetText(node, data.timeMin.offsetType, data.timeMin.offset, data.timeMin.multiplier);
                                         if (enh && enh.timeMin && enh.timeMin.text) {
@@ -995,7 +1016,7 @@
                                         result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax');
                                         result += '</span> <var>';
-                                        result += RED.nodes.getType('position-config').getValueLabel(node, data.timeMax.type, data.timeMax.value, null, length);
+                                        result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.timeMax.type, data.timeMax.value, null, null, null, length);
                                         result += '</var>';
                                         result += _getOffsetText(node, data.timeMax.offsetType, data.timeMax.offset, data.timeMax.multiplier);
                                         if (enh && enh.timeMax && enh.timeMax.text) {
@@ -1127,7 +1148,7 @@
                                         result += ': </span> ';
                                         result += data.level.operatorText;
                                         result += ' <var>';
-                                        result += RED.nodes.getType('position-config').getValueLabel(node, data.level.type, data.level.value, null, length);
+                                        result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.level.type, data.level.value, null, null, null, length);
                                         result += '</var></div>';
                                     } else {
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelND');
@@ -1136,7 +1157,7 @@
                                         result += '<div class="indent-slatPos-text"> <i class="fa fa-slack" aria-hidden="true"></i><span>';
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlat');
                                         result += ': </span> <var>';
-                                        result += RED.nodes.getType('position-config').getValueLabel(node, data.slat.type, data.slat.value, null, length);
+                                        result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.slat.type, data.slat.value, null, null, null, length);
                                         result += '</var>';
                                     }
                                     if (data.topic) {
@@ -1163,19 +1184,19 @@
                                     result += '<div class="indent-level-text"> <i class="fa fa-chevron-circle-down" aria-hidden="true"></i><span>';
                                     result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevelMinimum');
                                     result += ': </span><var>';
-                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.level.type, data.level.value, null, length);
+                                    result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.level.type, data.level.value, null, null, null, length);
                                     result += '</var></div>';
                                 } else if (data.level.operator === cNBC_RULE_OP.levelMaxOversteer) {
                                     result += '<div class="indent-level-text"> <i class="fa fa-chevron-circle-up" aria-hidden="true"></i><span>';
                                     result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleBlindLevelMaximum');
                                     result += ': </span><var>';
-                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.level.type, data.level.value, null, length);
+                                    result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.level.type, data.level.value, null, null, null, length);
                                     result += '</var></div>';
                                 } else if (data.level.operator === cNBC_RULE_OP.slatOversteer) {
                                     result += '<div class="indent-slatPos-text"> <i class="fa fa-slack" aria-hidden="true"></i><span>';
                                     result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlatOversteer');
                                     result += ': </span><var>';
-                                    result += RED.nodes.getType('position-config').getValueLabel(node, data.slat.type, data.slat.value, null, length);
+                                    result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.slat.type, data.slat.value, null, null, null, length);
                                     result += '</var>';
                                     if (data.importance > 0) {
                                         result += '<div class="indent-resetOverwrite-text"> <i class="fa fa-hand-spock-o" aria-hidden="true"></i><span>';
@@ -2589,6 +2610,7 @@
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
                             'flow',
@@ -2596,7 +2618,13 @@
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
                         ]
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
@@ -2637,6 +2665,7 @@
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
                             'flow',
@@ -2644,7 +2673,13 @@
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
                         ]
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
@@ -2685,6 +2720,7 @@
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
                             'flow',
@@ -2692,7 +2728,13 @@
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
                         ]
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');

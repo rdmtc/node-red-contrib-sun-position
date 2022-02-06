@@ -1,3 +1,25 @@
+/*
+ * This code is licensed under the Apache License Version 2.0.
+ *
+ * Copyright (c) 2022 Robert Gester
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ */
+
 /********************************************
  * within-time-switch:
  *********************************************/
@@ -285,13 +307,17 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
         if (!this.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
-            return null;
+            node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+            setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
+            return;
         }
+        if (this.positionConfig.checkNode(error => {
+            node.error(error);
+            setstate(node, { error });
+        }, false)) {
+            return;
+        }
+
         this.timeStart = {
             type: config.startTimeType,
             value : config.startTime,
@@ -438,7 +464,7 @@ module.exports = function (RED) {
         this.lastMsgObj = null;
         const node = this;
 
-        this.on('input', function (msg, send, done) {
+        node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
@@ -446,8 +472,8 @@ module.exports = function (RED) {
             try {
                 node.debug('--------- within-time-switch - input');
                 if (!node.positionConfig) {
-                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
-                    setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')});
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+                    node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     return null;
                 }
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
@@ -514,19 +540,8 @@ module.exports = function (RED) {
             return null;
         });
 
-        try {
-            if (!node.positionConfig) {
-                node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
-                setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state') });
-                return null;
-            }
-            node.status({});
-        } catch (err) {
-            node.error(err.message);
-            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-            setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
-        }
-        return null;
+        node.status({});
+        return;
     }
 
     RED.nodes.registerType('within-time-switch', withinTimeSwitchNode);

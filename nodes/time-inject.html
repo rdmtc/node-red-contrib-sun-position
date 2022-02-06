@@ -1,5 +1,27 @@
 <!DOCTYPE HTML>
 
+<!--
+This code is licensed under the Apache License Version 2.0.
+
+Copyright (c) 2022 Robert Gester
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+-->
+
 <script type="text/javascript">
     (function() {
         /**
@@ -20,7 +42,7 @@
                         }
                         return RED.nodes.getType('position-config').clipValueLength($.trim(prop.fT.split(',')[0]), 20);
                     }
-                    return RED.nodes.getType('position-config').getValueLabel(node, prop.vt, prop.v, (prop.oT !== 'none') ? prop.o : null);
+                    return RED.nodes.getType('position-config').getRDGNodeValLbl(node, prop.vt, prop.v, prop.oT, prop.o, prop.oM);
                 }
                 return '{}';
             };
@@ -71,7 +93,7 @@
             while (result.payloadLbl === '' && el.length > pos) {
                 const p = el[pos];
                 if (p.pt !== 'msgTopic') {
-                    result.payloadLbl = RED.nodes.getType('position-config').getValueLabel(this, p.pt, p.p, null) + '=' + getPropTLbl(p);
+                    result.payloadLbl = RED.nodes.getType('position-config').getRDGNodeValLbl(this, p.pt, p.p) + '=' + getPropTLbl(p);
                 }
                 pos++;
             }
@@ -129,6 +151,8 @@
             icon: 'injectSun-white.svg',
             inputs: 0,
             outputs: 1,
+            paletteLabel: 'inject enhanced',
+            align: 'left',
             defaults: {
                 name: { value: '' },
                 nameInt: { value: '' },
@@ -656,8 +680,6 @@
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
             },
-            paletteLabel: 'inject enhanced',
-            align: 'left',
             oneditprepare() {
                 setTimeout(() => {
                     $('.is-to-show-initial').show();
@@ -846,9 +868,9 @@
                                         types.SunAzimuthRad,
                                         types.SunElevationRad,
                                         types.SunTimeByAzimuth,
-                                        types.SunTimeByElevation,
+                                        types.SunTimeByElevationObj,
                                         types.SunTimeByAzimuthRad,
-                                        types.SunTimeByElevationRad,
+                                        types.SunTimeByElevationObjRad,
                                         types.isDST,
                                         types.WeekOfYear,
                                         types.WeekOfYearEven,
@@ -1341,7 +1363,13 @@
                             'global',
                             'env',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
@@ -1429,7 +1457,13 @@
                             'global',
                             'env',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
@@ -1899,11 +1933,19 @@
                 };
 
                 const getTimeId = () => {
-                    const part1 = RED.nodes.getType('position-config').getValueLabel(this,
-                        $('#node-input-time').typedInput('type'), $('#node-input-time').typedInput('value'), $('#node-input-offset').typedInput('value'));
+                    const part1 = RED.nodes.getType('position-config').getRDGNodeValLbl(this,
+                        $('#node-input-time').typedInput('type'),
+                        $('#node-input-time').typedInput('value'),
+                        $('#node-input-offset').typedInput('type'),
+                        $('#node-input-offset').typedInput('value'),
+                        $('#node-input-offsetMultiplier').val());
                     if ($('#node-input-property').typedInput('type') !== 'none') {
-                        return (part1 + '/' + RED.nodes.getType('position-config').getValueLabel(this,
-                            $('#node-input-timeAlt').typedInput('type'), $('#node-input-timeAlt').typedInput('value'), $('#node-input-timeAltOffset').typedInput('value'))) +
+                        return (part1 + '/' + RED.nodes.getType('position-config').getRDGNodeValLbl(this,
+                            $('#node-input-timeAlt').typedInput('type'),
+                            $('#node-input-timeAlt').typedInput('value'),
+                            $('#node-input-timeAltOffset').typedInput('type'),
+                            $('#node-input-timeAltOffset').typedInput('value'),
+                            $('#node-input-timeAltOffsetMultiplier').val())) +
                                 getTimeConstraints();
                     }
                     return part1 + getTimeConstraints();
@@ -1939,11 +1981,19 @@
                     this.nameInt += propData.payloadLbl;
                     this.nameInt += getInterval();
                 } else if ($('#node-input-injectTypeSelect').val() === 'interval-time') {
-                    this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
-                        $('#node-input-time').typedInput('type'), $('#node-input-time').typedInput('value'), $('#node-input-offset').typedInput('value'), 20);
+                    this.nameInt += RED.nodes.getType('position-config').getRDGNodeValLbl(this,
+                        $('#node-input-time').typedInput('type'),
+                        $('#node-input-time').typedInput('value'),
+                        $('#node-input-offset').typedInput('type'),
+                        $('#node-input-offset').typedInput('value'),
+                        $('#node-input-offsetMultiplier').val(), 20);
                     this.nameInt += ' - ';
-                    this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
-                        $('#node-input-timeEnd').typedInput('type'), $('#node-input-timeEnd').typedInput('value'), $('#node-input-timeEndOffset').typedInput('value'), 20);
+                    this.nameInt += RED.nodes.getType('position-config').getRDGNodeValLbl(this,
+                        $('#node-input-timeEnd').typedInput('type'),
+                        $('#node-input-timeEnd').typedInput('value'),
+                        $('#node-input-timeEndOffset').typedInput('type'),
+                        $('#node-input-timeEndOffset').typedInput('value'),
+                        $('#node-input-timeEndOffsetMultiplier').val(), 20);
                     this.nameInt += getTimeConstraints();
                     if (this.nameInt.length > 35) {
                         this.nameInt += ' =...';
@@ -1953,11 +2003,19 @@
                     }
                     this.nameInt += getInterval();
                 } else if ($('#node-input-injectTypeSelect').val() === 'interval-amount') {
-                    this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
-                        $('#node-input-time').typedInput('type'), $('#node-input-time').typedInput('value'), $('#node-input-offset').typedInput('value'), 20);
+                    this.nameInt += RED.nodes.getType('position-config').getRDGNodeValLbl(this,
+                        $('#node-input-time').typedInput('type'),
+                        $('#node-input-time').typedInput('value'),
+                        $('#node-input-offset').typedInput('type'),
+                        $('#node-input-offset').typedInput('value'),
+                        $('#node-input-offsetMultiplier').val(), 20);
                     this.nameInt += ' - ';
-                    this.nameInt += RED.nodes.getType('position-config').getValueLabel(this,
-                        $('#node-input-timeEnd').typedInput('type'), $('#node-input-timeEnd').typedInput('value'), $('#node-input-timeEndOffset').typedInput('value'), 20);
+                    this.nameInt += RED.nodes.getType('position-config').getRDGNodeValLbl(this,
+                        $('#node-input-timeEnd').typedInput('type'),
+                        $('#node-input-timeEnd').typedInput('value'),
+                        $('#node-input-timeEndOffset').typedInput('type'),
+                        $('#node-input-timeEndOffset').typedInput('value'),
+                        $('#node-input-timeEndOffsetMultiplier').val(), 20);
                     this.nameInt += getTimeConstraints();
                     if (this.nameInt.length > 35) {
                         this.nameInt += ' =...';

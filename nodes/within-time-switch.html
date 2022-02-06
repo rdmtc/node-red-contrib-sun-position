@@ -1,4 +1,25 @@
 <!DOCTYPE HTML>
+<!--
+This code is licensed under the Apache License Version 2.0.
+
+Copyright (c) 2022 Robert Gester
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+-->
 
 <script type="text/javascript">
     (function() {
@@ -287,11 +308,12 @@
             },
             outputLabels: ['within time', 'out of time'],
             label() {
-                const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
+                const getConcatId = (type1, value1, offset1Type, offset1, multipier1, property, type2, value2, offset2Type, offset2, multipier2) => {
                     if (property !== 'none' && property !== '' && value2) {
-                        return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, offset1, 12) + '/' + RED.nodes.getType('position-config').getValueLabel(this, type2, value2, offset2, 12);
+                        return  RED.nodes.getType('position-config').getRDGNodeValLbl(this, type1, value1, offset1Type, offset1, multipier1, 12) + '/' +
+                                RED.nodes.getType('position-config').getRDGNodeValLbl(this, type2, value2, offset2Type, offset2, multipier2, 12);
                     }
-                    return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, offset1, 12);
+                    return RED.nodes.getType('position-config').getRDGNodeValLbl(this, type1, value1, offset1Type, offset1, multipier1, 12);
                 };
 
                 if (this.name) {
@@ -299,17 +321,22 @@
                 }
 
                 if (this.startTime && this.endTime) {
-                    return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
-                        this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
+                    return getConcatId(this.startTimeType, this.startTime, this.startOffsetType, this.startOffset, this.startOffsetMultiplier,
+                        this.propertyStartType,
+                        this.startTimeAltType, this.startTimeAlt, this.startOffsetAltType, this.startOffsetAlt, this.startOffsetAltMultiplier) +
                             ' - ' +
-                            getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
-                                this.endTimeAltType, this.endTimeAlt, this.endOffsetAlt);
+                            getConcatId(this.endTimeType, this.endTime, this.endOffsetType, this.endOffset, this.endOffsetMultiplier,
+                                this.propertyEndType,
+                                this.endTimeAltType, this.endTimeAlt, this.endOffsetAltType, this.endOffsetAlt, this.endOffsetAltMultiplier);
                 }
 
                 return 'within-time';
             },
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
+            },
+            inputLabels() {
+                return this._('node-red-contrib-sun-position/position-config:common.label.inputPort');
             },
             paletteLabel: 'within-time',
             align: 'left',
@@ -378,7 +405,24 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
+                        ],
                         onFocus(_type, _value) {
                             const plVType = $('#node-input-startTime').typedInput('type');
                             const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
@@ -508,7 +552,24 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
+                        ],
                         onFocus(_type, _value) {
                             const plVType = $('#node-input-endTime').typedInput('type');
                             const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
@@ -652,7 +713,24 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
+                        ],
                         onFocus(_type, _value) {
                             if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
                                 ($('#node-input-propertyStart').typedInput('type') === 'none')) {
@@ -791,7 +869,24 @@
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.pdsTimeByElevationNext,
+                            types.pdsTimeByElevationNextRad,
+                            types.pdsTimeByElevationRise,
+                            types.pdsTimeByElevationRiseRad,
+                            types.pdsTimeByElevationSet,
+                            types.pdsTimeByElevationSetRad
+                        ],
                         onFocus(_type, _value) {
                             if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
                                 ($('#node-input-propertyEnd').typedInput('type') === 'none')) {
@@ -877,9 +972,9 @@
                             types.SunAzimuthRad,
                             types.SunElevationRad,
                             types.SunTimeByAzimuth,
-                            types.SunTimeByElevation,
+                            types.SunTimeByElevationObj,
                             types.SunTimeByAzimuthRad,
-                            types.SunTimeByElevationRad,
+                            types.SunTimeByElevationObjRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -926,9 +1021,9 @@
                             types.SunAzimuthRad,
                             types.SunElevationRad,
                             types.SunTimeByAzimuth,
-                            types.SunTimeByElevation,
+                            types.SunTimeByElevationObj,
                             types.SunTimeByAzimuthRad,
-                            types.SunTimeByElevationRad,
+                            types.SunTimeByElevationObjRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -1183,6 +1278,7 @@
         <span data-i18n="[html]within-time-switch.tips.documentation" style="word-wrap:break-word;"></span>
     </div>
 </script>
+
 <style>
     hr {
         width: 100%

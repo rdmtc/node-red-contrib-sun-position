@@ -1,4 +1,25 @@
 <!DOCTYPE HTML>
+<!--
+This code is licensed under the Apache License Version 2.0.
+
+Copyright (c) 2022 Robert Gester
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+-->
 
 <script type="text/javascript">
     (function() {
@@ -257,22 +278,62 @@
             },
 
             /**
+             * convert a time with a multipier to a string
+             * @param {*} node - the node object for getting i18N Data (node._())
+             * @param {number} mp - the multipier
+             * @param {number} v - the value
+             * @returns {string} the time as string
+             */
+            convertMsToString(node, mp, v) {
+                if (!mp) {
+                    return String(v);
+                }
+                mp = parseInt(mp);
+                if (mp === 604800000) {
+                    if (v === 1) {
+                        return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.week');
+                    }
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.weeks');
+                } else if (mp === 86400000) {
+                    if (v === 1) {
+                        return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.day');
+                    }
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.days');
+                } else if (mp === 3600000) {
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.hour');
+                } else if (mp === 60000) {
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.min');
+                } else if (mp === 1000) {
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.sec');
+                }
+                return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.ms');
+            },
+
+            /**
              * get the label for a typed input vlaue
              * @param {*} node - the node object for getting i18N Data (node._())
              * @param {string} t - the type of the value
              * @param {string} v - the value
-             * @param {number} [offset] - a optional offset to the value
+             * @param {number} [o] - a optional offset to the value
+             * @param {number} [oT] - a optional type of the offset to the value
+             * @param {number} [oM] - a optional multiplier of the offset
              * @param {number} [l] - the desired maximum length (default = 30)
              * @returns {string} the value clipped to the given length
              */
-            getValueLabel(node, t, v, offset, l) {
-                // console.log('getValueLabel global');
+            getRDGNodeValLbl(node, t, v, oT, o, oM, l) {
+                // console.log('getRDGNodeValLbl global');
                 l = l || 30;
                 let suffix = '';
-                if (offset && offset > 0) {
-                    suffix = '↷';
-                } else if (offset && offset < 0) {
-                    suffix = '↶';
+                if (o && oT !== 'none') {
+                    if (oT && (oT.startsWith('randomNum') || oT.startsWith('randmNum'))) {
+                        suffix += '⤨';
+                    } else if (o > 0) {
+                        suffix += '⤽';
+                        suffix += RED.nodes.getType('position-config').convertMsToString(node, oM, o);
+                    } else if (o < 0) {
+                        suffix += '⤼';
+                        suffix += RED.nodes.getType('position-config').convertMsToString(node, oM, o);
+                    } else suffix = '↷';
                 }
 
                 switch (t) {
@@ -340,14 +401,34 @@
                         return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
                     case 'pdsCalcElevationRad':
                         return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
-                    case 'pdsTimeByElevation':
-                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevation')}"${suffix}`;
+                    case 'numAzimuth':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.numAzimuth')}"${suffix}`;
+                    case 'numAzimuthRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.numAzimuthRad')}"${suffix}`;
+                    case 'numAltitude':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.numAltitude')}"${suffix}`;
+                    case 'numAltitudeRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.numAltitudeRad')}"${suffix}`;
                     case 'pdsTimeByAzimuth':
-                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuth')}"${suffix}`;
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuth')}"${suffix}`;
+                    case 'pdsTimeByAzimuthRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuthRad')}"${suffix}`;
+                    case 'pdsTimeByElevation':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObj')}"${suffix}`;
                     case 'pdsTimeByElevationRad':
-                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevationRad')}"${suffix}`;
-                    case 'SunTimeByAzimuthRad':
-                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuthRad')}"${suffix}`;
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObjRad')}"${suffix}`;
+                    case 'pdsTimeByElevationNext':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNext')}"${suffix}`;
+                    case 'pdsTimeByElevationNextRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNextRad')}"${suffix}`;
+                    case 'pdsTimeByElevationRise':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRise')}"${suffix}`;
+                    case 'pdsTimeByElevationRiseRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRiseRad')}"${suffix}`;
+                    case 'pdsTimeByElevationSet':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSet')}"${suffix}`;
+                    case 'pdsTimeByElevationSetRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSetRad')}"${suffix}`;
                     case 'pdmCalcData':
                         return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"${suffix}`;
                     case 'pdmPhase':
