@@ -1,11 +1,10 @@
 # node-red-contrib-sun-position for NodeRED
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/rdmtc/node-red-contrib-sun-position/graphs/commit-activity)
-[![HitCount](http://hits.dwyl.io/rdmtc/node-red-contrib-sun-position.svg)](http://hits.dwyl.io/rdmtc/node-red-contrib-sun-position)
-[![Dependencies Status](https://img.shields.io/david/rdmtc/node-red-contrib-sun-position.svg)](https://david-dm.org/rdmtc/node-red-contrib-sun-position)
+[![npm version](https://badge.fury.io/js/node-red-contrib-sun-position.svg)](https://badge.fury.io/js/node-red-contrib-sun-position)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Issues](https://img.shields.io/github/issues/rdmtc/node-red-contrib-sun-position.svg?style=flat-square)](https://github.com/rdmtc/node-red-contrib-sun-position/issues)
-
+[![code style](https://img.shields.io/badge/Code%20Style-eslint-green.svg)](https://eslint.org/)
 [![NPM](https://nodei.co/npm/node-red-contrib-sun-position.png)](https://nodei.co/npm/node-red-contrib-sun-position/)
 
 <!-- [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) -->

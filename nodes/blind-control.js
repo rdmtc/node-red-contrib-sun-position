@@ -548,12 +548,11 @@ module.exports = function (RED) {
         // node.debug(`first loop count:${ node.rules.count } lastuntil:${ node.rules.lastUntil}`);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
-            // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noFrom=${rule.time.operator !== cRuleFrom} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
             if (!rule.enabled) { continue; }
             if (rule.time && rule.time.operator === cRuleFrom) { continue; }
             const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
             if (res) {
-                // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
+                // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) level.operator=${ res.level.operator }`);
                 if (res.level.operator === cRule.slatOversteer) {
                     ruleSlatOvs = res;
                 } else if (res.level.operator === cRule.topicOversteer) {
@@ -565,9 +564,7 @@ module.exports = function (RED) {
                 } else {
                     ruleSel = res;
                     ruleindex = i;
-                    if (rule.time && rule.time.operator !== cRuleFrom) {
-                        break;
-                    }
+                    break;
                 }
             }
         }
