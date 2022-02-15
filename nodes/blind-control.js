@@ -240,7 +240,7 @@ module.exports = function (RED) {
         }
         let newPos = hlp.getMsgNumberValue(msg, ['blindPosition', 'position', 'level', 'blindLevel'], ['manual', 'levelOverwrite']);
         let nExpire = hlp.getMsgNumberValue(msg, 'expire', 'expire');
-        if (String(msg.topic).includes('noExpir')) { // hlp.getMsgTopicContains(msg, 'noExpir')) {
+        if (msg.topic && String(msg.topic).includes('noExpir')) { // hlp.getMsgTopicContains(msg, 'noExpir')) {
             nExpire = -1;
         }
         if (!isNaN(newPos)) {

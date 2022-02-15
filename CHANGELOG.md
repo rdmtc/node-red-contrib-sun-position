@@ -14,10 +14,16 @@ Install of a specific Version in Redmatic (on a Homematic):
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@2.0.0`
 
 This can be also used to go back to an older Version.
+### 2.1.1: bug fixes
+
+- clock-timer
+  - merged with blind-control
+
 ### 2.1.0: bug fixes
 
 - blind-control
   - fix bug of handling not time constrained rules be first to last evaluated
+  
 ### 2.0.13: bug fixes
 
 - general
