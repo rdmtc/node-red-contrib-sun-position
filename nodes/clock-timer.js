@@ -188,19 +188,12 @@ module.exports = function (RED) {
             if (!rule.enabled) { continue; }
             if (rule.time && rule.time.operator === cRuleFrom) { continue; }
             // const res = fktCheck(rule, r => (r >= nowNr));
-            let res = null;
-            if (!rule.time || rule.time.operator === cRuleFrom) {
-                res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
-            } else {
-                res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
-            }
+            const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
             if (res) {
                 // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
                 ruleSel = res;
                 ruleindex = i;
-                if (rule.time && rule.time.operator !== cRuleFrom) {
-                    break;
-                }
+                break;
             }
         }
 
