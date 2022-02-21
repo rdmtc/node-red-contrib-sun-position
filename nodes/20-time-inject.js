@@ -105,6 +105,7 @@ module.exports = function (RED) {
         if (node.positionConfig.checkNode(error => {
             node.error(error);
             node.status({fill: 'red', shape: 'dot', text: error });
+            delete node.positionConfig;
         }, false)) {
             return;
         }
