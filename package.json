@@ -98,6 +98,7 @@
       "position-config": "nodes/10-position-config.js",
       "time-inject": "nodes/20-time-inject.js",
       "within-time-switch": "nodes/21-within-time-switch.js",
+      "delay-until": "nodes/22-delay-until.js",
       "sun-position": "nodes/30-sun-position.js",
       "moon-position": "nodes/31-moon-position.js",
       "time-comp": "nodes/60-time-comp.js",
