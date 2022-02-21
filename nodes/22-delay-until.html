@@ -1,0 +1,521 @@
+<!DOCTYPE HTML>
+<!--
+This code is licensed under the Apache License Version 2.0.
+
+Copyright (c) 2022 Robert Gester
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+-->
+
+<script type="text/javascript">
+    RED.nodes.registerType('rdg-delay-until', {
+        category:     'time and astro',
+        color:        '#E6E0F8',
+        icon:         'hourglass-white.svg',
+        inputs:       1,
+        outputs:      1,
+        paletteLabel: 'delay until',
+        align: 'left',
+        defaults: {
+            name: { value: '' },
+            positionConfig: {
+                value: '',
+                type: 'position-config',
+                required: true
+            },
+            time: {
+                value: '',
+                required: true,
+                validate: RED.validators.typedInput('timeType')
+            },
+            timeType: { value: 'entered' },
+            offset: {
+                value: 0,
+                validate: RED.validators.typedInput('offsetType')
+            },
+            offsetType: { value: 'none' },
+            offsetMultiplier: {
+                value: 60000,
+                required: true,
+                validate(_v) {
+                    return (
+                        !isNaN(_v) ||
+                        this.offsetType === 'none' ||
+                        $('#node-input-offset').typedInput('type') === 'none'
+                    );
+                }
+            },
+            queuingBehavior: {
+                value: 'all',
+                required: true
+            },
+            flushMsgs: {
+                value: '',
+                validate: RED.validators.typedInput('flushMsgsType')
+            },
+            flushMsgsType: { value: 'none' },
+            flushMsgsValue: {
+                value: '',
+                validate(_v) {
+                    return (
+                        (_v !== '') ||
+                        (this.flushMsgsType === 'none') ||
+                        ($('#node-input-flushMsgs').typedInput('type') === 'none')
+                    );
+                }
+            },
+            dropMsgs: {
+                value: '',
+                validate: RED.validators.typedInput('flushMsgsType')
+            },
+            dropMsgsType: { value: 'none' },
+            dropMsgsValue: {
+                value: '',
+                validate(_v) {
+                    return (
+                        (_v !== '') ||
+                        (this.dropMsgsType === 'none') ||
+                        ($('#node-input-dropMsgs').typedInput('type') === 'none')
+                    );
+                }
+            },
+            enqueueMsg: {
+                value: '',
+                validate: RED.validators.typedInput('enqueueMsgType')
+            },
+            enqueueMsgType: { value: 'none' },
+            enqueueMsgValue: {
+                value: '',
+                validate(_v) {
+                    return (
+                        (_v !== '') ||
+                        (this.dropMsgsType === 'none') ||
+                        ($('#node-input-enqueueMsg').typedInput('type') === 'none')
+                    );
+                }
+            },
+            ctrlPropSet: {
+                value: false
+            },
+            ctrlPropValue: {
+                value: ''
+            },
+            tsCompare: {
+                value: '0'
+            }
+        },
+        label() {
+            if (this.name) return this.name;
+            const label = RED.nodes.getType('position-config').getRDGNodeValLbl(this, this.timeType, this.time, this.offsetType, this.offset, this.offsetMultiplier);
+            if (label === '' || label === '""') {
+                return this._('delay-until.label.name');
+            }
+            return label;
+        },
+        labelStyle() {
+            return this.name ? 'node_label_italic' : '';
+        },
+        inputLabels() {
+            return this._('node-red-contrib-sun-position/position-config:common.label.inputPort');
+        },
+        outputLabels(_index) {
+            return this._('node-red-contrib-sun-position/position-config:common.label.outputPort');
+        },
+        oneditprepare() {
+            setTimeout(() => {
+                $('.is-to-show-initially').show();
+                $('.is-to-hide-initially').hide();
+            }, 300);
+
+            $('.enhanced-row-toggle').on('click', () => {
+                $('.enhanced-row').toggle(); // .hide();
+            });
+
+            const node = this;
+            const $nodeConfig = $('#node-input-positionConfig');
+            const setup = function(node) {
+                /* global getTypes setupTInput getBackendData bdDateToTime initializeValue appendOptions */
+
+                const types = getTypes(node);
+                let onInit = true;
+                // #region initialize
+                /**
+                * update multiplier settings from a previous version
+                * @param {number} mp - the multiplier value
+                * @param {string} name - the name of the element
+                * @param {function} onchange - the function to be called on field change
+                * @returns {number} the updated multiplier value
+                */
+                function multiplierUpdate(mp, name, onchange) {
+                    const $field = $('#node-input-' + name);
+                    appendOptions(node, $field, 'multiplier', data => (data.id > 0));
+                    if (mp === null || typeof mp === 'undefined' || isNaN(mp) || mp === '' || mp === 0) {
+                        mp = 60000;
+                    } else {
+                        mp = parseFloat(mp);
+                    }
+                    $field.val(mp);
+                    $field.on('change', onchange);
+                    return mp;
+                }
+                // #endregion initialize
+
+                setupTInput(node, {
+                    typeProp: 'timeType',
+                    valueProp: 'time',
+                    width: 'calc(100% - 110px)',
+                    defaultType: types.TimeEntered.value,
+                    defaultValue: '',
+                    types: [
+                        types.TimeEntered,
+                        types.TimeSun,
+                        types.TimeMoon,
+                        'msg',
+                        'flow',
+                        'global',
+                        'env',
+                        types.SunTimeByAzimuth,
+                        types.SunTimeByElevationNext,
+                        types.SunTimeByElevationRise,
+                        types.SunTimeByElevationSet,
+                        types.SunTimeByAzimuthRad,
+                        types.SunTimeByElevationNextRad,
+                        types.SunTimeByElevationRiseRad,
+                        types.SunTimeByElevationSetRad
+                    ],
+                    onChange(_type, _value) {
+                        if ( onInit) { return; }
+                        getBackendData(d => {
+                            const $div = $('#node-input-time-div');
+                            const titleOrg = $div.attr('titleOrg');
+                            $div.attr('title', bdDateToTime(d, ' - ') + titleOrg);
+                        }, {
+                            nodeId:         node.id,
+                            kind:           'getTimeData',
+                            config:         $nodeConfig.val(),
+                            type:           $('#node-input-time').typedInput('type'),
+                            value:          $('#node-input-time').typedInput('value'),
+                            offsetType:     $('#node-input-offset').typedInput('type'),
+                            offset:         $('#node-input-offset').typedInput('value'),
+                            multiplier:     $('#node-input-offsetMultiplier').val(),
+                            noOffsetError:  true
+                        });
+                    }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'offsetType',
+                    valueProp: 'offset',
+                    width: 'calc(100% - 255px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: 0,
+                    types: [
+                        types.Undefined,
+                        'num',
+                        'msg',
+                        'flow',
+                        'global',
+                        'env',
+                        types.randomNumber,
+                        types.randmNumCachedDay,
+                        types.randmNumCachedWeek
+                    ],
+                    onChange(_type, _value) {
+                        if ( onInit) { return; }
+                        const type = $('#node-input-offset').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-offsetMultiplier').prop('disabled', true);
+                        } else {
+                            $('#node-input-offsetMultiplier').prop('disabled', false);
+                        }
+                        $('#node-input-time').change();
+                    }
+                });
+                node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier', () => $('#node-input-time').change());
+
+                $('#node-input-ctrlPropSet').on('change', (_type, _value) => {
+                    if ( onInit) { return; }
+                    const typef = $('#node-input-flushMsgs').typedInput('type');
+                    const typed = $('#node-input-dropMsgs').typedInput('type');
+                    if (typef === types.Undefined.value &&
+                        typed === types.Undefined.value) {
+                        $('.row-controlMsgPropDefined').hide();
+                        $('.row-ctrlPropSet').hide();
+                    } else {
+                        $('.row-controlMsgPropDefined').show();
+                        const typee = $('#node-input-enqueueMsg').typedInput('type');
+                        if (typee === types.Undefined.value) {
+                            $('#node-input-enqueueMsgValue').prop('disabled', true);
+                            $('.row-ctrlPropSet').hide();
+                        } else {
+                            $('#node-input-enqueueMsgValue').prop('disabled', false);
+                            $('.row-ctrlPropSet').show();
+                            $('#node-input-ctrlPropValue').prop('disabled', !$('#node-input-ctrlPropSet').is(':checked'));
+                        }
+                    }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'flushMsgsType',
+                    valueProp: 'flushMsgs',
+                    width: 'calc(100% - 255px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: 0,
+                    types: [
+                        types.Undefined,
+                        'msg'
+                    ],
+                    onChange(_type, _value) {
+                        if ( onInit) { return; }
+                        const type = $('#node-input-flushMsgs').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-flushMsgsValue').prop('disabled', true);
+                            $('.row-ctrlPropSet').hide();
+                        } else {
+                            $('#node-input-flushMsgsValue').prop('disabled', false);
+                        }
+                        $('#node-input-flushMsgsValue').change();
+                        $('#node-input-ctrlPropSet').change();
+                    }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'dropMsgsType',
+                    valueProp: 'dropMsgs',
+                    width: 'calc(100% - 255px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: 0,
+                    types: [
+                        types.Undefined,
+                        'msg'
+                    ],
+                    onChange(_type, _value) {
+                        if ( onInit) { return; }
+                        const type = $('#node-input-dropMsgs').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-dropMsgsValue').prop('disabled', true);
+                        } else {
+                            $('#node-input-dropMsgsValue').prop('disabled', false);
+                        }
+                        $('#node-input-dropMsgsValue').change();
+                        $('#node-input-ctrlPropSet').change();
+                    }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'enqueueMsgType',
+                    valueProp: 'enqueueMsg',
+                    width: 'calc(100% - 255px)',
+                    defaultType: types.Undefined.value,
+                    defaultValue: 0,
+                    types: [
+                        types.Undefined,
+                        'msg'
+                    ],
+                    onChange(_type, _value) {
+                        $('#node-input-ctrlPropSet').change();
+                    }
+                });
+
+                // #region Enhanced settings
+                initializeValue(node, 'tsCompare', 0);
+                const chkVal = (name, val) => {
+                    return (node[name] === null) ||
+                            (typeof node[name] === 'undefined') ||
+                            ($('#node-input-' + name).val() === val) ||
+                            ($('#node-input-' + name).is(':checked') === val) ||
+                            (parseFloat($('#node-input-' + name).val()) === val);
+                };
+
+                if (chkVal('tsCompare', 0)) {
+                    $('.enhanced-row').hide();
+                } else {
+                    $('.enhanced-row').show();
+                }
+                // #endregion Enhanced settings
+                onInit = false;
+                $('#node-input-offset').change();
+                $('#node-input-flushMsgs').change();
+                $('#node-input-dropMsgs').change();
+            }; // setup
+
+            $.getScript('sun-position/js/htmlglobal.js')
+                .done((_data, _textStatus, _jqxhr) => {
+                    try {
+                        setup(node);
+                    } catch (err) {
+                        console.log("failed to setup editor"); // eslint-disable-line
+                        console.log(err); // eslint-disable-line
+                        console.log(err.stack); // eslint-disable-line
+                    }
+                })
+                .fail((_jqxhr, settings, exception) => {
+                    console.log("failed to load htmlglobal.js"); // eslint-disable-line
+                    console.log(exception); // eslint-disable-line
+                    console.log(exception.stack); // eslint-disable-line
+                });
+        },
+        oneditsave()     {
+            this.timeType = $('#node-input-time').typedInput('type');
+            this.offsetType = $('#node-input-offset').typedInput('type');
+            this.flushMsgsType = $('#node-input-flushMsgs').typedInput('type');
+            this.dropMsgsType = $('#node-input-dropMsgs').typedInput('type');
+        }
+    });</script>
+
+<script type="text/html" data-template-name="rdg-delay-until">
+    <div class="form-row block-noindent is-to-show-initially">
+        <span><i class="fa fa-info-circle"></i> <span data-i18n="[html]node-red-contrib-sun-position/position-config:common.label.infoText" class="row-full-width"></span></span></span>
+    </div>
+    <div class="form-row block-noindent" data-i18n="[title]node-red-contrib-sun-position/position-config:common.placeholder.positionConfig">
+        <label for="node-input-positionConfig"><i class="fa fa-globe"></i> <span data-i18n="node-red-contrib-sun-position/position-config:common.label.positionConfig"></span></label>
+        <input type="text" id="node-input-positionConfig">
+    </div>
+    <hr>
+    <div class="form-row block-noindent is-to-show-initially" id="node-input-time-div" data-i18n="[titleOrg]delay-until.placeholder.time">
+        <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="delay-until.label.time"></span></label>
+        <input type="text" id="node-input-time" />
+        <input type="hidden" id="node-input-timeType">
+    </div>
+    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]delay-until.placeholder.offset">
+        <label for="node-input-offset"><i class="fa fa-calculator"></i> <span data-i18n="delay-until.label.offset"></span></label>
+        <input id="node-input-offset" data-i18n="[placeholder]delay-until.placeholder.offset"/>
+        <input type="hidden" id="node-input-offsetType">
+        <select id="node-input-offsetMultiplier" class="node-input-multiplier"></select>
+    </div>
+    <hr>
+    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]delay-until.placeholder.queuingBehavior">
+        <label for="node-input-queuingBehavior"><i class="fa fa-paper-plane"></i> <span data-i18n="delay-until.label.queuingBehavior"></span></label>
+        <select id="node-input-queuingBehavior" class="node-input-queuingBehavior">
+            <option value="all" data-i18n="delay-until.label.allMsgs"></option>
+            <option value="first" data-i18n="delay-until.label.firstMsgs"></option>
+            <option value="last" data-i18n="delay-until.label.lastMsgs"></option>
+        </select>
+    </div>
+    <div class="form-row form-tips is-to-show-initially" data-i18n="[html]delay-until.tips.controlMsgProp"></div>
+    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]delay-until.placeholder.flushMsgs">
+        <label for="node-input-flushMsgs"><i class="fa fa-paper-plane-o"></i> <span data-i18n="delay-until.label.flushMsgs"></span></label>
+        <input type="text" id="node-input-flushMsgs" />
+        <input type="hidden" id="node-input-flushMsgsType">
+        <span data-i18n="delay-until.label.equals"></span>
+        <input id="node-input-flushMsgsValue" class="node-input-addpropvalue"></select>
+    </div>
+    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]delay-until.placeholder.dropMsgs">
+        <label for="node-input-dropMsgs"><i class="fa fa-trash"></i> <span data-i18n="delay-until.label.dropMsgs"></span></label>
+        <input type="text" id="node-input-dropMsgs" />
+        <input type="hidden" id="node-input-dropMsgsType">
+        <span data-i18n="delay-until.label.equals"></span>
+        <input id="node-input-dropMsgsValue" class="node-input-addpropvalue"></select>
+    </div>
+    <div class="form-row is-initial-hidden row-controlMsgPropDefined">
+        <span data-i18n="[html]delay-until.tips.controlMsgPropDefined" style="word-wrap:break-word;"></span>
+    </div>
+    <div class="form-row block-indent1 is-initial-hidden row-controlMsgPropDefined" data-i18n="[title]delay-until.placeholder.enqueueMsg">
+        <label for="node-input-enqueueMsg"><i class="fa fa-trash"></i> <span data-i18n="delay-until.label.enqueueMsg"></span></label>
+        <input type="text" id="node-input-enqueueMsg" />
+        <input type="hidden" id="node-input-enqueueMsgType">
+        <span data-i18n="delay-until.label.equals"></span>
+        <input id="node-input-enqueueMsgValue" class="node-input-addpropvalue"></select>
+    </div>
+    <div class="form-row block-indent1 is-initial-hidden row-ctrlPropSet" data-i18n="[title]delay-until.placeholder.ctrlPropSet">
+        <label for="node-input-ctrlPropSet"><i class="fa fa-minus-circle"></i> <span data-i18n="delay-until.label.ctrlPropSet"></span></label>
+        <input type="checkbox" id="node-input-ctrlPropSet" />
+        <span data-i18n="delay-until.label.ctrlPropSetB"></span>
+        <input id="node-input-ctrlPropValue" class="node-input-addpropvalue"></select>
+    </div>
+    <hr>
+    <div class="form-row is-to-show-initially">
+        <a href="#" class="enhanced-row-toggle"><span data-i18n="delay-until.label.showEnhSettings"></span></a>
+    </div>
+    <div class="form-row enhanced-row" style="display:none">
+        <div class="form-row compare-row" data-i18n="[title]delay-until.placeholder.compareTime">
+            <label for="node-input-tsCompare"><i class="fa fa-clock-o"></i> <span data-i18n="delay-until.label.compareTime"></span></label>
+            <select id="node-input-tsCompare" style="width:70%;" >
+                <option value="0" data-i18n="delay-until.label.now"></option>
+                <option value="1" data-i18n="delay-until.label.msgts"></option>
+                <option value="2" data-i18n="delay-until.label.msglc"></option>
+                <option value="3" data-i18n="delay-until.label.msgtime"></option>
+            </select>
+        </div>
+    </div>
+    <hr>
+    <div class="form-row block-noindent" data-i18n="[title]node-red:common.label.name">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-tips is-to-show-initially">
+        <span data-i18n="[html]delay-until.tips.documentation" style="word-wrap:break-word;"></span>
+    </div>
+</script>
+
+<style>
+    hr {
+        width: 100%
+    }
+    .is-to-show-initially {
+        display:none
+    }
+    .is-initial-hidden {
+        display:none
+    }
+    .form-tips {
+        width: 90%
+    }
+    .block-indent1 {
+        float: left;
+        min-height: 1px;
+        margin-left: 10px;
+        width: calc(100% - 15px);
+    }
+    .block-indent2 {
+        float: left;
+        min-height: 1px;
+        margin-left: 20px;
+        width: calc(100% - 25px);
+    }
+    .block-noindent .row-full-width {
+        width : calc(100% - 115px);
+    }
+    .block-indent1 .row-full-width {
+        width : calc(100% - 125px);
+    }
+    .block-indent2 .row-full-width {
+        width : calc(100% - 135px);
+    }
+    .block-noindent .ui-spinner {
+        width : calc(100% - 250px);
+    }
+    .block-indent1 .ui-spinner {
+        width : calc(100% - 260px);
+    }
+    .block-indent2 .ui-spinner {
+        width : calc(100% - 270px);
+    }
+    .node-input-multiplier {
+        width: 125px;
+        max-width: 125px;
+        margin-left: 5px;
+    }
+    .node-input-addpropvalue {
+        width: 90px;
+        max-width: 90px;
+        margin-left: 5px;
+    }
+    #node-input-ctrlPropSet {
+        width: auto !important;
+    }
+</style>
