@@ -96,16 +96,16 @@
   "node-red": {
     "version": ">=1.0.0",
     "nodes": {
-      "position-config": "nodes/position-config.js",
-      "time-inject": "nodes/time-inject.js",
-      "within-time-switch": "nodes/within-time-switch.js",
-      "clock-timer": "nodes/clock-timer.js",
-      "time-comp": "nodes/time-comp.js",
-      "time-span": "nodes/time-span.js",
-      "blind-control": "nodes/blind-control.js",
-      "sun-position": "nodes/sun-position.js",
-      "moon-position": "nodes/moon-position.js",
-      "delay-until": "nodes/delay-until.js"
+      "position-config": "nodes/10-position-config.js",
+      "time-inject": "nodes/20-time-inject.js",
+      "within-time-switch": "nodes/21-within-time-switch.js",
+      "delay-until": "nodes/22-delay-until.js",
+      "sun-position": "nodes/30-sun-position.js",
+      "moon-position": "nodes/31-moon-position.js",
+      "time-comp": "nodes/60-time-comp.js",
+      "time-span": "nodes/61-time-span.js",
+      "blind-control": "nodes/80-blind-control.js",
+      "clock-timer": "nodes/81-clock-timer.js"
     }
   },
   "dependencies": {

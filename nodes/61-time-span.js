@@ -30,7 +30,6 @@ module.exports = function (RED) {
 
     const util = require('util');
     const path = require('path');
-
     const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
     const perSecond = 1000;
