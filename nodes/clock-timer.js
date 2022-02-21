@@ -23,21 +23,22 @@
 /********************************************
  * clock-timer:
  *********************************************/
-const path = require('path');
-
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
-const util = require('util');
-const clonedeep = require('lodash.clonedeep');
-const isEqual = require('lodash.isequal');
-
-const cRuleUntil = 0;
-const cRuleFrom = 1;
-const cRuleDefault = -1;
 
 /******************************************************************************************/
 module.exports = function (RED) {
     'use strict';
+    const path = require('path');
+
+    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+    const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
+    const util = require('util');
+    const clonedeep = require('lodash.clonedeep');
+    const isEqual = require('lodash.isequal');
+
+    const cRuleUntil = 0;
+    const cRuleFrom = 1;
+    const cRuleDefault = -1;
+
     /******************************************************************************************/
     /**
      * check if a manual overwrite should be set

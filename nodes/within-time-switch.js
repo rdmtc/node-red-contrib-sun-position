@@ -25,13 +25,13 @@
  *********************************************/
 'use strict';
 
-const util = require('util');
-const path = require('path');
-
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-
 module.exports = function (RED) {
     'use strict';
+
+    const util = require('util');
+    const path = require('path');
+
+    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
     /**
      * get the Data for compare Date
      * @param {number} comparetype - type of compare

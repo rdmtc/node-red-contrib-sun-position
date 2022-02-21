@@ -25,11 +25,6 @@
  *********************************************/
 'use strict';
 
-const util = require('util');
-const path = require('path');
-
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-
 module.exports = function(RED) {
     'use strict';
     /**
@@ -37,6 +32,11 @@ module.exports = function(RED) {
      * @param {*} config - configuration
      */
     function rdgDelayUntilNode(config) {
+        const util = require('util');
+        const path = require('path');
+
+        const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+
         RED.nodes.createNode(this, config);
         this.locale = require('os-locale').sync();
         // Retrieve the config node

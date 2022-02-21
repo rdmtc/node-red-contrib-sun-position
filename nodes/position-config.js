@@ -25,18 +25,19 @@
  *********************************************/
 'use strict';
 
-const path = require('path');
-
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-const util = require('util');
-
-const sunCalc = require(path.join(__dirname, '/lib/suncalc.js'));
-
 // (function() {
 /*******************************************************************************************************/
 
 module.exports = function (RED) {
     'use strict';
+
+    const path = require('path');
+
+    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+    const util = require('util');
+
+    const sunCalc = require(path.join(__dirname, '/lib/suncalc.js'));
+
     const dayMs = 86400000; // 1000 * 60 * 60 * 24;
 
     /** generic configuration Node */
@@ -1673,7 +1674,7 @@ module.exports = function (RED) {
     RED.nodes.registerType('position-config', positionConfigurationNode, {
         credentials: {
             posLatitude: { type: 'text' },
-            posLongitude: {type: 'text' }
+            posLongitude: { type: 'text' }
         }
     });
 
