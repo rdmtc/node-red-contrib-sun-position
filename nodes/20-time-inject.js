@@ -105,6 +105,7 @@ module.exports = function (RED) {
         if (node.positionConfig.checkNode(error => {
             node.error(error);
             node.status({fill: 'red', shape: 'dot', text: error });
+            delete node.positionConfig;
         }, false)) {
             return;
         }
@@ -1073,23 +1074,6 @@ module.exports = function (RED) {
         });
 
         try {
-            if (!node.positionConfig) {
-                node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
-                node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
-                return;
-            }
-            if (node.positionConfig.checkNode(error => {
-                node.error(error);
-                node.status({fill: 'red', shape: 'dot', text: error });
-            }, false)) {
-                return;
-            }
-            if (!node.positionConfig) {
-                node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
-                node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
-                return;
-            }
-
             if (!isNaN(node.onceDelay)) {
                 node.status({
                     fill: 'yellow',
