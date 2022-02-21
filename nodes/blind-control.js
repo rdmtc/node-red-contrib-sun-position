@@ -23,102 +23,103 @@
 /********************************************
  * blind-control:
  *********************************************/
-const path = require('path');
-
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
-const util = require('util');
-const clonedeep = require('lodash.clonedeep');
-const isEqual = require('lodash.isequal');
-
-const cRuleUntil = 0;
-const cRuleFrom = 1;
-const cRule = {
-    levelAbsolute : 0,
-    levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
-    levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
-    slatOversteer : 5,
-    topicOversteer : 8,
-    off : 9
-};
-const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
-const cautoTriggerTimeSun = 5 * 60000; // 5 min
-const cWinterMode = 1;
-const cMinimizeMode = 3;
-const cSummerMode = 16;
-const cRuleDefault = -1;
-/******************************************************************************************/
-/**
- * get the absolute level from percentage level
- * @param {*} node the node settings
- * @param {*} percentPos the level in percentage (0-1)
- */
-function posPrcToAbs_(node, levelPercent) {
-    return posRound_(node, ((node.nodeData.levelTop - node.nodeData.levelBottom) * levelPercent) + node.nodeData.levelBottom);
-}
-/**
- * get the percentage level from absolute level  (0-1)
- * @param {*} node the node settings
- * @param {*} levelAbsolute the level absolute
- * @return {number} get the level percentage
- */
-function posAbsToPrc_(node, levelAbsolute) {
-    return (levelAbsolute - node.nodeData.levelBottom) / (node.nodeData.levelTop - node.nodeData.levelBottom);
-}
-/**
- * get the absolute inverse level
- * @param {*} node the node settings
- * @param {*} levelAbsolute the level absolute
- * @return {number} get the inverse level
- */
-function getInversePos_(node, level) {
-    return posPrcToAbs_(node, 1 - posAbsToPrc_(node, level));
-}
-/**
- * get the absolute inverse level
- * @param {*} node the node settings
- * @return {number} get the current level
- */
-function getRealLevel_(node) {
-    if (node.levelReverse) {
-        return isNaN(node.level.currentInverse) ? node.previousData.levelInverse: node.level.currentInverse;
-    }
-    return isNaN(node.level.current) ? node.previousData.level : node.level.current;
-}
-
-/**
- * round a level to the next increment
- * @param {*} node node data
- * @param {number} pos level
- * @return {number} rounded level number
- */
-function posRound_(node, pos) {
-    // node.debug(`levelPrcToAbs_ ${pos} - increment is ${node.nodeData.increment}`);
-    // pos = Math.ceil(pos / node.nodeData.increment) * node.nodeData.increment;
-    // pos = Math.floor(pos / node.nodeData.increment) * node.nodeData.increment;
-    pos = Math.round(pos / node.nodeData.increment) * node.nodeData.increment;
-    pos = Number(pos.toFixed(hlp.countDecimals(node.nodeData.increment)));
-    if (pos > node.nodeData.levelTop) {
-        pos = node.nodeData.levelTop;
-    }
-    if (pos < node.nodeData.levelBottom) {
-        pos = node.nodeData.levelBottom;
-    }
-    // node.debug(`levelPrcToAbs_ result ${pos}`);
-    return pos;
-}
-
-/**
- * check if angle is between start and end
- */
-function angleBetween_(angle, start, end) {
-    if(start<end) return start<=angle && angle<=end;
-    return               start<=angle || angle<=end;
-}
 
 /******************************************************************************************/
 module.exports = function (RED) {
     'use strict';
+    const path = require('path');
+
+    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+    const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
+    const util = require('util');
+    const clonedeep = require('lodash.clonedeep');
+    const isEqual = require('lodash.isequal');
+
+    const cRuleUntil = 0;
+    const cRuleFrom = 1;
+    const cRule = {
+        levelAbsolute : 0,
+        levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
+        levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
+        slatOversteer : 5,
+        topicOversteer : 8,
+        off : 9
+    };
+    const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
+    const cautoTriggerTimeSun = 5 * 60000; // 5 min
+    const cWinterMode = 1;
+    const cMinimizeMode = 3;
+    const cSummerMode = 16;
+    const cRuleDefault = -1;
+    /******************************************************************************************/
+    /**
+     * get the absolute level from percentage level
+     * @param {*} node the node settings
+     * @param {*} percentPos the level in percentage (0-1)
+     */
+    function posPrcToAbs_(node, levelPercent) {
+        return posRound_(node, ((node.nodeData.levelTop - node.nodeData.levelBottom) * levelPercent) + node.nodeData.levelBottom);
+    }
+    /**
+     * get the percentage level from absolute level  (0-1)
+     * @param {*} node the node settings
+     * @param {*} levelAbsolute the level absolute
+     * @return {number} get the level percentage
+     */
+    function posAbsToPrc_(node, levelAbsolute) {
+        return (levelAbsolute - node.nodeData.levelBottom) / (node.nodeData.levelTop - node.nodeData.levelBottom);
+    }
+    /**
+     * get the absolute inverse level
+     * @param {*} node the node settings
+     * @param {*} levelAbsolute the level absolute
+     * @return {number} get the inverse level
+     */
+    function getInversePos_(node, level) {
+        return posPrcToAbs_(node, 1 - posAbsToPrc_(node, level));
+    }
+    /**
+     * get the absolute inverse level
+     * @param {*} node the node settings
+     * @return {number} get the current level
+     */
+    function getRealLevel_(node) {
+        if (node.levelReverse) {
+            return isNaN(node.level.currentInverse) ? node.previousData.levelInverse: node.level.currentInverse;
+        }
+        return isNaN(node.level.current) ? node.previousData.level : node.level.current;
+    }
+
+    /**
+     * round a level to the next increment
+     * @param {*} node node data
+     * @param {number} pos level
+     * @return {number} rounded level number
+     */
+    function posRound_(node, pos) {
+        // node.debug(`levelPrcToAbs_ ${pos} - increment is ${node.nodeData.increment}`);
+        // pos = Math.ceil(pos / node.nodeData.increment) * node.nodeData.increment;
+        // pos = Math.floor(pos / node.nodeData.increment) * node.nodeData.increment;
+        pos = Math.round(pos / node.nodeData.increment) * node.nodeData.increment;
+        pos = Number(pos.toFixed(hlp.countDecimals(node.nodeData.increment)));
+        if (pos > node.nodeData.levelTop) {
+            pos = node.nodeData.levelTop;
+        }
+        if (pos < node.nodeData.levelBottom) {
+            pos = node.nodeData.levelBottom;
+        }
+        // node.debug(`levelPrcToAbs_ result ${pos}`);
+        return pos;
+    }
+
+    /**
+     * check if angle is between start and end
+     */
+    function angleBetween_(angle, start, end) {
+        if(start<end) return start<=angle && angle<=end;
+        return               start<=angle || angle<=end;
+    }
+
     /******************************************************************************************/
     /**
      * check the oversteering data

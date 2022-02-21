@@ -24,13 +24,14 @@
  * moon-position:
  *********************************************/
 'use strict';
-const path = require('path');
-
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-const util = require('util');
 
 module.exports = function (RED) {
     'use strict';
+    const path = require('path');
+
+    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+    const util = require('util');
+
     /**
      * moonPositionNode
      * @param {*} config - configuration

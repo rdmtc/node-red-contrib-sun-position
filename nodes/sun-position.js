@@ -23,13 +23,13 @@
 /********************************************
  * sun-position:
  *********************************************/
-const path = require('path');
-
-const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-const util = require('util');
-
 module.exports = function (RED) {
     'use strict';
+    const path = require('path');
+
+    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+    const util = require('util');
+
     /**
      * sunPositionNode
      * @param {*} config - configuration
