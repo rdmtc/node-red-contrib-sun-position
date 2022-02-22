@@ -43,19 +43,19 @@ module.exports = function (RED) {
         let id = '';
         let value = '';
         switch (comparetype) {
-            case '1':
+            case 1:
                 id = 'msg.ts';
                 value = msg.ts;
                 break;
-            case '2':
+            case 2:
                 id = 'msg.lc';
                 value = msg.lc;
                 break;
-            case '3':
+            case 3:
                 id = 'msg.time';
                 value = msg.time;
                 break;
-            case '4':
+            case 4:
                 id = 'msg.value';
                 value = msg.value;
                 break;
@@ -303,14 +303,15 @@ module.exports = function (RED) {
      */
     function withinTimeSwitchNode(config) {
         RED.nodes.createNode(this, config);
+        const node = this;
         // Retrieve the config node
-        this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
-        if (!this.positionConfig) {
+        node.positionConfig = RED.nodes.getNode(config.positionConfig);
+        // node.debug('initialize withinTimeSwitchNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
+        if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
-        } else if (this.positionConfig.checkNode(
+        } else if (node.positionConfig.checkNode(
             error => {
                 node.error(error);
                 node.status({fill: 'red', shape: 'dot', text: error });
@@ -318,7 +319,7 @@ module.exports = function (RED) {
             return;
         }
 
-        this.timeStart = {
+        node.timeStart = {
             type: config.startTimeType,
             value : config.startTime,
             offsetType : config.startOffsetType,
@@ -326,7 +327,7 @@ module.exports = function (RED) {
             multiplier : config.startOffsetMultiplier
         };
 
-        this.timeEnd = {
+        node.timeEnd = {
             type: config.endTimeType,
             value : config.endTime,
             offsetType : config.endOffsetType,
@@ -334,7 +335,7 @@ module.exports = function (RED) {
             multiplier : config.endOffsetMultiplier
         };
 
-        this.timeStartAlt = {
+        node.timeStartAlt = {
             type: config.startTimeAltType || 'none',
             value : config.startTimeAlt,
             offsetType : config.startOffsetAltType,
@@ -342,29 +343,29 @@ module.exports = function (RED) {
             multiplier : config.startOffsetAltMultiplier
         };
 
-        this.propertyStartOperator = config.propertyStartCompare || 'true';
-        this.propertyStart = {
+        node.propertyStartOperator = config.propertyStartCompare || 'true';
+        node.propertyStart = {
             type  : config.propertyStartType || 'none',
             value : config.propertyStart || ''
         };
-        this.propertyStartThreshold = {
+        node.propertyStartThreshold = {
             type  : config.propertyStartThresholdType || 'none',
             value : config.propertyStartThreshold || ''
         };
-        if (this.positionConfig && this.propertyStart.type === 'jsonata') {
+        if (node.positionConfig && node.propertyStart.type === 'jsonata') {
             try {
-                this.propertyStart.expr = this.positionConfig.getJSONataExpression(this, this.propertyStart.value);
+                node.propertyStart.expr = node.positionConfig.getJSONataExpression(node, node.propertyStart.value);
             } catch (err) {
-                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                this.propertyStart.expr = null;
+                node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                node.propertyStart.expr = null;
             }
         }
-        if (this.propertyStart.type === 'none' || this.timeStartAlt.type === 'none') {
-            this.propertyStart.type = 'none';
-            delete this.timeStartAlt;
+        if (node.propertyStart.type === 'none' || node.timeStartAlt.type === 'none') {
+            node.propertyStart.type = 'none';
+            delete node.timeStartAlt;
         }
 
-        this.timeEndAlt = {
+        node.timeEndAlt = {
             type: config.endTimeAltType || 'none',
             value : config.endTimeAlt,
             offsetType : config.endOffsetAltType,
@@ -372,97 +373,97 @@ module.exports = function (RED) {
             multiplier : config.endOffsetAltMultiplier
         };
 
-        this.propertyEndOperator = config.propertyEndCompare || 'true';
-        this.propertyEnd = {
+        node.propertyEndOperator = config.propertyEndCompare || 'true';
+        node.propertyEnd = {
             type  : config.propertyEndType || 'none',
             value : config.propertyEnd || ''
         };
-        this.propertyEndThreshold = {
+        node.propertyEndThreshold = {
             type  : config.propertyEndThresholdType || 'none',
             value : config.propertyEndThreshold || ''
         };
-        if (this.positionConfig && this.propertyEnd.type === 'jsonata') {
+        if (node.positionConfig && node.propertyEnd.type === 'jsonata') {
             try {
-                this.propertyEnd.expr = this.positionConfig.getJSONataExpression(this, this.propertyEnd.value);
+                node.propertyEnd.expr = node.positionConfig.getJSONataExpression(node, node.propertyEnd.value);
             } catch (err) {
-                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                this.propertyEnd.expr = null;
+                node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                node.propertyEnd.expr = null;
             }
         }
-        if (this.propertyEnd.type === 'none' || this.timeEndAlt.type === 'none') {
-            this.propertyEnd.type = 'none';
-            delete this.timeEndAlt;
+        if (node.propertyEnd.type === 'none' || node.timeEndAlt.type === 'none') {
+            node.propertyEnd.type = 'none';
+            delete node.timeEndAlt;
         }
 
-        this.timeRestrictions = {
+        node.timeRestrictions = {
             type: config.timeRestrictionsType || 'none',
             value : config.timeRestrictions
         };
-        if (this.timeRestrictions.type === 'jsonata') {
+        if (node.timeRestrictions.type === 'jsonata') {
             try {
-                this.timeRestrictions.expr = this.positionConfig.getJSONataExpression(this, this.timeRestrictions.value);
+                node.timeRestrictions.expr = node.positionConfig.getJSONataExpression(node, node.timeRestrictions.value);
             } catch (err) {
-                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                this.timeRestrictions.expr = null;
+                node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                node.timeRestrictions.expr = null;
             }
         }
 
-        if (this.timeRestrictions.type === 'none') { // none means limitations would defined internal!
-            this.timeOnlyEvenDays = hlp.isTrue(config.timeOnlyEvenDays);
-            this.timeOnlyOddDays = hlp.isTrue(config.timeOnlyOddDays);
-            this.timeOnlyEvenWeeks = hlp.isTrue(config.timeOnlyEvenWeeks);
-            this.timeOnlyOddWeeks = hlp.isTrue(config.timeOnlyOddWeeks);
+        if (node.timeRestrictions.type === 'none') { // none means limitations would defined internal!
+            node.timeOnlyEvenDays = hlp.isTrue(config.timeOnlyEvenDays);
+            node.timeOnlyOddDays = hlp.isTrue(config.timeOnlyOddDays);
+            node.timeOnlyEvenWeeks = hlp.isTrue(config.timeOnlyEvenWeeks);
+            node.timeOnlyOddWeeks = hlp.isTrue(config.timeOnlyOddWeeks);
 
-            if (this.timeOnlyEvenDays && this.timeOnlyOddDays) {
-                this.timeOnlyEvenDays = false;
-                this.timeOnlyOddDays = false;
+            if (node.timeOnlyEvenDays && node.timeOnlyOddDays) {
+                node.timeOnlyEvenDays = false;
+                node.timeOnlyOddDays = false;
             }
-            if (this.timeOnlyEvenWeeks && this.timeOnlyOddWeeks) {
-                this.timeOnlyEvenWeeks = false;
-                this.timeOnlyOddWeeks = false;
+            if (node.timeOnlyEvenWeeks && node.timeOnlyOddWeeks) {
+                node.timeOnlyEvenWeeks = false;
+                node.timeOnlyOddWeeks = false;
             }
 
             if (typeof config.timedatestart !== 'undefined' && config.timedatestart !== '') {
-                this.timeStartDate = new Date(config.timedatestart);
+                node.timeStartDate = new Date(config.timedatestart);
             }
             if (typeof config.timedateend !== 'undefined' && config.timedateend !== '') {
-                this.timeEndDate = new Date(config.timedateend);
+                node.timeEndDate = new Date(config.timedateend);
             }
 
             if (config.timeDays === '') {
                 throw new Error('No valid days given! Please check settings!');
             } else if (!config.timeDays || config.timeDays === '*') {
                 // config.timeDays = null;
-                delete this.timeDays;
+                delete node.timeDays;
             } else {
-                this.timeDays = config.timeDays.split(',');
-                this.timeDays = this.timeDays.map( e => parseInt(e) );
+                node.timeDays = config.timeDays.split(',');
+                node.timeDays = node.timeDays.map( e => parseInt(e) );
             }
 
             if (config.timeMonths === '') {
                 throw new Error('No valid month given! Please check settings!');
             } else if (!config.timeMonths || config.timeMonths === '*') {
                 // config.timeMonths = null;
-                delete this.timeMonths;
+                delete node.timeMonths;
             } else {
-                this.timeMonths = config.timeMonths.split(',');
-                this.timeMonths = this.timeMonths.map( e => parseInt(e) );
+                node.timeMonths = config.timeMonths.split(',');
+                node.timeMonths = node.timeMonths.map( e => parseInt(e) );
             }
         }
-        this.withinTimeValue = {
+        node.withinTimeValue = {
             value       : config.withinTimeValue ? config.withinTimeValue : 'true',
             type        : config.withinTimeValueType ? config.withinTimeValueType : 'msgInput'
         };
-        if (this.withinTimeValue.type === 'input') { this.withinTimeValue.type = 'msgInput'; }
-        this.outOfTimeValue = {
+        if (node.withinTimeValue.type === 'input') { node.withinTimeValue.type = 'msgInput'; }
+        node.outOfTimeValue = {
             value       : config.outOfTimeValue ? config.outOfTimeValue : 'false',
             type        : config.outOfTimeValueType ? config.outOfTimeValueType : 'msgInput'
         };
-        if (this.outOfTimeValue.type === 'input') { this.outOfTimeValue.type = 'msgInput'; }
+        if (node.outOfTimeValue.type === 'input') { node.outOfTimeValue.type = 'msgInput'; }
 
-        this.timeOutObj = null;
-        this.lastMsgObj = null;
-        const node = this;
+        node.timeOutObj = null;
+        node.lastMsgObj = null;
+        node.tsCompare = parseInt(config.tsCompare) || 0;
 
         node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
@@ -478,7 +479,7 @@ module.exports = function (RED) {
                 }
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
                 // this.debug('self ' + util.inspect(this, { colors: true, compact: 10, breakLength: Infinity }));
-                const dNow = getIntDate(config.tsCompare, msg, node);
+                const dNow = getIntDate(node.tsCompare, msg, node);
                 const result = calcWithinTimes(this, msg, dNow);
 
                 if (result.valid && result.start.value && result.end.value) {
