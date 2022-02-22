@@ -57,14 +57,8 @@ this software without specific prior written permission.
                         return (v === true) || (v === 'true');
                     }
                 },
-                longitude: {
-                    value: '',
-                    required: false
-                },
-                latitude: {
-                    value: '',
-                    required: false
-                },
+                longitude: {value: '' },
+                latitude: {value: ''},
                 angleType: {
                     value: 'deg',
                     required: true,
@@ -131,9 +125,6 @@ this software without specific prior written permission.
                 $('#node-config-input-isValide').val(false);
                 const $lat = $('#node-config-input-posLatitude');
                 const $lon = $('#node-config-input-posLongitude');
-
-                const latOldVal = parseFloat($('#node-config-input-latitude').val());
-                const lonOldVal = parseFloat($('#node-config-input-longitude').val());
                 let latVal = parseFloat($lat.val());
                 let lonVal = parseFloat($lon.val());
 
@@ -167,8 +158,8 @@ this software without specific prior written permission.
                 });
 
                 if ($lat.val() === '' || isNaN(latVal)) {
-                    if (latOldVal !== '' && !isNaN(latOldVal) && latOldVal !== 0) {
-                        $lat.val(latOldVal);
+                    if (node.longitude !== '' && !isNaN(node.longitude) && node.longitude !== 0) {
+                        $lat.val(node.longitude);
                     } else {
                         $lat.val('');
                     }
@@ -176,8 +167,8 @@ this software without specific prior written permission.
                 }
 
                 if ($lon.val() === '' || isNaN(lonVal)) {
-                    if (lonOldVal !== '' && !isNaN(lonOldVal) && lonOldVal !== 0) {
-                        $lon.val(lonOldVal);
+                    if (node.longitude !== '' && !isNaN(node.longitude) && node.longitude !== 0) {
+                        $lon.val(node.longitude);
                     } else {
                         $lon.val('');
                     }
@@ -239,10 +230,9 @@ this software without specific prior written permission.
             } else  {
                 $('#node-config-input-posLatitude').val(latitude);
             }
-            $('#node-config-input-latitude').val(0);
             /* */
-                $('#node-config-input-latitude').val(0);
-                $('#node-config-input-longitude').val(0);
+                delete this.longitude;
+                delete this.latitude;
             },
 
             /**
@@ -491,13 +481,11 @@ this software without specific prior written permission.
     <div class="form-row">
         <label for="node-config-input-posLatitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
         <input type="text" id="node-config-input-posLatitude" data-i18n="[placeholder]position-config.placeholder.latitude">
-        <input  type="hidden" id="node-config-input-latitude">
     </div>
 
     <div class="form-row">
         <label for="node-config-input-posLongitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
         <input type="text" id="node-config-input-posLongitude" data-i18n="[placeholder]position-config.placeholder.longitude">
-        <input  type="hidden" id="node-config-input-longitude">
         <input  type="hidden" id="node-config-input-isValide">
     </div>
 

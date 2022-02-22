@@ -40,6 +40,18 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize time Node ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
+        if (!this.positionConfig) {
+            node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
+            return;
+        }
+        if (this.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
+            return;
+        }
         this.input = {
             type: config.inputType,
             value: config.input,
@@ -114,14 +126,6 @@ module.exports = function (RED) {
         this.rules = config.rules;
         this.checkall = config.checkall;
         const node = this;
-        if (!this.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
-            return;
-        }
 
         this.on('input', (msg, send, done) => {
             // If this is pre-1.0, 'done' will be undefined

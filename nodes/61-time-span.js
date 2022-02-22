@@ -287,11 +287,15 @@ module.exports = function (RED) {
         // Retrieve the config node
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         if (!this.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
+            node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
+            return;
+        }
+        if (this.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
             return;
         }
         this.operand1 = {

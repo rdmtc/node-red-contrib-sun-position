@@ -307,12 +307,15 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         // this.debug('initialize withinTimeSwitchNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
         if (!this.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
-            return null;
+            node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+            setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
+            return;
+        } else if (this.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
+            return;
         }
         this.timeStart = {
             type: config.startTimeType,
@@ -468,8 +471,8 @@ module.exports = function (RED) {
             try {
                 node.debug('--------- within-time-switch - input');
                 if (!node.positionConfig) {
-                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
-                    setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')});
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+                    setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state')});
                     return null;
                 }
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
@@ -537,18 +540,13 @@ module.exports = function (RED) {
         });
 
         try {
-            if (!node.positionConfig) {
-                node.error(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'));
-                setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state') });
-                return null;
-            }
             node.status({});
         } catch (err) {
             node.error(err.message);
             node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
             setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
         }
-        return null;
+        return;
     }
 
     RED.nodes.registerType('within-time-switch', withinTimeSwitchNode);

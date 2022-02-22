@@ -101,12 +101,11 @@ module.exports = function (RED) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
-        }
-        if (node.positionConfig.checkNode(error => {
-            node.error(error);
-            node.status({fill: 'red', shape: 'dot', text: error });
-            delete node.positionConfig;
-        }, false)) {
+        } else if (this.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
             return;
         }
         // node.debug('initialize timeInjectNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
@@ -759,13 +758,14 @@ module.exports = function (RED) {
          */
         node.prepOutMsg = msg => {
             // node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
-            const dNow = new Date();
+            const dNow = msg.__ts__input_date || new Date();
 
             let props = node.props;
             if (msg.__user_inject_props__ && msg.__user_inject_props__.props && Array.isArray(msg.__user_inject_props__.props)) {
                 props = prepareProps(node, msg.__user_inject_props__.props);
             }
             delete msg.__user_inject_props__;
+            delete msg.__ts__input_date;
             // node.debug(`prepOutMsg props=${util.inspect(props, { colors: true, compact: 10, breakLength: Infinity })}`);
 
             for (let i = 0; i < props.length; i++) {
@@ -1048,7 +1048,7 @@ module.exports = function (RED) {
             try {
                 node.debug('--------- time-inject - input msg='+ util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
                 if (!node.positionConfig) {
-                    throw new Error('configuration missing!');
+                    throw new Error('Configuration missing or wrong!');
                 }
                 if (node.injType === tInj.timer) {
                     node.doCreateStartTimeout(node);

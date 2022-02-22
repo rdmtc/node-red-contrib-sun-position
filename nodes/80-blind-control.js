@@ -780,13 +780,18 @@ module.exports = function (RED) {
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         const node = this;
         if (!this.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
+            node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
             return;
         }
+        if (this.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
+            return;
+        }
+
         if (!Array.isArray(config.results)) {
             config.results = [{
                 p: '',
@@ -1111,7 +1116,7 @@ module.exports = function (RED) {
                         shape: 'dot',
                         text: 'Node not properly configured!!'
                     });
-                    done(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'), msg);
+                    done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
                     return null;
                 }
 

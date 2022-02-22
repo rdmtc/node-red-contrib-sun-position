@@ -329,11 +329,15 @@ module.exports = function (RED) {
         this.outputs = Number(config.outputs || 1);
         const node = this;
         if (!this.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
+            node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
+            return;
+        }
+        if (this.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
             return;
         }
 
@@ -448,7 +452,7 @@ module.exports = function (RED) {
                         shape: 'dot',
                         text: 'Node not properly configured!!'
                     });
-                    done(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'), msg);
+                    done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
                     return null;
                 }
 

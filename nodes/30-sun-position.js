@@ -74,9 +74,9 @@ module.exports = function (RED) {
                     node.status({
                         fill: 'red',
                         shape: 'dot',
-                        text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
+                        text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state')
                     });
-                    done(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'), msg);
+                    done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
                     return null;
                 }
                 const ports = new Array(this.rules.length);
