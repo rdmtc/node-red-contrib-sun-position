@@ -1385,12 +1385,12 @@ this software without specific prior written permission.
                             'env',
                             types.SunTimeByAzimuth,
                             types.SunTimeByAzimuthRad,
-                            types.pdsTimeByElevationNext,
-                            types.pdsTimeByElevationNextRad,
-                            types.pdsTimeByElevationRise,
-                            types.pdsTimeByElevationRiseRad,
-                            types.pdsTimeByElevationSet,
-                            types.pdsTimeByElevationSetRad
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
@@ -1443,7 +1443,6 @@ this software without specific prior written permission.
                             });
                         }
                     }); // time
-
                     node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier', () => $('#node-input-time').change());
                     setupTInput(node, {
                         typeProp: 'offsetType',
@@ -1479,12 +1478,12 @@ this software without specific prior written permission.
                             'env',
                             types.SunTimeByAzimuth,
                             types.SunTimeByAzimuthRad,
-                            types.pdsTimeByElevationNext,
-                            types.pdsTimeByElevationNextRad,
-                            types.pdsTimeByElevationRise,
-                            types.pdsTimeByElevationRiseRad,
-                            types.pdsTimeByElevationSet,
-                            types.pdsTimeByElevationSetRad
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
