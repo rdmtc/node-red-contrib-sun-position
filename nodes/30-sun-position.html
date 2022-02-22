@@ -140,7 +140,8 @@ this software without specific prior written permission.
 
                 const rule = this.rules[index - 1];
                 if (rule) {
-                    return RED.nodes.getType('position-config').getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + RED.nodes.getType('position-config').getValueLabel(rule.valueHighType, rule.valueHigh);
+                    return  RED.nodes.getType('position-config').getRDGNodeValLbl(this, rule.valueLowType, rule.valueLow) + ' & ' +
+                            RED.nodes.getType('position-config').getRDGNodeValLbl(this, rule.valueHighType, rule.valueHigh);
                 }
                 return undefined;
             },

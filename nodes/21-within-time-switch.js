@@ -465,7 +465,7 @@ module.exports = function (RED) {
         node.lastMsgObj = null;
         node.tsCompare = parseInt(config.tsCompare) || 0;
 
-        this.on('input', function (msg, send, done) {
+        node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
@@ -474,7 +474,7 @@ module.exports = function (RED) {
                 node.debug('--------- within-time-switch - input');
                 if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
-                    setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state')});
+                    node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     return null;
                 }
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
@@ -541,13 +541,7 @@ module.exports = function (RED) {
             return null;
         });
 
-        try {
-            node.status({});
-        } catch (err) {
-            node.error(err.message);
-            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
-            setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
-        }
+        node.status({});
         return;
     }
 

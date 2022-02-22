@@ -53,11 +53,8 @@ module.exports = function (RED) {
         this.endOffsetMultiplier = config.endOffsetMultiplier || 60;
         const node = this;
         if (!this.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
+            node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
         }
 
@@ -71,11 +68,8 @@ module.exports = function (RED) {
                 const dNow = hlp.getNowTimeStamp(this, msg);
 
                 if (!this.positionConfig) {
-                    node.status({
-                        fill: 'red',
-                        shape: 'dot',
-                        text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state')
-                    });
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+                    node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
                     return null;
                 }

@@ -308,11 +308,12 @@ this software without specific prior written permission.
             },
             outputLabels: ['within time', 'out of time'],
             label() {
-                const getConcatId = (type1, value1, offset1, property, type2, value2, offset2) => {
+                const getConcatId = (type1, value1, offset1Type, offset1, multipier1, property, type2, value2, offset2Type, offset2, multipier2) => {
                     if (property !== 'none' && property !== '' && value2) {
-                        return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, offset1, 12) + '/' + RED.nodes.getType('position-config').getValueLabel(this, type2, value2, offset2, 12);
+                        return  RED.nodes.getType('position-config').getRDGNodeValLbl(this, type1, value1, offset1Type, offset1, multipier1, 12) + '/' +
+                                RED.nodes.getType('position-config').getRDGNodeValLbl(this, type2, value2, offset2Type, offset2, multipier2, 12);
                     }
-                    return RED.nodes.getType('position-config').getValueLabel(this, type1, value1, offset1, 12);
+                    return RED.nodes.getType('position-config').getRDGNodeValLbl(this, type1, value1, offset1Type, offset1, multipier1, 12);
                 };
 
                 if (this.name) {
@@ -320,17 +321,22 @@ this software without specific prior written permission.
                 }
 
                 if (this.startTime && this.endTime) {
-                    return getConcatId(this.startTimeType, this.startTime, this.startOffset, this.propertyStartType,
-                        this.startTimeAltType, this.startTimeAlt, this.startOffsetAlt) +
+                    return getConcatId(this.startTimeType, this.startTime, this.startOffsetType, this.startOffset, this.startOffsetMultiplier,
+                        this.propertyStartType,
+                        this.startTimeAltType, this.startTimeAlt, this.startOffsetAltType, this.startOffsetAlt, this.startOffsetAltMultiplier) +
                             ' - ' +
-                            getConcatId(this.endTimeType, this.endTime, this.endOffset, this.propertyEndType,
-                                this.endTimeAltType, this.endTimeAlt, this.endOffsetAlt);
+                            getConcatId(this.endTimeType, this.endTime, this.endOffsetType, this.endOffset, this.endOffsetMultiplier,
+                                this.propertyEndType,
+                                this.endTimeAltType, this.endTimeAlt, this.endOffsetAltType, this.endOffsetAlt, this.endOffsetAltMultiplier);
                 }
 
                 return 'within-time';
             },
             labelStyle() {
                 return this.name ? 'node_label_italic' : '';
+            },
+            inputLabels() {
+                return this._('node-red-contrib-sun-position/position-config:common.label.inputPort');
             },
             paletteLabel: 'within-time',
             align: 'left',
@@ -966,9 +972,9 @@ this software without specific prior written permission.
                             types.SunAzimuthRad,
                             types.SunElevationRad,
                             types.SunTimeByAzimuth,
-                            types.SunTimeByElevation,
+                            types.SunTimeByElevationObj,
                             types.SunTimeByAzimuthRad,
-                            types.SunTimeByElevationRad,
+                            types.SunTimeByElevationObjRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -1015,9 +1021,9 @@ this software without specific prior written permission.
                             types.SunAzimuthRad,
                             types.SunElevationRad,
                             types.SunTimeByAzimuth,
-                            types.SunTimeByElevation,
+                            types.SunTimeByElevationObj,
                             types.SunTimeByAzimuthRad,
-                            types.SunTimeByElevationRad,
+                            types.SunTimeByElevationObjRad,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -1272,6 +1278,7 @@ this software without specific prior written permission.
         <span data-i18n="[html]within-time-switch.tips.documentation" style="word-wrap:break-word;"></span>
     </div>
 </script>
+
 <style>
     hr {
         width: 100%

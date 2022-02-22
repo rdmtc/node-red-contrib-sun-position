@@ -32,7 +32,9 @@
             "ok":"Ok",
             "randNum":"random till",
             "randNumCachedDay":"random (daily) till",
-            "randNumCachedWeek":"random (weekly) till"
+            "randNumCachedWeek":"random (weekly) till",
+            "inputPort": "input message",
+            "outputPort": "output message"
         },
         "types": {
             "unlimited":"no limitation",
@@ -64,10 +66,16 @@
             "numAltitude":"Elevation angle",
             "numAzimuthRad":"Azimuth angle (rad)",
             "numAltitudeRad":"Elevation angle (rad)",
-            "sunTimeByElevation":"time by elevation",
-            "sunTimeByAzimuth":"time by azimuth",
-            "sunTimeByElevationRad":"time by elevation (rad)",
-            "sunTimeByAzimuthRad":"time by azimuth (rad)",
+            "SunTimeByAzimuth":"time by azimuth",
+            "SunTimeByAzimuthRad":"time by azimuth (rad)",
+            "SunTimeByElevationObj":"time by elevation (set or rise)",
+            "SunTimeByElevationObjRad":"time by elevation (set or rise in rad)",
+            "SunTimeByElevationNext":"next time by elevation (set or rise)",
+            "SunTimeByElevationNextRad":"next time by elevation (set or rise in rad)",
+            "SunTimeByElevationRise":"next rise time by elevation",
+            "SunTimeByElevationRiseRad":"next rise time by elevation (rad)",
+            "SunTimeByElevationSet":"next set time by elevation",
+            "SunTimeByElevationSetRad":"next set time by elevation (rad)",
             "suntime":"sun time",
             "suntimes":"sun times",
             "mooncalc":"moon calculation",
@@ -521,7 +529,7 @@
         "errors": {
             "latitude-missing": "Latitude is missing or wrong!",
             "longitude-missing": "Longitude is missing or wrong!",
-            "coordinates-missing": "Latitude and Longitude is wrong!"
+            "coordinates-missing": "Coordinates Latitude and Longitude is missing in the configuration node!"
         }
     }
 }
