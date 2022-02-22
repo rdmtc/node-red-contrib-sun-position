@@ -26,7 +26,6 @@ require("should-sinon");
 const helper = require('node-red-node-test-helper');
 
 // Nodes
-// const functionNode = require('@node-red/nodes/core/core/80-function.js');
 const nodeConfig = require('../nodes/10-position-config.js');
 const nodeTimeInject = require('../nodes/20-time-inject.js');
 
@@ -46,101 +45,6 @@ const cfgNode = {
 const tabNode = {id: 'flow', type: 'tab', label: 'FLOW' };
 const groupNode = {id: 'g0', type: 'group', name: 'GROUP' };
 const hlpNode = {id: 'n2', type: 'helper'};
-
-/*
-const flow = [
-                        {
-                            id: 'n1',
-                            type: 'time-inject',
-                            z: 'flow',
-                            g: "g0",
-                            name: 'NAME',
-                            nameInt: 'test',
-                            positionConfig: 'nc1',
-                            props: [
-                                {
-                                    p: '',
-                                    pt: 'msgPayload',
-                                    v: '${NR_NODE_NAME}',
-                                    vt: 'str',
-                                    o: '',
-                                    oT: 'none',
-                                    oM: '60000',
-                                    f: 0,
-                                    fS: 0,
-                                    fI: '0',
-                                    next: true,
-                                    days: '*',
-                                    months: '*',
-                                    onlyOddDays: false,
-                                    onlyEvenDays: false,
-                                    onlyOddWeeks: false,
-                                    onlyEvenWeeks: false
-                                },
-                                {
-                                    p: '',
-                                    pt: 'msgTopic',
-                                    v: 'test-topic',
-                                    vt: 'str',
-                                    o: '',
-                                    oT: 'none',
-                                    oM: '60000',
-                                    f: 0,
-                                    fS: 0,
-                                    fI: '0',
-                                    next: false,
-                                    days: '*',
-                                    months: '*',
-                                    onlyOddDays: false,
-                                    onlyEvenDays: false,
-                                    onlyOddWeeks: false,
-                                    onlyEvenWeeks: false
-                                }
-                            ],
-                            injectTypeSelect: 'none',
-                            intervalCount: 1,
-                            intervalCountType: 'num',
-                            intervalCountMultiplier: 60000,
-                            time: '',
-                            timeType: 'entered',
-                            offset: 0,
-                            offsetType: 'none',
-                            offsetMultiplier: 60000,
-                            timeEnd: '',
-                            timeEndType: 'entered',
-                            timeEndOffset: 0,
-                            timeEndOffsetType: 'none',
-                            timeEndOffsetMultiplier: 60000,
-                            timeDays: '*',
-                            timeOnlyOddDays: false,
-                            timeOnlyEvenDays: false,
-                            timeOnlyOddWeeks: false,
-                            timeOnlyEvenWeeks: false,
-                            timeMonths: '*',
-                            timedatestart: '',
-                            timedateend: '',
-                            property: '',
-                            propertyType: 'none',
-                            propertyCompare: 'true',
-                            propertyThreshold: '',
-                            propertyThresholdType: 'num',
-                            timeAlt: '',
-                            timeAltType: 'entered',
-                            timeAltDays: '*',
-                            timeAltOnlyOddDays: false,
-                            timeAltOnlyEvenDays: false,
-                            timeAltOnlyOddWeeks: false,
-                            timeAltOnlyEvenWeeks: false,
-                            timeAltMonths: '*',
-                            timeAltOffset: 0,
-                            timeAltOffsetType: 'none',
-                            timeAltOffsetMultiplier: 60000,
-                            once: false,
-                            onceDelay: 0.1,
-                            recalcTime: 2,
-                            wires: [['n2']]
-                        }, cfgNode, hlpNode];
-*/
 
 describe('time inject node', () => {
     beforeEach(function (done) {
@@ -505,7 +409,7 @@ describe('time inject node', () => {
                         {p: '', pt: 'msgPayload', v: '10:00', vt: 'entered',
                         o: "", oT: "none", oM: "60000",
                         f: 0, fS: 0, fI: "0",
-                        next: true,
+                        next: false,
                         days: "*", months: "*",
                         onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
@@ -1385,7 +1289,7 @@ describe('time inject node', () => {
                 n2.on('input', function(msg) {
                     try {
                         msg.should.have.property('topic', 't1');
-                        msg.should.have.property('type', 'once/startup');
+                        msg.should.have.property('_inject_type', 'once/startup');
                         msg.should.have.property('payload');
                         should(msg.payload).be.lessThan(timestamp.getTime());
                         done();
@@ -1446,8 +1350,8 @@ describe('time inject node', () => {
                 const n2 = helper.getNode('n2');
                 n2.on('input', function(msg) {
                     msg.should.have.property('topic', 't1');
-                    msg.should.have.property('type', 'once/startup');
                     msg.should.have.property('payload');
+                    msg.should.have.property('_inject_type', 'once/startup');
                     should(msg.payload).be.greaterThan(timestamp.getTime());
                     done();
                 });
@@ -1530,6 +1434,141 @@ describe('time inject node', () => {
             });
         });
     }); /* inject repeatedly */
+
+    /*
+    describe('inject repeatedly between times', function() {
+
+    }); /* inject repeatedly between times */
+
+    /*
+    describe('inject fixed count between times', function() {
+
+    }); /* inject fixed count between times */
+
+
+    describe('inject at fixed timestamp ', function() {
+        it('should inject at fixed timestamp', function(done) {
+            this.timeout(10100); // have to wait for the inject with delay of two seconds
+            const timestamp = new Date();
+            timestamp.setSeconds(timestamp.getSeconds() + 5);
+            timestamp.setMilliseconds(0);
+            const flow = [{
+                id: 'n1',
+                type: 'time-inject',
+                z: 'flow',
+                name: 'injectNodeName',
+                nameInt: '⏲ fixed timestamp',
+                positionConfig: 'nc1',
+                props: [
+                    {p: '', pt: 'msgPayload', v: 'payload', vt: 'str'},
+                    {p: '', pt: 'msgTopic', v: 't2', vt: 'str'}],
+                injectTypeSelect: 'time',
+                time: timestamp.toLocaleTimeString(), // timestamp.getHours() + ":" + timestamp.getHours() + ":" + timestamp.getMinutes(),
+                timeType: "entered",
+                offset: 0,
+                offsetType: "none",
+                offsetMultiplier: 60000,
+                timeDays: "*",
+                timeOnlyOddDays: false,
+                timeOnlyEvenDays: false,
+                timeOnlyOddWeeks: false,
+                timeOnlyEvenWeeks: false,
+                timeMonths: "*",
+                timedatestart: "",
+                timedateend: "",
+                property: "",
+                propertyType: "none",
+                propertyCompare: "true",
+                propertyThreshold: "",
+                propertyThresholdType: "num",
+                once: false,
+                onceDelay: 0.01,
+                wires: [['n2']]
+            }, cfgNode, hlpNode, tabNode];
+
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+                const n2 = helper.getNode('n2');
+                n2.on('input', function(msg) {
+                    try {
+                        const d = (new Date()).getTime();
+                        const ts = timestamp.getTime();
+                        msg.should.have.property('topic', 't2');
+                        msg.should.have.property('_inject_type', 'time');
+                        msg.should.have.property('payload');
+                        should(d).be.greaterThan(ts);
+                        should(d).be.lessThan(ts + 100);
+                        done();
+                    } catch(err) {
+                        console.log(ts);
+                        console.log(d);
+                        console.log(msg);
+                        done(err);
+                    }
+                });
+            });
+        });
+
+        it('should inject at fixed timestamp and offset (num)', function(done) {
+            this.timeout(10100); // have to wait for the inject with delay of two seconds
+            const timestamp = new Date();
+            timestamp.setSeconds(timestamp.getSeconds() + 5);
+            timestamp.setMilliseconds(0);
+            const flow = [{
+                id: 'n1',
+                type: 'time-inject',
+                z: 'flow',
+                name: 'injectNodeName',
+                nameInt: '⏲ fixed timestamp',
+                positionConfig: 'nc1',
+                props: [
+                    {p: '', pt: 'msgPayload', v: 'payload', vt: 'str'},
+                    {p: '', pt: 'msgTopic', v: 't2', vt: 'str'}],
+                injectTypeSelect: 'time',
+                time: timestamp.toLocaleTimeString(), // timestamp.getHours() + ":" + timestamp.getHours() + ":" + timestamp.getMinutes(),
+                timeType: "entered",
+                offset: 2,
+                offsetType: "num",
+                offsetMultiplier: 1000,
+                timeDays: "*",
+                timeOnlyOddDays: false,
+                timeOnlyEvenDays: false,
+                timeOnlyOddWeeks: false,
+                timeOnlyEvenWeeks: false,
+                timeMonths: "*",
+                timedatestart: "",
+                timedateend: "",
+                property: "",
+                propertyType: "none",
+                propertyCompare: "true",
+                propertyThreshold: "",
+                propertyThresholdType: "num",
+                once: false,
+                onceDelay: 0.01,
+                wires: [['n2']]
+            }, cfgNode, hlpNode, tabNode];
+
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+                const n2 = helper.getNode('n2');
+                n2.on('input', function(msg) {
+                    try {
+                        const d = (new Date()).getTime();
+                        const ts = timestamp.getTime();
+                        msg.should.have.property('topic', 't2');
+                        msg.should.have.property('_inject_type', 'time');
+                        msg.should.have.property('payload');
+                        should(d).be.greaterThan(ts + 2000);
+                        should(d).be.lessThan(ts + 2100);
+                        done();
+                    } catch(err) {
+                        console.log(ts);
+                        console.log(d);
+                        console.log(msg);
+                        done(err);
+                    }
+                });
+            });
+        });
+    }); /* inject at fixed timestamp */
 
     // TODO: implement inject by time
 
