@@ -47,10 +47,11 @@ module.exports = function(RED) {
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return null;
         }
-        if (this.positionConfig.checkNode(error => {
-            node.error(error);
-            node.status({fill: 'red', shape: 'dot', text: error });
-        }, false)) {
+        if (this.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
             return null;
         }
         this.timeData = {

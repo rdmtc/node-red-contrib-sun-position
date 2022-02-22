@@ -310,11 +310,11 @@ module.exports = function (RED) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
-        }
-        if (this.positionConfig.checkNode(error => {
-            node.error(error);
-            setstate(node, { error });
-        }, false)) {
+        } else if (this.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
             return;
         }
 

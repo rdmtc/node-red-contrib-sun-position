@@ -51,8 +51,15 @@ module.exports = function (RED) {
 
             try {
                 this.name = config.name;
-                this.latitude = parseFloat(this.credentials.posLatitude || config.latitude);
-                this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
+                this.valid = true;
+                this.latitude = parseFloat(Object.prototype.hasOwnProperty.call(this.credentials, 'posLatitude') ? this.credentials.posLatitude : config.latitude);
+                this.longitude = parseFloat(Object.prototype.hasOwnProperty.call(this.credentials, 'posLongitude') ? this.credentials.posLongitude : config.longitude);
+                this.checkNode(
+                    error => {
+                        this.error(error);
+                        this.status({fill: 'red', shape: 'dot', text: error });
+                        this.valid = false;
+                    });
                 this.angleType = config.angleType;
                 this.tzOffset = parseInt(config.timeZoneOffset || 99);
                 this.tzDST = parseInt(config.timeZoneDST || 0);
@@ -112,8 +119,8 @@ module.exports = function (RED) {
          * register a node as child
          * @param {*} node node to register as child node
          */
-        register(node) {
-            this.users[node.id] = node;
+        register(srcnode) {
+            this.users[srcnode.id] = srcnode;
         }
 
         /**
@@ -122,11 +129,10 @@ module.exports = function (RED) {
          * @param {function} done function which should be executed after deregister
          * @returns {*} result of the function
          */
-        deregister(node, done) {
-            delete node.users[node.id];
+        deregister(srcnode, done) {
+            delete srcnode.users[srcnode.id];
             return done();
         }
-
         /*******************************************************************************************************/
         /**
          * This callback type is called `requestCallback` and is displayed as a global symbol.
@@ -143,8 +149,7 @@ module.exports = function (RED) {
          * @return {boolean|string} returns the result of onrror if an error occurs, otherwise onOK
          */
         checkNode(onError, onOk) {
-            if ((Number.isNaN(this.latitude) && Number.isNaN(this.longitude)) ||
-                ((this.latitude === 0) && (this.longitude === 0))) {
+            if ((Number.isNaN(this.latitude) && Number.isNaN(this.longitude))) {
                 return onError(RED._('position-config.errors.coordinates-missing'));
             }
             if (isNaN(this.latitude) || (this.latitude < -90) || (this.latitude > 90)) {
@@ -1614,7 +1619,7 @@ module.exports = function (RED) {
         }
         /**************************************************************************************************************/
         _sunTimesRefresh(todayValue, dayId) {
-            this.checkNode(error => { throw new Error(error); });
+            if (!this.valid) { return; }
             if (this.cache.sunTimesToday.dayId === (dayId + 1)) {
                 this.cache.sunTimesToday.times = this.cache.sunTimesTomorrow.times;
                 this.cache.sunTimesToday.sunPosAtSolarNoon = this.cache.sunTimesTomorrow.sunPosAtSolarNoon;
@@ -1642,7 +1647,7 @@ module.exports = function (RED) {
         }
 
         _moonTimesRefresh(todayValue, dayId) {
-            this.checkNode(error => { throw new Error(error); });
+            if (!this.valid) { return; }
 
             if (this.cache.moonTimesToday.dayId === (dayId + 1)) {
                 this.cache.moonTimesTomorrow.dayId = this.cache.moonTimes2Days.dayId;
