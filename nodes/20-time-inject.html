@@ -1363,6 +1363,12 @@ this software without specific prior written permission.
                             'env',
                             types.SunTimeByAzimuth,
                             types.SunTimeByAzimuthRad
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
@@ -1415,7 +1421,6 @@ this software without specific prior written permission.
                             });
                         }
                     }); // time
-
                     node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier', () => $('#node-input-time').change());
                     setupTInput(node, {
                         typeProp: 'offsetType',
@@ -1450,7 +1455,13 @@ this software without specific prior written permission.
                             'global',
                             'env',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
                         ],
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();

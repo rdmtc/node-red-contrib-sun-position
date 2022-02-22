@@ -399,7 +399,24 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
+                        ],
                         onFocus(_type, _value) {
                             const plVType = $('#node-input-startTime').typedInput('type');
                             const plVTypeAlt = $('#node-input-startTimeAlt').typedInput('type');
@@ -529,7 +546,24 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon,  'msg', 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
+                        ],
                         onFocus(_type, _value) {
                             const plVType = $('#node-input-endTime').typedInput('type');
                             const plVTypeAlt = $('#node-input-endTimeAlt').typedInput('type');
@@ -673,7 +707,24 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
+                        ],
                         onFocus(_type, _value) {
                             if (($('#node-input-startTimeAlt').typedInput('type') === 'none') ||
                                 ($('#node-input-propertyStart').typedInput('type') === 'none')) {
@@ -812,7 +863,24 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.TimeEntered.value,
                         defaultValue: '',
-                        types: [types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env', types.SunTimeByAzimuth, types.SunTimeByAzimuthRad],
+                        types: [
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
+                        ],
                         onFocus(_type, _value) {
                             if (($('#node-input-endTimeAlt').typedInput('type') === 'none') ||
                                 ($('#node-input-propertyEnd').typedInput('type') === 'none')) {
