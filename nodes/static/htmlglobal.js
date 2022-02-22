@@ -456,12 +456,6 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunPercent.svg',
             hasValue: false
         },
-        SunAzimuth: {
-            value: 'pdsCalcAzimuth',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth','Azimuth'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
-            hasValue: false
-        },
         numAzimuth: {
             value: 'numAzimuth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.numAzimuth'),
@@ -473,20 +467,14 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             }
         },
         numAzimuthRad: {
-            value: 'numAzimuth',
+            value: 'numAzimuthRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.numAzimuthRad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthRad.svg',
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
                 return (RED.validators.number()(v) && (n > -6.3) && (n < 12.6));
             }
-        },
-        SunElevation: {
-            value: 'pdsCalcElevation',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
-            hasValue: false
         },
         numAltitude: {
             value: 'numAltitude',
@@ -498,53 +486,109 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
                 return (RED.validators.number()(v) && (n >= -90) && (n <= 90));
             }
         },
-        SunAzimuthRad: {
-            value: 'pdsCalcAzimuthRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad','Azimuth'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthRad.svg',
-            hasValue: false
-        },
         numAltitudeRad: {
             value: 'numAltitudeRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.numAltitudeRad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevationRad.svg',
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
                 return (RED.validators.number()(v) && (n > -1.56) && (n < 1.56));
             }
         },
-        SunElevationRad: {
-            value: 'pdsCalcElevationRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad'),
+        SunAzimuth: {
+            value: 'pdsCalcAzimuth',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth','Azimuth'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
+            hasValue: false
+        },
+        SunAzimuthRad: {
+            value: 'pdsCalcAzimuthRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad','Azimuth'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthRad.svg',
+            hasValue: false
+        },
+        SunElevation: {
+            value: 'pdsCalcElevation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
             hasValue: false
         },
-        SunTimeByElevation: {
-            value: 'pdsTimeByElevation',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevation','Time by Elevation'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
-            hasValue: true,
-            validate: RED.validators.number()
+        SunElevationRad: {
+            value: 'pdsCalcElevationRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevationRad.svg',
+            hasValue: false
         },
+
+
         SunTimeByAzimuth: {
             value: 'pdsTimeByAzimuth',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuth','Time by Azimuth'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuth','Time by Azimuth'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuth.svg',
-            hasValue: true,
-            validate: RED.validators.number()
-        },
-        SunTimeByElevationRad: {
-            value: 'pdsTimeByElevationRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevationRad','Time by Elevation Rad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
             hasValue: true,
             validate: RED.validators.number()
         },
         SunTimeByAzimuthRad: {
             value: 'pdsTimeByAzimuthRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuthRad','Time by Azimuth Rad'),
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuthRad','Time by Azimuth Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuthRad.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationObj: {
+            value: 'pdsTimeByElevation',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObj','next Time by Elevation'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationObjRad: {
+            value: 'pdsTimeByElevationRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObjRad','next Time by Elevation Rad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationNext: {
+            value: 'pdsTimeByElevationNext',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNext','next Time by Elevation'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationNextRad: {
+            value: 'pdsTimeByElevationNextRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNextRad','next Time by Elevation Rad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationRise: {
+            value: 'pdsTimeByElevationRise',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRise','next rise Time by Elevation'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRise.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationRiseRad: {
+            value: 'pdsTimeByElevationRiseRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRiseRad','next rise Time by Elevation Rad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRiseRad.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationSet: {
+            value: 'pdsTimeByElevationSet',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSet','next set Time by Elevation'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSet.svg',
+            hasValue: true,
+            validate: RED.validators.number()
+        },
+        SunTimeByElevationSetRad: {
+            value: 'pdsTimeByElevationSetRad',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSetRad','next set Time by Elevation Rad'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSetRad.svg',
             hasValue: true,
             validate: RED.validators.number()
         },

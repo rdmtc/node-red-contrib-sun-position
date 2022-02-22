@@ -140,7 +140,8 @@ this software without specific prior written permission.
 
                 const rule = this.rules[index - 1];
                 if (rule) {
-                    return RED.nodes.getType('position-config').getValueLabel(rule.valueLowType, rule.valueLow) + ' & ' + RED.nodes.getType('position-config').getValueLabel(rule.valueHighType, rule.valueHigh);
+                    return  RED.nodes.getType('position-config').getRDGNodeValLbl(this, rule.valueLowType, rule.valueLow) + ' & ' +
+                            RED.nodes.getType('position-config').getRDGNodeValLbl(this, rule.valueHighType, rule.valueHigh);
                 }
                 return undefined;
             },
@@ -191,7 +192,24 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                        types: [
+                            types.Undefined,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
+                        ],
                         onChange(_type, _value) {
                             if ($('#node-input-start').typedInput('type') === types.Undefined.value) {
                                 $('.sun-position-row-startOffset').hide();
@@ -229,7 +247,24 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.Undefined.value,
                         defaultValue: '',
-                        types: [types.Undefined, types.TimeEntered, types.TimeSun, types.TimeMoon, 'flow', 'global', 'env'],
+                        types: [
+                            types.Undefined,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'flow',
+                            'global',
+                            'env',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
+                        ],
                         onChange(_type, _value) {
                             if ($('#node-input-end').typedInput('type') === types.Undefined.value) {
                                 $('.sun-position-row-endOffset').hide();

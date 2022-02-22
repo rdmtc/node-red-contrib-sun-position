@@ -51,8 +51,15 @@ module.exports = function (RED) {
 
             try {
                 this.name = config.name;
-                this.latitude = parseFloat(this.credentials.posLatitude || config.latitude);
-                this.longitude = parseFloat(this.credentials.posLongitude || config.longitude);
+                this.valid = true;
+                this.latitude = parseFloat(Object.prototype.hasOwnProperty.call(this.credentials, 'posLatitude') ? this.credentials.posLatitude : config.latitude);
+                this.longitude = parseFloat(Object.prototype.hasOwnProperty.call(this.credentials, 'posLongitude') ? this.credentials.posLongitude : config.longitude);
+                this.checkNode(
+                    error => {
+                        this.error(error);
+                        this.status({fill: 'red', shape: 'dot', text: error });
+                        this.valid = false;
+                    });
                 this.angleType = config.angleType;
                 this.tzOffset = parseInt(config.timeZoneOffset || 99);
                 this.tzDST = parseInt(config.timeZoneDST || 0);
@@ -112,8 +119,8 @@ module.exports = function (RED) {
          * register a node as child
          * @param {*} node node to register as child node
          */
-        register(node) {
-            this.users[node.id] = node;
+        register(srcnode) {
+            this.users[srcnode.id] = srcnode;
         }
 
         /**
@@ -122,9 +129,36 @@ module.exports = function (RED) {
          * @param {function} done function which should be executed after deregister
          * @returns {*} result of the function
          */
-        deregister(node, done) {
-            delete node.users[node.id];
+        deregister(srcnode, done) {
+            delete srcnode.users[srcnode.id];
             return done();
+        }
+        /*******************************************************************************************************/
+        /**
+         * This callback type is called `requestCallback` and is displayed as a global symbol.
+         *
+         * @callback onErrorCallback
+         * @param {string} errorMessage - the error message
+         * @return {boolean|string} returns true if ok otherwise an string with the error
+         */
+
+        /**
+         * check this node for configuration errors
+         * @property {onErrorCallback} [onError] - if an error occurs this function will be called
+         * @property {any} [onOk] - the return value in case of ok
+         * @return {boolean|string} returns the result of onrror if an error occurs, otherwise onOK
+         */
+        checkNode(onError, onOk) {
+            if ((Number.isNaN(this.latitude) && Number.isNaN(this.longitude))) {
+                return onError(RED._('position-config.errors.coordinates-missing'));
+            }
+            if (isNaN(this.latitude) || (this.latitude < -90) || (this.latitude > 90)) {
+                return onError(RED._('position-config.errors.latitude-missing'));
+            }
+            if (isNaN(this.longitude) || (this.longitude < -180) || (this.longitude > 180)) {
+                return onError(RED._('position-config.errors.longitude-missing'));
+            }
+            return onOk;
         }
         /*******************************************************************************************************/
         /**
@@ -220,7 +254,7 @@ module.exports = function (RED) {
             }
 
             if (r.hasChanged) {
-                this._checkCoordinates();
+                this.checkNode(error => { throw new Error(error); });
                 result = Object.assign(result, sunCalc.getSunTimes(result.value.valueOf(), latitude, longitude)[value]);
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
             }
@@ -234,11 +268,10 @@ module.exports = function (RED) {
          * @param {Date} dNow current time
          * @param {number} elevationAngle name of the sun time
          * @param {timePropType} [tprop] additional limitations for the calculation
-         * @param {number} [latitude] latitude
-         * @param {number} [longitude] longitude
+         * @param {string} [prop=both] property (set, rise or both) to return
          * @return {timeresult|erroresult} result object of sunTime
          */
-        getSunTimeElevation(dNow, elevationAngle, degree, tprop, latitude, longitude) {
+        getSunTimeElevation(dNow, elevationAngle, degree, tprop, prop) {
             if (!hlp.isValidDate(dNow)) {
                 const dto = new Date(dNow);
                 if (hlp.isValidDate(dto)) {
@@ -248,8 +281,8 @@ module.exports = function (RED) {
                 }
             }
             // this.debug('getSunTimeByName dNow=' + dNow + ' tprop=' + util.inspect(tprop, { colors: true, compact: 10, breakLength: Infinity }));
-            latitude = (latitude || tprop.latitude || this.latitude);
-            longitude = (longitude || tprop.longitude || this.longitude);
+            const latitude = (tprop.latitude || this.latitude);
+            const longitude = (tprop.longitude || this.longitude);
             const result = Object.assign({},sunCalc.getSunTime(dNow.valueOf(), latitude, longitude, elevationAngle, degree));
 
             const offsetX = this.getFloatProp(this, null, tprop.offsetType, tprop.offset, 0, tprop.offsetCallback, tprop.noOffsetError, dNow);
@@ -271,11 +304,18 @@ module.exports = function (RED) {
                 }
 
                 if (r.hasChanged) {
-                    this._checkCoordinates();
+                    this.checkNode(error => { throw new Error(error); });
                     result = Object.assign(result, recalc(result.value.valueOf()));
                     result.value = hlp.addOffset(new Date(result.value), offsetX, tprop.multiplier);
                 }
             };
+            if (prop==='rise') {
+                calc(result.rise, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).rise);
+                return result.rise;
+            } else if (prop==='set') {
+                calc(result.set, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).set);
+                return result.set;
+            }
             calc(result.rise, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).rise);
             calc(result.set, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).set);
             return result;
@@ -322,7 +362,7 @@ module.exports = function (RED) {
             }
 
             if (r.hasChanged) {
-                this._checkCoordinates();
+                this.checkNode(error => { throw new Error(error); });
                 result = sunCalc.getSunTimeByAzimuth(result, latitude, longitude, azimuthAngle, degree);
                 result = hlp.addOffset(result, offsetX, tprop.multiplier);
             }
@@ -520,7 +560,7 @@ module.exports = function (RED) {
             }
 
             if (r.hasChanged) {
-                this._checkCoordinates();
+                this.checkNode(error => { throw new Error(error); });
                 result.value = new Date(sunCalc.getMoonTimes(result.value.valueOf(), latitude, longitude)[value]);
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
             }
@@ -805,6 +845,8 @@ module.exports = function (RED) {
         * @property {string} [days] - valid days
         * @property {string} [months] - valid monthss
         * @property {Date} [now] - base date, current time as default
+        * @property {number} [latitude] - base date, current time as default
+        * @property {number} [longitude] - base date, current time as default
         */
 
         /**
@@ -1060,7 +1102,7 @@ module.exports = function (RED) {
                 }
                 return this.getSunTimePrevNext(dNow);
             }, '<(osn)?:(ol)>');
-            expr.registerFunction('getSunTimeByElevation', (elevation, dNow) => {
+            expr.registerFunction('getSunTimeByElevationNext', (elevation, dNow) => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow); // if dNow is given as Number in milliseconds, try to convert
                     if (hlp.isValidDate(dto)) {
@@ -1194,14 +1236,34 @@ module.exports = function (RED) {
                 result = this.getSunCalc(dNow, false, false).azimuthRadians;
             } else if (data.type === 'pdsCalcElevationRad') {
                 result = this.getSunCalc(dNow, false, false).altitudeRadians;
-            } else if (data.type === 'pdsTimeByElevation') {
+            } else if (data.type === 'pdsTimeByElevation') { // gives an object back
                 result = this.getSunTimeElevation(dNow, parseFloat(data.value), true, data);
+            } else if (data.type === 'pdsTimeByElevationRad') { // gives an object back
+                result = this.getSunTimeElevation(dNow, parseFloat(data.value), false, data);
             } else if (data.type === 'pdsTimeByAzimuth') {
                 result = this.getSunTimeAzimuth(dNow, parseFloat(data.value), true, data);
-            } else if (data.type === 'pdsTimeByElevationRad') {
-                result = this.getSunTimeElevation(dNow, parseFloat(data.value), false, data);
             } else if (data.type === 'pdsTimeByAzimuthRad') {
                 result = this.getSunTimeAzimuth(dNow, parseFloat(data.value), false, data);
+            } else if (data.type === 'pdsTimeByElevationNext') {
+                result = this.getSunTimeElevation(dNow, parseFloat(data.value), true, data);
+                if (result.set.value.getTime() < result.rise.value.getTime()) {
+                    return result.set;
+                }
+                return result.rise;
+            } else if (data.type === 'pdsTimeByElevationNextRad') {
+                result = this.getSunTimeElevation(dNow, parseFloat(data.value), false, data);
+                if (result.set.value.getTime() < result.rise.value.getTime()) {
+                    return result.set;
+                }
+                return result.rise;
+            } else if (data.type === 'pdsTimeByElevationRise') {
+                result = this.getSunTimeElevation(dNow, parseFloat(data.value), true, data, 'rise');
+            } else if (data.type === 'pdsTimeByElevationRiseRad') {
+                result = this.getSunTimeElevation(dNow, parseFloat(data.value), false, data, 'rise');
+            } else if (data.type === 'pdsTimeByElevationSet') {
+                result = this.getSunTimeElevation(dNow, parseFloat(data.value), true, data, 'set');
+            } else if (data.type === 'pdsTimeByElevationSetRad') {
+                result = this.getSunTimeElevation(dNow, parseFloat(data.value), false, data, 'set');
             } else if (data.type === 'pdmCalcData') {
                 result = this.getMoonCalc(dNow, true, false);
             } else if (data.type === 'pdmPhase') {
@@ -1556,20 +1618,8 @@ module.exports = function (RED) {
             return result;
         }
         /**************************************************************************************************************/
-        _checkCoordinates() {
-            if (isNaN(this.latitude) || (this.latitude < -90) || (this.latitude > 90)) {
-                throw new Error(RED._('position-config.errors.latitude-missing'));
-            }
-            if (isNaN(this.longitude) || (this.longitude < -180) || (this.longitude > 180)) {
-                throw new Error(RED._('position-config.errors.longitude-missing'));
-            }
-            if ((this.latitude === 0) && (this.longitude === 0)) {
-                throw new Error(RED._('position-config.errors.coordinates-missing'));
-            }
-        }
-
         _sunTimesRefresh(todayValue, dayId) {
-            this._checkCoordinates();
+            if (!this.valid) { return; }
             if (this.cache.sunTimesToday.dayId === (dayId + 1)) {
                 this.cache.sunTimesToday.times = this.cache.sunTimesTomorrow.times;
                 this.cache.sunTimesToday.sunPosAtSolarNoon = this.cache.sunTimesTomorrow.sunPosAtSolarNoon;
@@ -1597,7 +1647,7 @@ module.exports = function (RED) {
         }
 
         _moonTimesRefresh(todayValue, dayId) {
-            this._checkCoordinates();
+            if (!this.valid) { return; }
 
             if (this.cache.moonTimesToday.dayId === (dayId + 1)) {
                 this.cache.moonTimesTomorrow.dayId = this.cache.moonTimes2Days.dayId;

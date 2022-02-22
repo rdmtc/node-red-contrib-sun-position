@@ -45,11 +45,8 @@ module.exports = function (RED) {
         this.azimuthPos = {};
         const node = this;
         if (!this.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
+            node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
         }
 
@@ -63,12 +60,8 @@ module.exports = function (RED) {
                 const dNow = hlp.getNowTimeStamp(this, msg);
 
                 if (!this.positionConfig) {
-                    node.status({
-                        fill: 'red',
-                        shape: 'dot',
-                        text: RED._('node-red-contrib-sun-position/position-config:errors.pos-config-state')
-                    });
-                    done(RED._('node-red-contrib-sun-position/position-config:errors.pos-config'), msg);
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+                    node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     return null;
                 }
                 const ports = new Array(this.rules.length);

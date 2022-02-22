@@ -36,24 +36,25 @@ module.exports = function(RED) {
         const path = require('path');
 
         const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-
-        RED.nodes.createNode(this, config);
-        this.locale = require('os-locale').sync();
+        const node = this;
+        RED.nodes.createNode(node, config);
+        node.locale = require('os-locale').sync();
         // Retrieve the config node
-        this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        // this.debug('initialize rdgDelayUntilNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
-        if (!this.positionConfig) {
+        node.positionConfig = RED.nodes.getNode(config.positionConfig);
+        // node.debug('initialize rdgDelayUntilNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
+        if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return null;
         }
-        if (this.positionConfig.checkNode(error => {
-            node.error(error);
-            node.status({fill: 'red', shape: 'dot', text: error });
-        }, false)) {
+        if (node.positionConfig.checkNode(
+            error => {
+                node.error(error);
+                node.status({fill: 'red', shape: 'dot', text: error });
+            }, false)) {
             return null;
         }
-        this.timeData = {
+        node.timeData = {
             type: config.timeType,
             value : config.time,
             offsetType : config.offsetType,
@@ -64,34 +65,33 @@ module.exports = function(RED) {
                         config.timeType === 'flow' ||
                         config.timeType === 'global')
         };
-        if (this.timeData.type === 'jsonata') {
+        if (node.timeData.type === 'jsonata') {
             try {
-                this.timeData.expr = this.positionConfig.getJSONataExpression(this, this.timeData.value);
+                node.timeData.expr = node.positionConfig.getJSONataExpression(node, node.timeData.value);
             } catch (err) {
-                this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                this.timeData.expr = null;
+                node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                node.timeData.expr = null;
             }
         }
-        this.queuingBehavior = config.queuingBehavior;
-        this.flushMsgs = {
+        node.queuingBehavior = config.queuingBehavior;
+        node.flushMsgs = {
             type: config.flushMsgsType || 'none',
             value : config.flushMsgs
         };
-        this.flushMsgsValue = config.flushMsgsValue;
-        this.dropMsgs = {
+        node.flushMsgsValue = config.flushMsgsValue;
+        node.dropMsgs = {
             type: config.dropMsgsType || 'none',
             value : config.dropMsgs
         };
-        this.dropMsgsValue = config.dropMsgsValue;
-        this.enqueueMsg = {
+        node.dropMsgsValue = config.dropMsgsValue;
+        node.enqueueMsg = {
             type: config.enqueueMsgType || 'none',
             value : config.enqueueMsg
         };
-        this.enqueueMsgValue = config.enqueueMsgValue;
-        this.ctrlPropSet = config.ctrlPropSet;
-        this.ctrlPropValue = config.ctrlPropValue;
-        this.tsCompare = config.tsCompare;
-        const node = this;
+        node.enqueueMsgValue = config.enqueueMsgValue;
+        node.ctrlPropSet = config.ctrlPropSet;
+        node.ctrlPropValue = config.ctrlPropValue;
+        node.tsCompare = parseInt(config.tsCompare) || 0;
 
         node.msgQueue = [];
 
@@ -193,15 +193,15 @@ module.exports = function(RED) {
             let id = '';
             let value = '';
             switch (comparetype) {
-                case '1':
+                case 1:
                     id = 'msg.ts';
                     value = msg.ts;
                     break;
-                case '2':
+                case 2:
                     id = 'msg.lc';
                     value = msg.lc;
                     break;
-                case '3':
+                case 3:
                     id = 'msg.time';
                     value = msg.time;
                     break;

@@ -1089,10 +1089,12 @@ function getTimeOfText(t, date, utc, timeZoneOffset) {
  * parses a string which contains a date or only a time to a Date object
  * @param {any} dt number or text which contains a date or a time
  * @param {boolean} preferMonthFirst if true, Dates with moth first should be preferd, otherwise month last (european)
- * @param {boolean} [utc] define if the time should be in utc
+ * @param {boolean} [utc] indicates if the date should be in utc
+ * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
+ * @param {Date} [dNow] base Date, if defined missing parts will be used from this Date object
  * @return {Date} the parsed date object, throws an error if can not parsed
  */
-function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
+function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset, dNow) {
     // console.debug('getDateOfText dt=' + util.inspect(dt, { colors: true, compact: 10, breakLength: Infinity })); // eslint-disable-line
     if (dt === null || typeof dt === 'undefined') {
         throw new Error('Could not evaluate as a valid Date or time. Value is null or undefined!');
@@ -1128,11 +1130,11 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset) {
     }
 
     if (typeof dt === 'string') {
-        let res = _parseDateTime(dt, preferMonthFirst, utc, timeZoneOffset);
+        let res = _parseDateTime(dt, preferMonthFirst, utc, timeZoneOffset, dNow);
         if (res !== null && typeof res !== 'undefined') { return res; }
-        res = _parseDate(dt, preferMonthFirst, utc, timeZoneOffset);
+        res = _parseDate(dt, preferMonthFirst, utc, timeZoneOffset, dNow);
         if (res !== null && typeof res !== 'undefined') { return res; }
-        res = _parseArray(dt, _dateFormat.parseTimes, utc, timeZoneOffset);
+        res = _parseArray(dt, _dateFormat.parseTimes, utc, timeZoneOffset, dNow);
         if (res !== null && typeof res !== 'undefined') { return res; }
         if (utc || timeZoneOffset === 0) {
             if (!dt.includes('UTC') && !dt.includes('utc') && !dt.includes('+') && !dt.includes('-')) {
@@ -1666,10 +1668,11 @@ function _getInt(str, i, minlength, maxlength) {
  * @param {string} format format of the value
  * @param {boolean} [utc] indicates if the date should be in utc
  * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
+ * @param {Date} [dNow] base Date, if defined missing parts will be used from this Date object
  * @returns {object} a Date object with value:{Date} or error:{String} if pattern does not match.
  */
-function _getDateFromFormat(val, format, utc, timeZoneOffset) {
-    // console.debug(`getDateFromFormat val=${val} format=${format} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
+function _getDateFromFormat(val, format, utc, timeZoneOffset, dNow) {
+    // console.debug(`getDateFromFormat val=${val} format=${format} utc=${utc} timeZoneOffset=${timeZoneOffset}`); // eslint-disable-line
     val = String(val);
 
     if (format.slice(0, 4) === 'UTC:' || format.slice(0, 4) === 'utc:') {
@@ -1683,17 +1686,27 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
 
     val = String(val);
     format = String(format);
-    const dNow = new Date();
     let i_val = 0;
     let i_format = 0;
     let x; let y;
-    let year = dNow.getFullYear();
-    let month = dNow.getMonth() + 1;
-    let date = dNow.getDate();
-    let hour = dNow.getHours();
-    let min = dNow.getMinutes();
-    let sec = dNow.getSeconds();
-    let misec = dNow.getMilliseconds();
+
+    let year = 0;
+    let month = 0;
+    let date = 0;
+    let hour = 0;
+    let min = 0;
+    let sec = 0;
+    let misec = 0;
+
+    if (dNow) {
+        year = dNow.getFullYear();
+        month = dNow.getMonth() + 1;
+        date = dNow.getDate();
+        hour = dNow.getHours();
+        min = dNow.getMinutes();
+        sec = dNow.getSeconds();
+        misec = dNow.getMilliseconds();
+    }
     let ampm = '';
 
     while (i_format < format.length) {
@@ -1895,11 +1908,14 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset) {
  * parses an array of different formats
  * @param {string} val date string to parse
  * @param {Array.<string>} listToCheck a list of strings with different formats to check
+ * @param {boolean} [utc] indicates if the date should be in utc
+ * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
+ * @param {Date} [dNow] base Date, if defined missing parts will be used from this Date object
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function _parseArray(val, listToCheck, utc, timeZoneOffset) {
+function _parseArray(val, listToCheck, utc, timeZoneOffset, dNow) {
     for (let i = 0, n = listToCheck.length; i < n; i++) {
-        const res = _getDateFromFormat(val, listToCheck[i], utc, timeZoneOffset);
+        const res = _getDateFromFormat(val, listToCheck[i], utc, timeZoneOffset, dNow);
         if (res.value !== null && typeof res.value !== 'undefined') {
             return res.value;
         }
@@ -1926,15 +1942,18 @@ function _isTimestamp(str) {
  * d/M/y   d-M-y      d.M.y     d-MMM     d/M      d-M
  * @param {string} val date string to parse
  * @param {boolean} [preferMonthFirst] if **true** the method to search first for formats like M/d/y (e.g. American format) before d/M/y (e.g. European).
+ * @param {boolean} [utc] indicates if the date should be in utc
+ * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
+ * @param {Date} [dNow] base Date, if defined missing parts will be used from this Date object
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function _parseDate(val, preferMonthFirst, utc, timeZoneOffset) {
+function _parseDate(val, preferMonthFirst, utc, timeZoneOffset, dNow) {
     // console.debug('_parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
-    let res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.monthFirst : _dateFormat.parseDates.dateFirst, utc, timeZoneOffset);
+    let res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.monthFirst : _dateFormat.parseDates.dateFirst, utc, timeZoneOffset, dNow);
     if (res !== null && typeof res !== 'undefined') { return res; }
-    res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.dateFirst : _dateFormat.parseDates.monthFirst, utc, timeZoneOffset);
+    res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.dateFirst : _dateFormat.parseDates.monthFirst, utc, timeZoneOffset, dNow);
     if (res !== null && typeof res !== 'undefined') { return res; }
-    return _parseArray(val, _dateFormat.parseDates.general, utc, timeZoneOffset);
+    return _parseArray(val, _dateFormat.parseDates.general, utc, timeZoneOffset, dNow);
 }
 
 /**
@@ -1942,9 +1961,12 @@ function _parseDate(val, preferMonthFirst, utc, timeZoneOffset) {
  * number of possible date formats to get the value.
  * @param {string} val date string to parse
  * @param {boolean} [preferMonthFirst] if **true** the method to search first for formats like M/d/y (e.g. American format) before d/M/y (e.g. European).
+ * @param {boolean} [utc] indicates if the date should be in utc
+ * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
+ * @param {Date} [dNow] base Date, if defined missing parts will be used from this Date object
  * @returns {Date|null} a Date object or **null** if no patterns match.
  */
-function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset) {
+function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset, dNow) {
     // console.debug('_parseDateTime val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
     /** mixes two lists */
     function mix(lst1, lst2, result) {
@@ -1965,7 +1987,7 @@ function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset) {
         checkList = mix(_dateFormat.parseDates.monthFirst, _dateFormat.parseTimes, checkList);
     }
     checkList = mix(_dateFormat.parseDates.general, _dateFormat.parseTimes, checkList);
-    return _parseArray(val, checkList, utc, timeZoneOffset);
+    return _parseArray(val, checkList, utc, timeZoneOffset, dNow);
 }
 
 /**
@@ -1975,9 +1997,12 @@ function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset) {
  * @param {Array.<string>} [dayNames] list of day names
  * @param {Array.<string>} [monthNames] list of month names
  * @param {Array.<string>} [dayDiffNames] list of day diff names
+ * @param {boolean} [utc] indicates if the date should be in utc
+ * @param {number} [timeZoneOffset] timezone offset in minutes of the input date
+ * @param {Date} [dNow] base Date, if defined missing parts will be used from this Date object
  * @returns {Date} a Date object or throws an error if no patterns match.
  */
-function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset) {
+function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset, dNow) {
     // console.debug('parseDateFromFormat date=' + util.inspect(date, { colors: true, compact: 10, breakLength: Infinity }) + ' - format=' + util.inspect(format, { colors: true, compact: 10, breakLength: Infinity }) + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (dayNames) {
         _dateFormat.i18n.dayNames = dayNames;
@@ -1999,7 +2024,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
     let res = null;
 
     if (isNaN(format)) { // timeparse_TextOther
-        res = _getDateFromFormat(date, format, utc, timeZoneOffset);
+        res = _getDateFromFormat(date, format, utc, timeZoneOffset, dNow);
         if (res.error) {
             throw new Error('could not evaluate format of ' + date + ' (' + format + ') - ' + res.error);
         }
@@ -2007,11 +2032,11 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
     } else {
         const tryparse = (val, preferMonthFirst) => {
             // console.debug('try parse ' + util.inspect(val, { colors: true, compact: 10, breakLength: Infinity }) + ' preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
-            let res = _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset);
+            let res = _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset, dNow);
             if (res !== null && typeof res !== 'undefined') { return res; }
-            res = _parseDate(val, preferMonthFirst, utc, timeZoneOffset);
+            res = _parseDate(val, preferMonthFirst, utc, timeZoneOffset, dNow);
             if (res !== null && typeof res !== 'undefined') { return res; }
-            res = _parseArray(val, _dateFormat.parseTimes, utc, timeZoneOffset);
+            res = _parseArray(val, _dateFormat.parseTimes, utc, timeZoneOffset, dNow);
             if (res !== null && typeof res !== 'undefined') { return res; }
             res = Date.parse(val);
             if (!isNaN(res)) {
@@ -2093,29 +2118,29 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
 
 /**
  * replaces placeholder in a string
- * @param {string} topic - the topic
- * @param {object} topicAttrs - an object with different propertys who are allowed as placeholders
- * @returns {string} the topic with replaced placeholders
+ * @param {string} str - the string to replace placeholders
+ * @param {object} strAttrs - an object with different propertys who are allowed as placeholders
+ * @returns {string} the string with replaced placeholders
  */
-function topicReplace(topic, topicAttrs) {
-    if (!topic || typeof topicAttrs !== 'object') {
-        return topic;
+function topicReplace(str, strAttrs) {
+    if (!str || typeof strAttrs !== 'object') {
+        return str;
     }
 
-    const topicAttrsLower = {};
-    Object.keys(topicAttrs).forEach(k => {
-        topicAttrsLower[k.toLowerCase()] = topicAttrs[k];
+    const strAttrsLower = {};
+    Object.keys(strAttrs).forEach(k => {
+        strAttrsLower[k.toLowerCase()] = strAttrs[k];
     });
 
-    const match = topic.match(/\${[^}]+}/g);
+    const match = str.match(/[\$#]{[^}]+}/g);
     if (match) {
         match.forEach(v => {
             const key = v.substr(2, v.length - 3);
-            const rx = new RegExp('\\${' + key + '}', 'g');
+            const rx = new RegExp('\[\$#]{' + key + '}', 'g');
             const rkey = key.toLowerCase();
-            const res = Object.prototype.hasOwnProperty.call(topicAttrsLower, rkey) ? topicAttrsLower[rkey] : '';
-            topic = topic.replace(rx, res);
+            const res = Object.prototype.hasOwnProperty.call(strAttrsLower, rkey) ? strAttrsLower[rkey] : '';
+            str = str.replace(rx, res);
         });
     }
-    return topic;
+    return str;
 }

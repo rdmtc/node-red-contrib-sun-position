@@ -57,14 +57,8 @@ this software without specific prior written permission.
                         return (v === true) || (v === 'true');
                     }
                 },
-                longitude: {
-                    value: '',
-                    required: false
-                },
-                latitude: {
-                    value: '',
-                    required: false
-                },
+                longitude: {value: '' },
+                latitude: {value: ''},
                 angleType: {
                     value: 'deg',
                     required: true,
@@ -131,9 +125,6 @@ this software without specific prior written permission.
                 $('#node-config-input-isValide').val(false);
                 const $lat = $('#node-config-input-posLatitude');
                 const $lon = $('#node-config-input-posLongitude');
-
-                const latOldVal = parseFloat($('#node-config-input-latitude').val());
-                const lonOldVal = parseFloat($('#node-config-input-longitude').val());
                 let latVal = parseFloat($lat.val());
                 let lonVal = parseFloat($lon.val());
 
@@ -171,8 +162,8 @@ this software without specific prior written permission.
                 });
 
                 if ($lat.val() === '' || isNaN(latVal)) {
-                    if (latOldVal !== '' && !isNaN(latOldVal) && latOldVal !== 0) {
-                        $lat.val(latOldVal);
+                    if (node.longitude !== '' && !isNaN(node.longitude) && node.longitude !== 0) {
+                        $lat.val(node.longitude);
                     } else {
                         $lat.val('');
                     }
@@ -180,8 +171,8 @@ this software without specific prior written permission.
                 }
 
                 if ($lon.val() === '' || isNaN(lonVal)) {
-                    if (lonOldVal !== '' && !isNaN(lonOldVal) && lonOldVal !== 0) {
-                        $lon.val(lonOldVal);
+                    if (node.longitude !== '' && !isNaN(node.longitude) && node.longitude !== 0) {
+                        $lon.val(node.longitude);
                     } else {
                         $lon.val('');
                     }
@@ -243,10 +234,9 @@ this software without specific prior written permission.
             } else  {
                 $('#node-config-input-posLatitude').val(latitude);
             }
-            $('#node-config-input-latitude').val(0);
             /* */
-                $('#node-config-input-latitude').val(0);
-                $('#node-config-input-longitude').val(0);
+                delete this.longitude;
+                delete this.latitude;
             },
 
             /**
@@ -278,22 +268,62 @@ this software without specific prior written permission.
             },
 
             /**
+             * convert a time with a multipier to a string
+             * @param {*} node - the node object for getting i18N Data (node._())
+             * @param {number} mp - the multipier
+             * @param {number} v - the value
+             * @returns {string} the time as string
+             */
+            convertMsToString(node, mp, v) {
+                if (!mp) {
+                    return String(v);
+                }
+                mp = parseInt(mp);
+                if (mp === 604800000) {
+                    if (v === 1) {
+                        return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.week');
+                    }
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.weeks');
+                } else if (mp === 86400000) {
+                    if (v === 1) {
+                        return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.day');
+                    }
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.days');
+                } else if (mp === 3600000) {
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.hour');
+                } else if (mp === 60000) {
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.min');
+                } else if (mp === 1000) {
+                    return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.sec');
+                }
+                return String(v) + node._('node-red-contrib-sun-position/position-config:common.units.ms');
+            },
+
+            /**
              * get the label for a typed input vlaue
              * @param {*} node - the node object for getting i18N Data (node._())
              * @param {string} t - the type of the value
              * @param {string} v - the value
-             * @param {number} [offset] - a optional offset to the value
+             * @param {number} [o] - a optional offset to the value
+             * @param {number} [oT] - a optional type of the offset to the value
+             * @param {number} [oM] - a optional multiplier of the offset
              * @param {number} [l] - the desired maximum length (default = 30)
              * @returns {string} the value clipped to the given length
              */
-            getValueLabel(node, t, v, offset, l) {
-                // console.log('getValueLabel global');
+            getRDGNodeValLbl(node, t, v, oT, o, oM, l) {
+                // console.log('getRDGNodeValLbl global');
                 l = l || 30;
                 let suffix = '';
-                if (offset && offset > 0) {
-                    suffix = '↷';
-                } else if (offset && offset < 0) {
-                    suffix = '↶';
+                if (o && oT !== 'none') {
+                    if (oT && (oT.startsWith('randomNum') || oT.startsWith('randmNum'))) {
+                        suffix += '⤨';
+                    } else if (o > 0) {
+                        suffix += '⤽';
+                        suffix += RED.nodes.getType('position-config').convertMsToString(node, oM, o);
+                    } else if (o < 0) {
+                        suffix += '⤼';
+                        suffix += RED.nodes.getType('position-config').convertMsToString(node, oM, o);
+                    } else suffix = '↷';
                 }
 
                 switch (t) {
@@ -361,14 +391,34 @@ this software without specific prior written permission.
                         return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevation')}"${suffix}`;
                     case 'pdsCalcElevationRad':
                         return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad')}"${suffix}`;
-                    case 'pdsTimeByElevation':
-                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevation')}"${suffix}`;
+                    case 'numAzimuth':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.numAzimuth')}"${suffix}`;
+                    case 'numAzimuthRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.numAzimuthRad')}"${suffix}`;
+                    case 'numAltitude':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.numAltitude')}"${suffix}`;
+                    case 'numAltitudeRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.numAltitudeRad')}"${suffix}`;
                     case 'pdsTimeByAzimuth':
-                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuth')}"${suffix}`;
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuth')}"${suffix}`;
+                    case 'pdsTimeByAzimuthRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuthRad')}"${suffix}`;
+                    case 'pdsTimeByElevation':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObj')}"${suffix}`;
                     case 'pdsTimeByElevationRad':
-                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByElevationRad')}"${suffix}`;
-                    case 'SunTimeByAzimuthRad':
-                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.sunTimeByAzimuthRad')}"${suffix}`;
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObjRad')}"${suffix}`;
+                    case 'pdsTimeByElevationNext':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNext')}"${suffix}`;
+                    case 'pdsTimeByElevationNextRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNextRad')}"${suffix}`;
+                    case 'pdsTimeByElevationRise':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRise')}"${suffix}`;
+                    case 'pdsTimeByElevationRiseRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRiseRad')}"${suffix}`;
+                    case 'pdsTimeByElevationSet':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSet')}"${suffix}`;
+                    case 'pdsTimeByElevationSetRad':
+                        return `"${node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSetRad')}"${suffix}`;
                     case 'pdmCalcData':
                         return `"${node._('node-red-contrib-sun-position/position-config:common.types.mooncalc')}"${suffix}`;
                     case 'pdmPhase':
@@ -495,13 +545,11 @@ this software without specific prior written permission.
     <div class="form-row">
         <label for="node-config-input-posLatitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.latitude"></span></label>
         <input type="text" id="node-config-input-posLatitude" data-i18n="[placeholder]position-config.placeholder.latitude">
-        <input  type="hidden" id="node-config-input-latitude">
     </div>
 
     <div class="form-row">
         <label for="node-config-input-posLongitude"><i class="fa fa-globe"></i> <span data-i18n="position-config.label.longitude"></span></label>
         <input type="text" id="node-config-input-posLongitude" data-i18n="[placeholder]position-config.placeholder.longitude">
-        <input  type="hidden" id="node-config-input-longitude">
         <input  type="hidden" id="node-config-input-isValide">
     </div>
 

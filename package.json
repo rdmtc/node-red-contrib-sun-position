@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -53,12 +53,13 @@
     "node": ">=8.0.0"
   },
   "scripts": {
-    "test": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate",
+    "test": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate && mocha \"test/**/*_spec.js\"",
+    "testnode": "mocha \"test/**/*_spec.js\"",
     "lintfix": "eslint --fix \"./**/*.js\" \"./**/*.html\"",
     "lint": "eslint \"./**/*.js\" \"./**/*.html\"",
     "predev": "npm i -g",
     "dev": "node-red -v",
-    "prepublishOnly": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate"
+    "prepublishOnly": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate && mocha \"test/**/*_spec.js\""
   },
   "repository": {
     "type": "git",
@@ -98,6 +99,7 @@
       "position-config": "nodes/10-position-config.js",
       "time-inject": "nodes/20-time-inject.js",
       "within-time-switch": "nodes/21-within-time-switch.js",
+      "delay-until": "nodes/22-delay-until.js",
       "sun-position": "nodes/30-sun-position.js",
       "moon-position": "nodes/31-moon-position.js",
       "time-comp": "nodes/60-time-comp.js",
@@ -116,7 +118,14 @@
     "eslint-plugin-jsdoc": ">=37.9.4",
     "eslint-plugin-json": ">=3.1.0",
     "eslint-plugin-node": ">=11.1.0",
-    "node-red-dev": "^0.1.5"
+    "jsonata": "^1.8.6",
+    "mocha": "^8.3.0",
+    "node-red": ">=2.0.0",
+    "node-red-dev": "^0.1.5",
+    "node-red-node-test-helper": "^0.2.7",
+    "should": "^13.2.3",
+    "should-sinon": "^0.0.6",
+    "sinon": "^13.0.1"
   },
   "disabledSettings": {
     "plugins-disabled": [
