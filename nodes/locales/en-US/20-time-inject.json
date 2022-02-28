@@ -20,6 +20,7 @@
             "fewDays": "few days",
             "fewMonths": "few months",
             "interval-amount":"fixed number between time",
+            "cron":"CRON expression",
             "count":"Count",
             "intervalStart":"start from"
         },
@@ -31,7 +32,6 @@
             "propertyThreshold": "Threshold",
             "payload": "payload data of the send message",
             "intervalCount":"count",
-            "intervalStart":"YYYY-MM-DDTHH:mm:ss",
             "time": "time for inject",
             "timeOffset": "offset of time",
             "timeAlt": "alternate time",
@@ -41,8 +41,9 @@
             "months":"select months wherefore it should be valid",
             "recalcTime": "Interval of a recalculation of the time for send a message.",
             "once": "define if the node should emit a message independent of the time a message on flow start",
+            "intervalStart":"YYYY-MM-DDTHH:mm:ss",
             "start":"tt.mm",
-			"end":"tt.mm"
+            "end":"tt.mm"
         },
         "tips": {
             "addTimes": "Alternative time: If the specified property has the value 'true', the trigger is triggered at the specified alternative time instead of the normal specified time. This is useful for triggering a flow at a different time on public holidays or other special days.",

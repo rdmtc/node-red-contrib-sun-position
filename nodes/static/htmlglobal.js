@@ -277,7 +277,14 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.timeentered','time (next)'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeTime.svg',
             hasValue: true,
-            validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm|p|PM|P|utc|UTC|local|LOCAL)?$/
+            validate: /^(0\d|\d|1\d|2[0-3])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?\s*(pm|p|PM|P|am|a|AM|A)?\s*(utc|UTC|local|LOCAL|Local)?$/
+        },
+        cronExpr: {
+            value: 'cronexpr',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.cronexpr','time (next)'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeCRON.svg',
+            hasValue: true,
+            validate: /^(@(yearly|annually|monthly|weekly|daily|midnight|hourly))|(?:(?:(?:(?:\d+,)+\d+|(?:\d+(?:\/|-|#)\d+)|\d+L?|\*(?:\/\d+)?|L(?:-\d+)?|\?|[A-Z]{3}(?:-[A-Z]{3})?) ?){5,7})$/
         },
         DateEntered: {
             value: 'dateEntered',

@@ -19,6 +19,7 @@
             "fewDays": "ein paar Tage",
             "fewMonths": "ein paar Monate",
             "interval-amount":"feste Anzahl zwischen den Zeitpunkten",
+            "cron":"CRON-Ausdruck",
             "count":"Anzahl",
             "intervalStart":"beginnend von"
         },

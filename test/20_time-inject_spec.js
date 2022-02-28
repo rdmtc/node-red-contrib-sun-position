@@ -19,9 +19,17 @@
  **/
 /* global Context context describe beforeEach before afterEach after it */
 
+/**
+ * Test cases for time inect node
+ *
+ * @example:
+ * to run all tests: npm test
+ * to run all node tests: npm run testnode
+ * to run single test: mocha -g "time inject node"
+ */
 const should = require('should');
-const sinon = require("sinon");
-require("should-sinon");
+const sinon = require('sinon');
+require('should-sinon');
 
 const helper = require('node-red-node-test-helper');
 
@@ -57,7 +65,7 @@ describe('time inject node', () => {
         });
     });
 
-    describe('test configuration', function() {
+    describe('test configuration', () => {
         it('fail if missing configuration ', done => {
             const flow = [
                 {
@@ -71,7 +79,7 @@ describe('time inject node', () => {
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode, tabNode];
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n1 = helper.getNode('n1');
                 try {
                     n1.status.should.be.calledOnce();
@@ -85,19 +93,19 @@ describe('time inject node', () => {
 
         it('fail if latitude missing ', done => {
             const flow = [
-                    {
-                      id: "n1",
-                      type: "time-inject",
-                      name: "",
-                      nameInt: "Zeitpunkt",
-                      positionConfig: "nc1",
-                      props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
-                      injectTypeSelect: "none",
-                      once: false,
-                      wires: [[]]
-                    }, cfgNode];
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, cfgNode];
             const invalidCreds = {'nc1': { 'posLongitude': '10'}};
-            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, () => {
                 const n1 = helper.getNode('n1');
                 const nc1 = helper.getNode('nc1');
                 try {
@@ -113,19 +121,19 @@ describe('time inject node', () => {
 
         it('fail if longitude missing ', done => {
             const flow = [
-                    {
-                      id: "n1",
-                      type: "time-inject",
-                      name: "",
-                      nameInt: "Zeitpunkt",
-                      positionConfig: "nc1",
-                      props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
-                      injectTypeSelect: "none",
-                      once: false,
-                      wires: [[]]
-                    }, cfgNode];
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, cfgNode];
             const invalidCreds = {'nc1': { 'posLatitude': '5'}};
-            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, () => {
                 const n1 = helper.getNode('n1');
                 const nc1 = helper.getNode('nc1');
                 try {
@@ -141,19 +149,19 @@ describe('time inject node', () => {
 
         it('fail if latitude invalid ', done => {
             const flow = [
-                    {
-                      id: "n1",
-                      type: "time-inject",
-                      name: "",
-                      nameInt: "Zeitpunkt",
-                      positionConfig: "nc1",
-                      props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
-                      injectTypeSelect: "none",
-                      once: false,
-                      wires: [[]]
-                    }, cfgNode];
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, cfgNode];
             const invalidCreds = {'nc1': { 'posLatitude': '90.1',  'posLongitude': '10'}};
-            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, () => {
                 const n1 = helper.getNode('n1');
                 const nc1 = helper.getNode('nc1');
                 try {
@@ -169,19 +177,19 @@ describe('time inject node', () => {
 
         it('fail if longitude invalid ', done => {
             const flow = [
-                    {
-                      id: "n1",
-                      type: "time-inject",
-                      name: "",
-                      nameInt: "Zeitpunkt",
-                      positionConfig: "nc1",
-                      props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
-                      injectTypeSelect: "none",
-                      once: false,
-                      wires: [[]]
-                    }, cfgNode];
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, cfgNode];
             const invalidCreds = {'nc1': { 'posLatitude': '51', 'posLongitude': '180.1'}};
-            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, () => {
                 const n1 = helper.getNode('n1');
                 const nc1 = helper.getNode('nc1');
                 try {
@@ -196,7 +204,7 @@ describe('time inject node', () => {
         });
     });
 
-    describe('basic tests', function() {
+    describe('basic tests', () => {
         function basicTest(type, val, rval, topic = 't1', adFkt = null) {
             it('inject value ('+type+')', function(done) {
                 const flow = [
@@ -215,7 +223,7 @@ describe('time inject node', () => {
                         once: false,
                         wires: [['n2']]
                     }, cfgNode, hlpNode, tabNode];
-                helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+                helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                     const n1 = helper.getNode('n1'); // inject node
                     // const nc1 = helper.getNode('nc1'); // inject node
                     const n2 = helper.getNode('n2'); // helper node
@@ -282,7 +290,7 @@ describe('time inject node', () => {
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -314,18 +322,21 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: '', vt: 'dateSpecific',
-                        o: "", oT: "none", oM: "60000",
-                        f: 1, fS: 1, fT: "UTC Datum und Zeit", fI: "1",
-                        next: true,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
-                        {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
+                        {
+                            p: '', pt: 'msgPayload', v: '', vt: 'dateSpecific',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 1, fS: 1, fT: 'UTC Datum und Zeit', fI: '1',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false
+                        },
+                        {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}
+                    ],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -334,7 +345,7 @@ describe('time inject node', () => {
                     try {
                         msg.should.have.property('topic', 'tx');
                         msg.should.have.property('payload');
-                        let d = new Date(msg.payload);
+                        const d = new Date(msg.payload);
                         should(d.getTime()).be.greaterThan(timestamp.getTime() - 1000);
                         should(d.getTime()).be.lessThan(timestamp.getTime() + 1000);
                         msg.payload.substring(0, msg.payload.length - 6).should.equal(timestamp.toUTCString().substring(0, timestamp.toUTCString().length - 6));
@@ -360,18 +371,19 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: '', vt: 'dateSpecific',
-                        o: "", oT: "none", oM: "60000",
-                        f: 0, fS: 0, fT: "Millisekunden UNIX-Zeit", fI: "0",
-                        next: true,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {
+                            p: '', pt: 'msgPayload', v: '', vt: 'dateSpecific',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fT: 'Millisekunden UNIX-Zeit', fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -406,18 +418,19 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: '10:00', vt: 'entered',
-                        o: "", oT: "none", oM: "60000",
-                        f: 0, fS: 0, fI: "0",
-                        next: false,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {
+                            p: '', pt: 'msgPayload', v: '10:00', vt: 'entered',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: false,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -445,18 +458,19 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: '1.1.2020 10:00', vt: 'dateEntered',
-                        o: "", oT: "none", oM: "60000",
-                        f: 0, fS: 0, fI: "0",
-                        next: true,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {
+                            p: '', pt: 'msgPayload', v: '1.1.2020 10:00', vt: 'dateEntered',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -484,18 +498,19 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: 'astronomicalDawn', vt: 'pdsTime',
-                        o: "", oT: "none", oM: "60000",
-                        f: 0, fS: 0, fI: "0",
-                        next: true,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {
+                            p: '', pt: 'msgPayload', v: 'astronomicalDawn', vt: 'pdsTime',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -523,18 +538,19 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: 'civilDawn', vt: 'pdsTime',
-                        o: "", oT: "none", oM: "60000",
-                        f: 0, fS: 0, fI: "0",
-                        next: true,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {
+                            p: '', pt: 'msgPayload', v: 'civilDawn', vt: 'pdsTime',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -562,18 +578,19 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: 'rise', vt: 'pdmTime',
-                        o: "", oT: "none", oM: "60000",
-                        f: 0, fS: 0, fI: "0",
-                        next: true,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {
+                            p: '', pt: 'msgPayload', v: 'rise', vt: 'pdmTime',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -601,18 +618,19 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: 'fMon', vt: 'dayOfMonth',
-                        o: "", oT: "none", oM: "60000",
-                        f: 0, fS: 0, fI: "0",
-                        next: true,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {
+                            p: '', pt: 'msgPayload', v: 'fMon', vt: 'dayOfMonth',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -640,18 +658,19 @@ describe('time inject node', () => {
                     nameInt: 'test',
                     positionConfig: 'nc1',
                     props: [
-                        {p: '', pt: 'msgPayload', v: '', vt: 'pdsTimeNow',
-                        o: "", oT: "none", oM: "60000",
-                        f: 0, fS: 0, fI: "0",
-                        next: true,
-                        days: "*", months: "*",
-                        onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {
+                            p: '', pt: 'msgPayload', v: '', vt: 'pdsTimeNow',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
                         {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
                     injectTypeSelect: 'none',
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n1.status.should.be.calledOnce();
@@ -836,7 +855,7 @@ describe('time inject node', () => {
 
     }); /* basic tests */
 
-    describe('environment variable', function() {
+    describe('environment variable', () => {
         it('inject name of node as environment variable ', done => {
             const flow = [
                 {
@@ -850,7 +869,7 @@ describe('time inject node', () => {
                     once: false,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n1 = helper.getNode('n1');
                 const n2 = helper.getNode('n2');
                 n2.on('input', msg => {
@@ -1245,7 +1264,7 @@ describe('time inject node', () => {
         });
     }); /* environment variable */
 
-    describe('inject once', function() {
+    describe('inject once', () => {
         it('should inject once with default delay property', function(done) {
             const flow = [
                 {
@@ -1259,7 +1278,7 @@ describe('time inject node', () => {
                     once: true,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n1 = helper.getNode('n1');
                 n1.should.have.property('onceDelay', 0.1);
                 done();
@@ -1284,7 +1303,7 @@ describe('time inject node', () => {
                     once: true,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
                 const n2 = helper.getNode('n2');
                 n2.on('input', function(msg) {
                     try {
@@ -1317,7 +1336,7 @@ describe('time inject node', () => {
                     onceDelay: 0.5,
                     wires: [['n2']]
                 }, cfgNode, hlpNode];
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n1 = helper.getNode('n1');
                 n1.should.have.property('onceDelay', 0.5);
                 done();
@@ -1346,7 +1365,7 @@ describe('time inject node', () => {
                     onceDelay: 2,
                     wires: [['n2']]
                 }, cfgNode, hlpNode, tabNode];
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n2 = helper.getNode('n2');
                 n2.on('input', function(msg) {
                     msg.should.have.property('topic', 't1');
@@ -1359,7 +1378,7 @@ describe('time inject node', () => {
         });
     }); /* inject once */
 
-    describe('inject repeatedly', function() {
+    describe('inject repeatedly', () => {
         it('should inject repeatedly', function(done) {
             const flow = [{
                 id: 'n1',
@@ -1379,7 +1398,7 @@ describe('time inject node', () => {
                 wires: [['n2']]
             }, cfgNode, hlpNode, tabNode];
 
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n2 = helper.getNode('n2');
                 let count = 0;
                 n2.on('input', function(msg) {
@@ -1387,7 +1406,7 @@ describe('time inject node', () => {
                     msg.should.have.property('payload', 'payload');
                     count += 1;
                     if (count > 2) {
-                        helper.clearFlows().then(function() {
+                        helper.clearFlows().then(() => {
                             done();
                         });
                     }
@@ -1418,7 +1437,7 @@ describe('time inject node', () => {
                 wires: [['n2']]
             }, cfgNode, hlpNode, tabNode];
 
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n2 = helper.getNode('n2');
                 let count = 0;
                 n2.on('input', function(msg) {
@@ -1426,7 +1445,7 @@ describe('time inject node', () => {
                     should(msg.payload).be.greaterThan(timestamp.getTime());
                     count += 1;
                     if (count > 2) {
-                        helper.clearFlows().then(function() {
+                        helper.clearFlows().then(() => {
                             done();
                         });
                     }
@@ -1435,18 +1454,19 @@ describe('time inject node', () => {
         });
     }); /* inject repeatedly */
 
-    /*
-    describe('inject repeatedly between times', function() {
-
+    describe('inject repeatedly between times', () => {
+        it('test needs to be implemented', function() {
+            this.skip();
+        });
     }); /* inject repeatedly between times */
 
-    /*
-    describe('inject fixed count between times', function() {
-
+    describe('inject fixed count between times', () => {
+        it('test needs to be implemented', function() {
+            this.skip();
+        });
     }); /* inject fixed count between times */
 
-
-    describe('inject at fixed timestamp ', function() {
+    describe('inject at fixed timestamp ', () => {
         it('should inject at fixed timestamp', function(done) {
             this.timeout(10100); // have to wait for the inject with delay of two seconds
             const timestamp = new Date();
@@ -1464,29 +1484,29 @@ describe('time inject node', () => {
                     {p: '', pt: 'msgTopic', v: 't2', vt: 'str'}],
                 injectTypeSelect: 'time',
                 time: timestamp.toLocaleTimeString(), // timestamp.getHours() + ":" + timestamp.getHours() + ":" + timestamp.getMinutes(),
-                timeType: "entered",
+                timeType: 'entered',
                 offset: 0,
-                offsetType: "none",
+                offsetType: 'none',
                 offsetMultiplier: 60000,
-                timeDays: "*",
+                timeDays: '*',
                 timeOnlyOddDays: false,
                 timeOnlyEvenDays: false,
                 timeOnlyOddWeeks: false,
                 timeOnlyEvenWeeks: false,
-                timeMonths: "*",
-                timedatestart: "",
-                timedateend: "",
-                property: "",
-                propertyType: "none",
-                propertyCompare: "true",
-                propertyThreshold: "",
-                propertyThresholdType: "num",
+                timeMonths: '*',
+                timedatestart: '',
+                timedateend: '',
+                property: '',
+                propertyType: 'none',
+                propertyCompare: 'true',
+                propertyThreshold: '',
+                propertyThresholdType: 'num',
                 once: false,
                 onceDelay: 0.01,
                 wires: [['n2']]
             }, cfgNode, hlpNode, tabNode];
 
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n2 = helper.getNode('n2');
                 n2.on('input', function(msg) {
                     try {
@@ -1499,9 +1519,7 @@ describe('time inject node', () => {
                         should(d).be.lessThan(ts + 100);
                         done();
                     } catch(err) {
-                        console.log(ts);
-                        console.log(d);
-                        console.log(msg);
+                        console.log(msg);   // eslint-disable-line no-console
                         done(err);
                     }
                 });
@@ -1525,29 +1543,29 @@ describe('time inject node', () => {
                     {p: '', pt: 'msgTopic', v: 't2', vt: 'str'}],
                 injectTypeSelect: 'time',
                 time: timestamp.toLocaleTimeString(), // timestamp.getHours() + ":" + timestamp.getHours() + ":" + timestamp.getMinutes(),
-                timeType: "entered",
+                timeType: 'entered',
                 offset: 2,
-                offsetType: "num",
+                offsetType: 'num',
                 offsetMultiplier: 1000,
-                timeDays: "*",
+                timeDays: '*',
                 timeOnlyOddDays: false,
                 timeOnlyEvenDays: false,
                 timeOnlyOddWeeks: false,
                 timeOnlyEvenWeeks: false,
-                timeMonths: "*",
-                timedatestart: "",
-                timedateend: "",
-                property: "",
-                propertyType: "none",
-                propertyCompare: "true",
-                propertyThreshold: "",
-                propertyThresholdType: "num",
+                timeMonths: '*',
+                timedatestart: '',
+                timedateend: '',
+                property: '',
+                propertyType: 'none',
+                propertyCompare: 'true',
+                propertyThreshold: '',
+                propertyThresholdType: 'num',
                 once: false,
                 onceDelay: 0.01,
                 wires: [['n2']]
             }, cfgNode, hlpNode, tabNode];
 
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n2 = helper.getNode('n2');
                 n2.on('input', function(msg) {
                     try {
@@ -1560,9 +1578,7 @@ describe('time inject node', () => {
                         should(d).be.lessThan(ts + 2100);
                         done();
                     } catch(err) {
-                        console.log(ts);
-                        console.log(d);
-                        console.log(msg);
+                        console.log(msg);   // eslint-disable-line no-console
                         done(err);
                     }
                 });
@@ -1570,27 +1586,41 @@ describe('time inject node', () => {
         });
     }); /* inject at fixed timestamp */
 
-    // TODO: implement inject by time
-
-    /*
-    it('should inject with cron', function(done) {
-        helper.load(nodeTimeInject, [{id:'n1', type:'inject',
-            payloadType:'date', topic: 't3',
-            crontab: '* * * * * *', wires:[['n3']] },
-        {id:'n3', type:'helper'}],
-        function() {
-            const n3 = helper.getNode('n3');
-            n3.on('input', function(msg) {
-                msg.should.have.property('topic', 't3');
-                msg.should.have.property('payload').be.a.Number();
-                helper.clearFlows().then(function() {
-                    done();
+    describe('inject with cron ', () => {
+        it('should inject with cron', function(done) {
+            const flow = [
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    z: 'flow',
+                    name: 'injectNodeName',
+                    nameInt: '* * * * * * = timestamp',
+                    positionConfig: 'nc1',
+                    props: [
+                        {p: '', pt: 'msgPayload', v: '', vt: 'date'},
+                        {p: '', pt: 'msgTopic', v: 't3', vt: 'str'}],
+                    injectTypeSelect: 'cron',
+                    cron: '* * * * * *',
+                    cronType: 'cronexpr',
+                    once: false,
+                    onceDelay: 0.1,
+                    recalcTime: 2,
+                    wires: [['n3']]
+                }, cfgNode, {id:'n3', type:'helper'}, tabNode];
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
+                const n3 = helper.getNode('n3');
+                n3.on('input', function(msg) {
+                    msg.should.have.property('topic', 't3');
+                    msg.should.have.property('payload').be.a.Number();
+                    helper.clearFlows().then(function() {
+                        done();
+                    });
                 });
             });
-        });
-    }); /* should inject with cron */
+        }); /* should inject with cron */
+    }); /* inject with cron */
 
-    describe('post', function() {
+    describe('post', () => {
         it('should inject message', function(done) {
             const flow = [{
                 id: 'n1',
@@ -1609,12 +1639,12 @@ describe('time inject node', () => {
                 once: false,
                 wires: [['n4']]
             }, cfgNode, {id: 'n4', type: 'helper'}, tabNode];
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n4 = helper.getNode('n4');
                 n4.on('input', function(msg) {
                     msg.should.have.property('topic', 't4');
                     msg.should.have.property('payload', 'hello');
-                    helper.clearFlows().then(function() {
+                    helper.clearFlows().then(() => {
                         done();
                     });
                 });
@@ -1653,7 +1683,7 @@ describe('time inject node', () => {
                 once: false,
                 wires: [['n4']]
             }, cfgNode, {id: 'n4', type: 'helper'}, tabNode];
-            helper.load([nodeConfig, nodeTimeInject], flow, credentials, function() {
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n4 = helper.getNode('n4');
                 n4.on('input', function(msg) {
                     msg.should.not.have.property('payload'); // payload removed
@@ -1662,7 +1692,7 @@ describe('time inject node', () => {
                     msg.should.have.property('num1', 1); // injected prop
                     msg.should.have.property('bool1', true); // injected prop
 
-                    helper.clearFlows().then(function() {
+                    helper.clearFlows().then(() => {
                         done();
                     });
                 });

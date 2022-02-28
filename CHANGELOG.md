@@ -14,6 +14,17 @@ Install of a specific Version in Redmatic (on a Homematic):
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@2.0.0`
 
 This can be also used to go back to an older Version.
+### ?.?.?: enhancement
+
+- general
+  - first implementation of tests with moca and some changes due to this
+
+- inject enhance (time-inject)
+  - added repletely inject with CRON expression
+  - added automatic test case
+    - basic inject
+    - time based inject
+
 ### 2.1.1: bug fixes
 
 - clock-timer
@@ -23,7 +34,7 @@ This can be also used to go back to an older Version.
 
 - blind-control
   - fix bug of handling not time constrained rules be first to last evaluated
-  
+
 ### 2.0.13: bug fixes
 
 - general

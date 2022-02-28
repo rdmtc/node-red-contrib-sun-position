@@ -29,6 +29,7 @@ module.exports = function (RED) {
 
     const util = require('util');
     const path = require('path');
+    const {scheduleTask} = require('cronosjs');
 
     const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
 
@@ -90,7 +91,8 @@ module.exports = function (RED) {
             timer : 1,
             interval : 2,
             intervalBtwStartEnd : 4,
-            intervalAmount : 5
+            intervalAmount : 5,
+            cron : 6
         };
         const intervalMax = 24*60*60*1000 * 3; // 3 Tage
         const node = this;
@@ -101,7 +103,7 @@ module.exports = function (RED) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
-        } else if (this.positionConfig.checkNode(
+        } else if (node.positionConfig.checkNode(
             error => {
                 node.error(error);
                 node.status({fill: 'red', shape: 'dot', text: error });
@@ -117,6 +119,8 @@ module.exports = function (RED) {
             node.injType = tInj.timer;
         } else if (config.injectTypeSelect === 'interval-amount') {
             node.injType = tInj.intervalAmount;
+        } else if (config.injectTypeSelect === 'cron') {
+            node.injType = tInj.cron;
         } else {
             node.injType = tInj.none;
         }
@@ -265,7 +269,10 @@ module.exports = function (RED) {
                 node.timeEndData.onlyOddWeeks = false;
             }
         } // timeEndData
-
+        node.cronjob = null;
+        if (node.injType === tInj.cron) {
+            node.cronExpr = config.cron || '';
+        } // cron
         /* Handle legacy */
         if(!Array.isArray(config.props)){
             config.props = [];
@@ -428,20 +435,6 @@ module.exports = function (RED) {
         }
 
         /**
-         * get the schedule time
-         * @param {Date} time - time to schedule
-         * @returns {number} milliseconds until the defined Date
-         */
-        node.tsGetNextScheduleTime = time => {
-            const dNow = new Date();
-            let millisec = (time.valueOf() - dNow.valueOf()) - 5;
-            while (millisec < 10) {
-                millisec += 86400000; // 24h
-            }
-            return millisec;
-        };
-
-        /**
          * get the limitation for time
          */
         node.getTimeLimitation = dNow => {
@@ -589,6 +582,15 @@ module.exports = function (RED) {
                         node.doCreateStartTimeout(node, 'initial');
                     }
                     break;
+                case tInj.cron:
+                    // node.debug('initialize - Intervall cron');
+                    if (doEmit === true) {
+                        node.emit('input', {
+                            _inject_type: 'once/startup'
+                        }); // will create timeout
+                    }
+                    node.doCreateCRONSetup(node);
+                    break;
                 default:
                     // node.debug('initialize - default');
                     node.doSetStatus(node, 'green');
@@ -625,7 +627,7 @@ module.exports = function (RED) {
             let millisecEnd = 1000 * 60 * 60 * 24; // 24h
             if ((node.nextEndTime !== null) && (typeof node.nextEndTime !== 'undefined')) {
                 // node.debug('timeout ' + node.nextEndTime + ' is in ' + millisec + 'ms');
-                millisecEnd = node.tsGetNextScheduleTime(node.nextEndTime);
+                millisecEnd = hlp.getTimeOut(new Date(), node.nextEndTime);
             }
             return millisecEnd;
         };
@@ -816,6 +818,14 @@ module.exports = function (RED) {
             }, node.intervalTime);
         };
 
+        node.doCreateCRONSetup = function () {
+            node.cronjob = scheduleTask(node.cronExpr,() => {
+                node.emit('input', { _inject_type: 'cron' });
+                node.doSetStatus(node);
+            });
+            node.doSetStatus(node);
+        };
+
         /**
          * creates the timeout
          * @param {*} node - the node representation
@@ -904,10 +914,10 @@ module.exports = function (RED) {
                     return;
                 }
 
-                let millisec = node.tsGetNextScheduleTime(node.nextStartTime);
+                let millisec = hlp.getTimeOut(node.timeStartData.now, node.nextStartTime);
                 if (node.timeStartData.isAltAvailable) {
                     shape = 'ring';
-                    const millisecAlt = node.tsGetNextScheduleTime(node.nextStartTimeAlt);
+                    const millisecAlt = hlp.getTimeOut(node.timeStartData.now, node.nextStartTimeAlt);
                     if (millisecAlt < millisec) {
                         millisec = millisecAlt;
                         node.timeStartData.isAltFirst = true;
@@ -988,7 +998,22 @@ module.exports = function (RED) {
         };
 
         node.doSetStatus = (node, fill, shape) => {
-            if (node.nextStartTimeAlt && node.timeOutStartObj) {
+            if (node.cronjob) {
+                const d = node.cronjob.nextRun;
+                if (d) {
+                    node.status({
+                        fill: fill || 'green',
+                        shape,
+                        text: node.cronExpr + ' = ' + node.positionConfig.toDateTimeString(d)
+                    });
+                } else {
+                    node.status({
+                        fill: fill || 'red',
+                        shape,
+                        text: node.cronExpr
+                    });
+                }
+            } else if (node.nextStartTimeAlt && node.timeOutStartObj) {
                 if (node.timeStartData.isAltFirst) {
                     node.status({
                         fill,
@@ -1140,6 +1165,10 @@ module.exports = function (RED) {
             clearTimeout(this.timeOutEndObj);
             this.timeOutEndObj = null;
             if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
+        }
+        if (this.cronjob !== null) {
+            this.cronjob.stop();
+            delete this.cronjob;
         }
     };
 
