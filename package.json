@@ -110,16 +110,17 @@
   },
   "dependencies": {
     "lodash.clonedeep": "^4.5.0",
-    "lodash.isequal": "^4.5.0"
+    "lodash.isequal": "^4.5.0",
+    "cronosjs": "^1.7.1"
   },
   "devDependencies": {
-    "eslint": ">=8.9.0",
+    "eslint": ">=8.10.0",
     "eslint-plugin-html": ">=6.2.0",
-    "eslint-plugin-jsdoc": ">=37.9.4",
+    "eslint-plugin-jsdoc": ">=37.9.5",
     "eslint-plugin-json": ">=3.1.0",
     "eslint-plugin-node": ">=11.1.0",
     "jsonata": "^1.8.6",
-    "mocha": "^8.3.0",
+    "mocha": "^8.4.0",
     "node-red": ">=2.0.0",
     "node-red-dev": "^0.1.5",
     "node-red-node-test-helper": "^0.2.7",

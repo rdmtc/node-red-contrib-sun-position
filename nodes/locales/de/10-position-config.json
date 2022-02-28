@@ -44,6 +44,7 @@
             "nodePath":"Node Pfad",
             "timeentered": "Uhrzeit (nächste)",
             "dateentered": "Datum (spezieller Zeitpunkt)",
+            "cronexpr":"CRON-Ausdruck",
             "timepredefined": "Uhrzeit speziell",
             "dayofmonth": "Monatstag",
             "dayofweek": "Wochentag",

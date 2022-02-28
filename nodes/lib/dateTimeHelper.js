@@ -25,8 +25,18 @@
  *********************************************/
 'use strict';
 const util = require('util');
+const TIME_WEEK = 604800000;
+const TIME_24h = 86400000;
+const TIME_1h = 3600000;
+const TIME_1min = 60000;
+const TIME_1s = 1000;
 
 module.exports = {
+    TIME_WEEK,
+    TIME_24h,
+    TIME_1h,
+    TIME_1min,
+    TIME_1s,
     isBool,
     isTrue,
     isFalse,
@@ -67,6 +77,7 @@ module.exports = {
     getUTCDayId,
     getDayId,
     getTimeNumberUTC,
+    getTimeOut,
     getNodeId,
     initializeParser,
     getFormattedDateOut,
@@ -92,7 +103,7 @@ Date.prototype.getWeek = function() {
     // January 4 is always in week 1.
     const week1 = new Date(date.getFullYear(), 0, 4);
     // Adjust to Thursday in week 1 and count number of weeks from date to week1.
-    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
+    return 1 + Math.round(((date.getTime() - week1.getTime()) / TIME_24h
                           - 3 + (week1.getDay() + 6) % 7) / 7);
 };
 
@@ -414,7 +425,7 @@ function getWeekOfYear(date) {
     // Get first day of year
     const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
     // Calculate full weeks to nearest Thursday
-    const weekNo = Math.ceil(( ( (date - yearStart) / 86400000) + 1)/7);
+    const weekNo = Math.ceil(( ( (date - yearStart) / TIME_24h) + 1)/7);
     // Return array of year and week number
     return [date.getUTCFullYear(), weekNo];
 }
@@ -426,9 +437,8 @@ function getWeekOfYear(date) {
  */
 function getDayOfYear(date) {
     const start = new Date(date.getFullYear(), 0, 0);
-    const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
-    const oneDay = 1000 * 60 * 60 * 24;
-    return [date.getUTCFullYear(),  Math.floor(diff / oneDay)];
+    const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * TIME_1min);
+    return [date.getUTCFullYear(),  Math.floor(diff / TIME_24h)];
 }
 
 /**
@@ -515,7 +525,21 @@ function getNowObject(node, msg) {
  * @return {number}   numeric representation of the time part of the date
  */
 function getTimeNumberUTC(date) {
-    return date.getUTCMilliseconds() + date.getUTCSeconds() * 1000 + date.getUTCMinutes() * 60000 + date.getUTCHours() * 3600000;
+    return date.getUTCMilliseconds() + date.getUTCSeconds() * TIME_1s + date.getUTCMinutes() * TIME_1min + date.getUTCHours() * TIME_1h;
+}
+/*******************************************************************************************************/
+/**
+ * get the timeout time
+ * @param {Date} base - base time (tyically new Date())
+ * @param {Date} time - time to schedule the timeout
+ * @returns {number} milliseconds until the defined Date
+ */
+function getTimeOut(base, time) {
+    let millisec = (time.valueOf() - base.valueOf()); // - 5;
+    while (millisec < 10) {
+        millisec += TIME_24h; // 24h
+    }
+    return millisec;
 }
 /*******************************************************************************************************/
 /**
@@ -744,9 +768,9 @@ function isDSTObserved(d) {
  */
 function convertDateTimeZone(date, timeZoneOffset) {
     const localTime = date.getTime();
-    const localOffset = date.getTimezoneOffset() * 60000;
+    const localOffset = date.getTimezoneOffset() * TIME_1min;
     const utc = localTime + localOffset;
-    const destTime = utc + (60000*timeZoneOffset);
+    const destTime = utc + (TIME_1min * timeZoneOffset);
     return new Date(destTime);
 }
 
@@ -847,8 +871,7 @@ const parseDate = dateString => {
  * @returns {DATE} Date round to next full Hour
  */
 function roundToHour(date) {
-    const p = 60 * 60 * 1000; // milliseconds in an hour
-    return new Date(Math.round(date.getTime() / p ) * p);
+    return new Date(Math.round(date.getTime() / TIME_1h ) * TIME_1h);
 }
 
 /*******************************************************************************************************/
@@ -1037,18 +1060,18 @@ function limitDate(limit, d) {
  * @return {Date|null} the parsed date object or **null** if can not parsed
  */
 function getTimeOfText(t, date, utc, timeZoneOffset) {
-    // console.debug('getTimeOfText t=' + t + ' date=' + date); // eslint-disable-line
-    const d = date || new Date();
+    // console.debug(`getTimeOfText t=${ t } date=${ date.toISOString() } utc=${ utc } timeZoneOffset=${ timeZoneOffset }`); // eslint-disable-line
+    const d = date ? new Date(date) : new Date();
     if (t && (!t.includes('.')) && (!t.includes('-'))) {
         t = t.toLocaleLowerCase();
         // const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)/);
         if (t.includes('utc')) {
             utc = true;
-            t = t.replace('utc','');
+            t = t.replace('utc','').trim();
         }
         if (t.includes('local')) {
             utc = false;
-            t = t.replace('local','');
+            t = t.replace('local','').trim();
         }
         const matches = t.match(/(0\d|1\d|2[0-3]|\d)(?::([0-5]\d|\d))(?::([0-5]\d|\d))?\s*(p?)(?:a|am|m|\s)?\s*(?:(\+|-)(\d\d):([0-5]\d)|(\+|-)(\d\d\d\d?))?/);
         if (matches) {
@@ -1453,11 +1476,11 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
         case 6: // timeformat_ms
             return date.getTime() - (new Date()).getTime();
         case 7: // timeformat_sec
-            return Math.round((date.getTime() - (new Date()).getTime()) / 1000);
+            return Math.round((date.getTime() - (new Date()).getTime()) / TIME_1s);
         case 8: // timeformat_min
-            return (Math.round((date.getTime() - (new Date()).getTime()) / 1000) / 60);
+            return (Math.round((date.getTime() - (new Date()).getTime()) / TIME_1s) / 60);
         case 9: // timeformat_hour
-            return (Math.round((date.getTime() - (new Date()).getTime()) / 1000) / 3600);
+            return (Math.round((date.getTime() - (new Date()).getTime()) / TIME_1s) / 3600);
         case 10: // timeformat_YYYYMMDDHHMMSS
             if (utc) {
                 return Number(date.getUTCFullYear() +
@@ -1539,7 +1562,7 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
         timeUTCStr: date.toUTCString(),
         timeISOStr: date.toISOString(),
         delay,
-        delaySec: Math.round(delay / 1000),
+        delaySec: Math.round(delay / TIME_1s),
         lc: dNow.getTime(),
         ofYear: {
             year : dayOfYear[0],
@@ -2132,6 +2155,7 @@ function topicReplace(str, strAttrs) {
         strAttrsLower[k.toLowerCase()] = strAttrs[k];
     });
 
+    /* eslint-disable no-useless-escape */
     const match = str.match(/[\$#]{[^}]+}/g);
     if (match) {
         match.forEach(v => {
@@ -2142,5 +2166,6 @@ function topicReplace(str, strAttrs) {
             str = str.replace(rx, res);
         });
     }
+    /* eslint-enable no-useless-escape */
     return str;
 }

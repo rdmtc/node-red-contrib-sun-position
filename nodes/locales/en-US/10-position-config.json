@@ -46,6 +46,7 @@
             "nodePath":"node path",
             "timeentered":"time (next)",
             "dateentered":"date",
+            "cronexpr":"CRON expression",
             "timepredefined":"fixed times",
             "dayofmonth":"day of month",
             "dayofweek":"day of week",

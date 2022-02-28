@@ -225,6 +225,7 @@ this software without specific prior written permission.
                             (typeof this.injectTypeSelect === 'undefined') ||
                             (this.injectTypeSelect === 'none') ||
                             (this.injectTypeSelect === 'time') ||
+                            (this.injectTypeSelect === 'cron') ||
                             RED.validators.typedInput('intervalCountType')(v) ||
                             (v > 0)
                         );
@@ -242,6 +243,7 @@ this software without specific prior written permission.
                             (this.injectTypeSelect === 'none') ||
                             (this.injectTypeSelect === 'time') ||
                             (this.injectTypeSelect === 'interval-amount') ||
+                            (this.injectTypeSelect === 'cron') ||
                             RED.validators.number()(v)
                         );
                     }
@@ -257,6 +259,17 @@ this software without specific prior written permission.
                             RED.validators.regex(/^\d{4}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}(:\d{1,2})?(.\d{1,3})?Z?$|^\d{2}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}(:\d{1,2})?(.\d{1,3})?Z?$/)(v)
                         );
                     }
+                },
+                cron: {
+                    value: '',
+                    required: false,
+                    validate(v) {
+                        return (this.injectTypeSelect !== 'cron') ||
+                                RED.validators.typedInput('cronType')(v);
+                    }
+                },
+                cronType: {
+                    value: 'cronexpr'
                 },
                 time: {
                     value: '',
@@ -281,6 +294,7 @@ this software without specific prior written permission.
                             (typeof this.offsetType === 'undefined') ||
                             (this.injectTypeSelect === 'none') ||
                             (this.injectTypeSelect === 'interval') ||
+                            (this.injectTypeSelect === 'cron') ||
                             RED.validators.typedInput('offsetType')(v)
                         );
                     }
@@ -297,6 +311,7 @@ this software without specific prior written permission.
                             RED.validators.number()(v) ||
                             (this.injectTypeSelect === 'none') ||
                             (this.injectTypeSelect === 'interval') ||
+                            (this.injectTypeSelect === 'cron') ||
                             $('#node-input-offsetType').typedInput('type') === 'none' ||
                             this.offsetType === 'none'
                         );
@@ -377,6 +392,7 @@ this software without specific prior written permission.
                             typeof v === 'undefined' ||
                             (this.injectTypeSelect === 'none') ||
                             (this.injectTypeSelect === 'interval') ||
+                            (this.injectTypeSelect === 'cron') ||
                             RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
                         );
                     }
@@ -389,6 +405,7 @@ this software without specific prior written permission.
                             typeof v === 'undefined' ||
                             (this.injectTypeSelect === 'none') ||
                             (this.injectTypeSelect === 'interval') ||
+                            (this.injectTypeSelect === 'cron') ||
                             RED.validators.regex(/^$|^\d{4}-\d{1,2}-\d{1,2}$|^\d{2}-\d{1,2}-\d{1,2}$/)(v)
                         );
                     }
@@ -1328,10 +1345,12 @@ this software without specific prior written permission.
                                 $('.time-inject-row-timeOnly').show();
                                 $('#node-input-intervalCountMultiplier').hide();
                                 break;
+                            case 'cron':
+                                $('#time-inject-row-cron').show();
+                                break;
                             default:
                                 break;
                         }
-                        // $('.time-inject-row-all').hide();
                         $('#node-input-offset').change(); // includes time + property change
                         $('#node-input-timeEndOffset').change(); // also timeEnd change
                         $('#node-input-timeAltOffset').change(); // includes time + property change
@@ -1395,7 +1414,7 @@ this software without specific prior written permission.
                         onChange(_type, _value) {
                             const injectType = $('#node-input-injectTypeSelect').val();
                             // console.log('time onChange -> ' + injectType + ' / type = ' + type);
-                            if (injectType === 'none' || injectType === 'interval') {
+                            if (injectType === 'none' || injectType === 'interval' || injectType === 'cron') {
                                 $('.time-inject-row-timeStartOffset').hide();
                                 $('.time-inject-row-timeLimits').hide();
                                 $('.time-inject-row-altStart').hide();
@@ -1765,6 +1784,21 @@ this software without specific prior written permission.
                         }
                     });
                     // #endregion timeAlt
+                    // #region cron
+                    setupTInput(node, {
+                        typeProp: 'cronType',
+                        valueProp: 'cron',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.cronExpr.value,
+                        defaultValue: '',
+                        types: [
+                            types.cronExpr
+                        ],
+                        onChange(_type, _value) {
+                            $('#node-input-time').change();
+                        }
+                    }); // cron
+                    // # endregion cron
                     // console.log('Loading done, trigegr changes');
                     $('#node-input-injectTypeSelect').change();
                     setTimeout(() => {
@@ -2047,6 +2081,10 @@ this software without specific prior written permission.
                     if ($('#node-input-intervalCount').typedInput('type') === 'num') {
                         this.nameInt += $('#node-input-intervalCount').typedInput('value');
                     }
+                } else if ($('#node-input-injectTypeSelect').val() === 'cron') {
+                    this.nameInt += $('#node-input-cron').typedInput('value');
+                    this.nameInt += ' = ';
+                    this.nameInt += propData.payloadLbl;
                 } else {
                     this.nameInt += '⏲ ';
                     if ($('#node-input-time').typedInput('type') === propData.payloadType) {
@@ -2128,6 +2166,7 @@ this software without specific prior written permission.
             <option value="interval-time" data-i18n="node-red:inject.interval-time"></option>
             <option value="interval-amount" data-i18n="time-inject.label.interval-amount"></option>
             <option value="time" data-i18n="node-red:inject.time"></option>
+            <option value="cron" data-i18n="time-inject.label.cron"></option>
         </select>
     </div>
     <div class="form-row time-inject-row-all block-noindent time-inject-row-interval time-inject-row-intervalFromStart time-inject-row-intervalTime is-initial-hidden" id="time-inject-row-interval">
@@ -2144,7 +2183,11 @@ this software without specific prior written permission.
     <div class="form-row time-inject-row-all time-inject-row-intervalTime is-initial-hidden ">
         <span data-i18n="node-red-contrib-sun-position/position-config:common.label.between"></span>
     </div>
-
+    <div class="form-row time-inject-row-all block-noindent time-inject-row-cron is-initial-hidden" id="time-inject-row-cron"  data-i18n="[titleOrg]time-inject.placeholder.cron">
+        <label for="node-input-cron"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.cron"></span></label>
+        <input type="text" id="node-input-cron" />
+        <input type="hidden" id="node-input-cronType">
+    </div>
     <div class="form-row time-inject-row-all block-noindent time-inject-row-timeStart time-inject-row-intervalTime time-inject-row-timeOnly is-initial-hidden" id="time-inject-row-timeStart"  data-i18n="[titleOrg]time-inject.placeholder.time">
         <label for="node-input-time"><i class="fa fa-clock-o"></i> <span data-i18n="time-inject.label.time"></span></label>
         <input type="text" id="node-input-time" />
