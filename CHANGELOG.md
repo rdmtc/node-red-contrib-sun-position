@@ -17,7 +17,8 @@ This can be also used to go back to an older Version.
 ### ?.?.?: enhancement
 
 - general
-  - first implementation of tests with moca and some changes due to this
+  - first implementation of tests with `mocha` and some changes due to the test implementation
+    - revised error handling and output messages if the configuration of nodes is not correct (missing config node, missing latitude/longitude).
 
 - inject enhance (time-inject)
   - added repletely inject with CRON expression
