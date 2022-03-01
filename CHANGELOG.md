@@ -26,6 +26,8 @@ This can be also used to go back to an older Version.
     - basic inject
     - time based inject
 
+- new Node. delay-until which allows to delay messages until defined time
+
 ### 2.1.1: bug fixes
 
 - clock-timer

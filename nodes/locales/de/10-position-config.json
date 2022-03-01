@@ -32,11 +32,14 @@
             "ok":"Ok",
             "randNum":"zufällig bis",
             "randNumCachedDay":"zufällig (täglich) bis",
-            "randNumCachedWeek":"zufällig (wöchentlich) bis"
+            "randNumCachedWeek":"zufällig (wöchentlich) bis",
+            "inputPort": "Eingangs- Nachricht",
+            "outputPort": "Ausgangs- Nachricht"
         },
         "types": {
             "unlimited": "keine Limitierung",
             "undefined": "nicht verwendet",
+            "delete":"entfernen",
             "msgInput": "eingangs Nachricht",
             "datespecific": "Zeitpunkt (erweitert)",
             "nodeId":"Node Name",

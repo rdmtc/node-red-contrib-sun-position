@@ -1,0 +1,38 @@
+{
+    "delay-until": {
+        "label": {
+            "name": "delay until",
+            "outputPort": "message",
+            "time":"Zeit",
+            "offset":"Offset",
+            "flushMsgs":"messages senden mit",
+            "dropMsgs":"messages verwerfen mit",
+            "equals": "gleich",
+            "compareTime":"Basis Zeit",
+            "now":"date.now",
+            "msgts":"msg.ts",
+            "msglc":"msg.lc",
+            "msgtime":"msg.time",
+            "showEnhSettings":"Erweiterte Einstellungen",
+            "enqueueMsg":"Nachricht in Warteschlange aufnehmen mit",
+            "ctrlPropChange":"Setze Steuer Eigenschaft",
+            "ctrlPropChangeB":"auf Wert",
+            "queuingBehavior":"Nachrichten Behandlung",
+            "allMsgs":"alle Nachrichten in die Warteschlange stellen",
+            "firstMsgs":"nur die erste Nachricht in die Warteschlange stellen",
+            "lastMsgs":"nur die letzte Nachricht in die Warteschlange stellen"
+        },
+        "placeholder": {
+            "time":"Zeit",
+            "offset":"Offset time",
+            "flushMsgs": "alle wartenden Nachrichten senden, wenn die Eigenschaft den angegebebnen Wert hat",
+            "dropMsgs": "alle wartenden Nachrichten löschen, wenn die Eigenschaft den angegebebnen Wert hat",
+            "ctrlPropChange": "setzt die Kontrolleigenschaft auf den angegebenen Wert"
+        },
+        "tips": {
+            "documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/delay\">Dokumentation und Beispiele</a>",
+            "controlMsgProp":"Hier können spezielle Eigenschaften mit Werten der Eingangsnachricht definiert werden, womit die Nachrichten in der Warteschlange sofort gesendet werden sollen oder womit die Warteschlange geleert werden soll (und die Nachrichten zu verwerfen).",
+            "controlMsgPropDefined": "Wenn eine der Kontrolleigenschaften gleich dem Wert ist, werden alle Nachrichten aus der Warteschlange entfernt oder gelöscht. Wenn die Nachricht zusätzlich die Eigenschaft zum wiedereinstellen enthält, wird die Nachricht in die Warteschlange aufgenommen. In diesem Fall kann man noch festlegen ob die Steuereigenschaften der Nachricht auf einen anderen Wert gesetzt oder entfernt werden sollen."
+        }
+    }
+}
