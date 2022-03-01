@@ -148,11 +148,7 @@ this software without specific prior written permission.
                         $('#node-config-map-row').show();
                         const clat = parseFloat(lat);
                         const clon = parseFloat(lon);
-                        $('#node-config-map-content').attr('src', `https://www.openstreetmap.org/export/embed.html?bbox=${(clon-0.004).toFixed(14)}%2C${(clat-0.004).toFixed(14)}%2C${(clon+0.004).toFixed(14)}%2C${(clat+0.004).toFixed(14)}&amp;layer=mapnik&amp;marker=${lat}%2C${lon}`);
-                        // src="https://www.openstreetmap.org/export/embed.html?bbox=13.630465865135195%2C51.088954687366886%2C13.633700609207155%2C51.09019968648441&amp;layer=mapnik&amp;marker=51.089577967896076%2C13.632082700696628
-                        // src="https://www.openstreetmap.org/export/embed.html?bbox=13.61883000000000%2C51.08226000000000%2C13.62883000000000%2C51.09226000000000&amp;layer=mapnik&amp;marker=51.08726%2C13.62383"
-                        //      https://www.openstreetmap.org/export/embed.html?bbox=13.62281000000000%2C51.08621          %2C13.62481          %2C51.08821         &amp;layer=mapnik&amp;marker=51.08721%2C13.62381
-                        // src="https://www.openstreetmap.org/export/embed.html?bbox=51.07726%2C13.61383%2C51.087260.01%2C13.623830.01&amp;layer=mapnik
+                        $('#node-config-map-content').attr('src', `https://www.openstreetmap.org/export/embed.html?bbox=${(clon-0.004).toFixed(14)}%2C${(clat-0.004).toFixed(14)}%2C${(clon+0.004).toFixed(14)}%2C${(clat+0.004).toFixed(14)}&layer=mapnik&marker=${clat.toFixed(14)}%2C${clon.toFixed(14)}`);
                         $('#node-config-map-link').html(`<a href="https://www.openstreetmap.org/#map=17/${lat}/${lon}" target="_blank">Openstreetmap</a>`);
                     } else {
                         $('#node-config-map-row').hide();
