@@ -203,6 +203,11 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.undefined'),
             hasValue: false
         },
+        Delete: {
+            value: 'delete',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.delete'),
+            hasValue: false
+        },
         DateSpecific: {
             value: 'dateSpecific',
             label: node._('node-red-contrib-sun-position/position-config:common.types.datespecific'),

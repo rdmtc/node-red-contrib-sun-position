@@ -57,9 +57,9 @@ module.exports = function(RED) {
         node.timeData = {
             type: config.timeType,
             value : config.time,
-            offsetType : config.offsetType,
+            offsetType : config.offsetType || 'none',
             offset : config.offset,
-            multiplier : config.offsetMultiplier,
+            multiplier : config.offsetMultiplier || 60000,
             next: true,
             calcByMsg: (config.timeType === 'msg' ||
                         config.timeType === 'flow' ||
@@ -74,23 +74,33 @@ module.exports = function(RED) {
             }
         }
         node.queuingBehavior = config.queuingBehavior;
-        node.flushMsgs = {
-            type: config.flushMsgsType || 'none',
-            value : config.flushMsgs
-        };
-        node.flushMsgsValue = config.flushMsgsValue;
-        node.dropMsgs = {
-            type: config.dropMsgsType || 'none',
-            value : config.dropMsgs
-        };
-        node.dropMsgsValue = config.dropMsgsValue;
-        node.enqueueMsg = {
-            type: config.enqueueMsgType || 'none',
-            value : config.enqueueMsg
-        };
-        node.enqueueMsgValue = config.enqueueMsgValue;
-        node.ctrlPropSet = config.ctrlPropSet;
-        node.ctrlPropValue = config.ctrlPropValue;
+        if (config.flushMsgsType && config.flushMsgsType !== 'none') {
+            node.flushMsgs = {
+                type: config.flushMsgsType,
+                value : config.flushMsgs,
+                compare : RED.util.evaluateNodeProperty(config.flushMsgsValue, config.flushMsgsValueType, node)
+            };
+        }
+        if (config.dropMsgsType && config.dropMsgsType !== 'none') {
+            node.dropMsgs = {
+                type: config.dropMsgsType,
+                value : config.dropMsgs,
+                compare : RED.util.evaluateNodeProperty(config.dropMsgsValue, config.dropMsgsValueType, node)
+            };
+        }
+        if (config.enqueueMsgType && config.enqueueMsgType !== 'none') {
+            node.enqueueMsg = {
+                type: config.enqueueMsgType,
+                value : config.enqueueMsg,
+                compare : RED.util.evaluateNodeProperty(config.enqueueMsgValue, config.enqueueMsgValueType, node)
+            };
+        }
+        if (config.ctrlPropChange === 'true' || config.ctrlPropChange === true) {
+            node.ctrlProp = {
+                type: config.ctrlPropValueType || 'delete',
+                value : config.ctrlPropValue
+            };
+        }
         node.tsCompare = parseInt(config.tsCompare) || 0;
 
         node.msgQueue = [];
@@ -110,22 +120,14 @@ module.exports = function(RED) {
 
                 // this.debug('starting ' + util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity }));
                 // this.debug('self ' + util.inspect(this, { colors: true, compact: 10, breakLength: Infinity }));
-                node.debug('test 00');
-                if (!node.flushMsgs.type !== 'none') {
+                if (node.flushMsgs) {
                     try {
-                        const result = RED.util.getMessageProperty(msg, node.flushMsgs.value);
-                        if (result == node.flushMsgsValue) { // eslint-disable-line eqeqeq
+                        const result = RED.util.evaluateNodeProperty(node.flushMsgs.value, node.flushMsgs.type, node, msg);
+                        if (result == node.flushMsgs.compare) { // eslint-disable-line eqeqeq
                             node.debug(`flush queue control property ${node.flushMsgs.value}=${result}`);
                             flushEntireQueue();
                             clearTimer();
-                            const enqueue = RED.util.getMessageProperty(msg, node.enqueueMsg.value);
-                            if (enqueue == node.enqueueMsgValue) { // eslint-disable-line eqeqeq
-                                if (node.ctrlPropSet) {
-                                    RED.util.setMessageProperty(msg, node.flushMsgs.value, node.ctrlPropValue, false);
-                                }
-                                addMsgToQueue(msg, done);
-                                return null;
-                            }
+                            handleEnqueue(msg, done, node.flushMsgs);
                             setStatus();
                             done();
                             return null;
@@ -134,23 +136,14 @@ module.exports = function(RED) {
                         node.debug(_err);
                     }
                 }
-                node.debug('test 05');
-                if (!node.dropMsgs.type !== 'none') {
-                    node.debug('test 06');
+                if (node.dropMsgs) {
                     try {
-                        const result = RED.util.getMessageProperty(msg, node.dropMsgs.value);
-                        if (result == node.dropMsgsValue) { // eslint-disable-line eqeqeq
+                        const result = RED.util.evaluateNodeProperty(node.dropMsgs.value, node.dropMsgs.type, node, msg);
+                        if (result == node.dropMsgs.compare) { // eslint-disable-line eqeqeq
                             node.debug(`flush queue control property ${node.dropMsgs.value}=${result}`);
                             dropEntireQueue();
                             clearTimer();
-                            const enqueue = RED.util.getMessageProperty(msg, node.enqueueMsg.value);
-                            if (enqueue == node.enqueueMsgValue) { // eslint-disable-line eqeqeq
-                                if (node.ctrlPropSet) {
-                                    RED.util.setMessageProperty(msg, node.dropMsgs.value, node.ctrlPropValue, false);
-                                }
-                                addMsgToQueue(msg, done);
-                                return null;
-                            }
+                            handleEnqueue(msg, done, node.dropMsgs);
                             setStatus();
                             done();
                             return null;
@@ -159,11 +152,10 @@ module.exports = function(RED) {
                         node.debug(_err);
                     }
                 }
-                node.debug('test 1');
                 addMsgToQueue(msg, done);
+                setStatus();
                 return null;
             } catch (err) {
-                node.debug('test catch');
                 node.log(err.message);
                 node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
                 node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
@@ -263,17 +255,20 @@ module.exports = function(RED) {
                 clearTimer();
             }
             const dNow = getIntDate(node.tsCompare, qObj.msg, node);
+
             node.nextTime = node.positionConfig.getTimeProp(node, qObj.msg, node.timeData, dNow);
             if (node.nextTime.error) {
                 node.debug('node.nextTime=' + util.inspect(node.nextTime, { colors: true, compact: 10, breakLength: Infinity }));
                 hlp.handleError(node, node.nextTime.error, null, 'could not evaluate time');
                 return;
+
             }
-            let millisec = node.nextTime.value.valueOf() - dNow.valueOf();
+            let millisec = hlp.getTimeOut(dNow, node.nextTime.value);
+            // let millisec = node.nextTime.value.valueOf() - dNow.valueOf();
             node.debug(`set timeout to ${node.nextTime.value.valueOf()} - ${dNow.valueOf()}`);
-            while (millisec < 1) {
-                millisec += 86400000; // 24h
-            }
+            // while (millisec < 1) {
+            //    millisec += 86400000; // 24h
+            // }
             if (millisec > 345600000) {
                 // there is a limitation of nodejs that the maximum setTimeout time
                 // should not more then 2147483647 ms (24.8 days).
@@ -315,8 +310,37 @@ module.exports = function(RED) {
             if (!node.delayTimer || node.timeData.calcByMsg) {
                 recalcTimeOut(qObj);
             }
-            setStatus();
         }
+
+        /**
+         * adds a new message tot he queue
+         * @param {Object} msg - message object
+         * @param {*} done - done object
+         * @param {Object} ctrlProp - control property object
+         */
+        function handleEnqueue(msg, done, ctrlProp) {
+            try {
+                if (node.enqueueMsg) {
+                    const enqueue = RED.util.evaluateNodeProperty(node.enqueueMsg.value, node.enqueueMsg.type, node, msg);
+                    if (enqueue == node.enqueueMsg.compare) { // eslint-disable-line eqeqeq
+                        if (node.ctrlProp) {
+                            if (node.ctrlProp.type === 'delete') {
+                                RED.util.setMessageProperty(msg, ctrlProp.value);
+                                RED.util.setMessageProperty(msg, node.enqueueMsg.value);
+                            } else {
+                                const data = RED.util.evaluateNodeProperty(node.ctrlProp.value, node.ctrlProp.type, node, msg);
+                                RED.util.setMessageProperty(msg, ctrlProp.value, data, true);
+                                RED.util.setMessageProperty(msg, node.enqueueMsg.value, data, true);
+                            }
+                        }
+                        addMsgToQueue(msg, done);
+                    }
+                }
+            } catch(_err) {
+                node.debug(_err);
+            }
+        }
+
 
         /**
          * adds a new message tot he queue

@@ -1,0 +1,43 @@
+{
+    "delay-until": {
+        "label": {
+            "name": "delay until",
+            "outputPort": "message",
+            "time":"time",
+            "offset":"Offset",
+            "flushMsgs":"flush messages with",
+            "dropMsgs":"drop message with",
+            "equals": "equals",
+            "compareTime":"base time",
+            "now":"date.now",
+            "msgts":"msg.ts",
+            "msglc":"msg.lc",
+            "msgtime":"msg.time",
+            "showEnhSettings":"Enhanced settings",
+            "enqueueMsg":"enqueue message with",
+            "ctrlPropChange":"set control properties",
+            "ctrlPropChangeB":"to value",
+            "queuingBehavior":"message treatment",
+            "allMsgs":"enqueue all messages",
+            "firstMsgs":"enqueue only first message",
+            "lastMsgs":"enqueue only last (latest) message"
+        },
+        "placeholder": {
+            "time":"time",
+            "offset":"Offset time",
+            "flushMsgs":"flush all waiting messages if property is equal value",
+            "dropMsgs":"drop all waiting messages if property is equal value",
+            "ctrlPropChange":"set a control propertie to the speciefied value"
+        },
+        "tips": {
+            "documentation": "<a href=\"https://github.com/rdmtc/node-red-contrib-sun-position/wiki/delay\">Documentation and examples</a>",
+            "controlMsgProp":"Here can be defined special properties of the input message to flush or drop queued messages.",
+            "controlMsgPropDefined": "If one of the control propeties are equal to the value, all messages will be dropped or flushed from the queue. If the message contains additional the property and value for enqueue the message will be stored. With the following the control property can be set in that case to another value."
+        },
+        "state": {
+            "default": "(__queueLength__) flush __sendTime__",
+            "intermedia": "(__queueLength__) retrigger __sendTime__",
+            "noTime": "(__queueLength__) will not send"
+        }
+    }
+}

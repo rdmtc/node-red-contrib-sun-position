@@ -39,6 +39,7 @@
         "types": {
             "unlimited":"no limitation",
             "undefined":"not used",
+            "delete":"delete",
             "msgInput": "input message",
             "datespecific":"timestamp enhanced",
             "nodeId":"node name",

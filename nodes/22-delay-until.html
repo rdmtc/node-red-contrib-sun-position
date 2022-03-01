@@ -69,51 +69,57 @@ this software without specific prior written permission.
             },
             flushMsgsType: { value: 'none' },
             flushMsgsValue: {
-                value: '',
+                value: 'true',
                 validate(_v) {
                     return (
-                        (_v !== '') ||
                         (this.flushMsgsType === 'none') ||
-                        ($('#node-input-flushMsgs').typedInput('type') === 'none')
+                        ($('#node-input-flushMsgs').typedInput('type') === 'none') ||
+                        RED.validators.typedInput('flushMsgsValueType')
                     );
                 }
             },
+            flushMsgsValueType: { value: 'bool' },
             dropMsgs: {
                 value: '',
                 validate: RED.validators.typedInput('flushMsgsType')
             },
             dropMsgsType: { value: 'none' },
             dropMsgsValue: {
-                value: '',
+                value: 'true',
                 validate(_v) {
                     return (
-                        (_v !== '') ||
                         (this.dropMsgsType === 'none') ||
-                        ($('#node-input-dropMsgs').typedInput('type') === 'none')
+                        ($('#node-input-dropMsgs').typedInput('type') === 'none') ||
+                        RED.validators.typedInput('dropMsgsValueType')
                     );
                 }
             },
+            dropMsgsValueType: { value: 'bool' },
             enqueueMsg: {
                 value: '',
                 validate: RED.validators.typedInput('enqueueMsgType')
             },
             enqueueMsgType: { value: 'none' },
             enqueueMsgValue: {
-                value: '',
+                value: 'true',
                 validate(_v) {
                     return (
                         (_v !== '') ||
                         (this.dropMsgsType === 'none') ||
-                        ($('#node-input-enqueueMsg').typedInput('type') === 'none')
+                        ($('#node-input-enqueueMsg').typedInput('type') === 'none') ||
+                        RED.validators.typedInput('enqueueMsgValueType')
                     );
                 }
             },
-            ctrlPropSet: {
+            enqueueMsgValueType: { value: 'bool' },
+            ctrlPropChange: {
                 value: false
             },
             ctrlPropValue: {
-                value: ''
+                value: '',
+                validate: RED.validators.typedInput('ctrlPropValueType')
             },
+            ctrlPropValueType: { value: 'delete' },
             tsCompare: {
                 value: '0'
             }
@@ -173,6 +179,8 @@ this software without specific prior written permission.
                     return mp;
                 }
                 // #endregion initialize
+
+                // #region time
 
                 setupTInput(node, {
                     typeProp: 'timeType',
@@ -246,33 +254,19 @@ this software without specific prior written permission.
                     }
                 });
                 node.offsetMultiplier = multiplierUpdate(node.offsetMultiplier, 'offsetMultiplier', () => $('#node-input-time').change());
+                // #endregion time
 
-                $('#node-input-ctrlPropSet').on('change', (_type, _value) => {
-                    if ( onInit) { return; }
-                    const typef = $('#node-input-flushMsgs').typedInput('type');
-                    const typed = $('#node-input-dropMsgs').typedInput('type');
-                    if (typef === types.Undefined.value &&
-                        typed === types.Undefined.value) {
-                        $('.row-controlMsgPropDefined').hide();
-                        $('.row-ctrlPropSet').hide();
-                    } else {
-                        $('.row-controlMsgPropDefined').show();
-                        const typee = $('#node-input-enqueueMsg').typedInput('type');
-                        if (typee === types.Undefined.value) {
-                            $('#node-input-enqueueMsgValue').prop('disabled', true);
-                            $('.row-ctrlPropSet').hide();
-                        } else {
-                            $('#node-input-enqueueMsgValue').prop('disabled', false);
-                            $('.row-ctrlPropSet').show();
-                            $('#node-input-ctrlPropValue').prop('disabled', !$('#node-input-ctrlPropSet').is(':checked'));
-                        }
-                    }
+                $('#node-input-queuingBehavior').on('change', () => {
+                    $('#node-input-flushMsgs').change();
+                    $('#node-input-dropMsgs').change();
+                    $('#node-input-enqueueMsg').change();
                 });
+                // #region controlMsgProps
 
                 setupTInput(node, {
                     typeProp: 'flushMsgsType',
                     valueProp: 'flushMsgs',
-                    width: 'calc(100% - 255px)',
+                    width: 'calc(100% - 305px)',
                     defaultType: types.Undefined.value,
                     defaultValue: 0,
                     types: [
@@ -283,20 +277,36 @@ this software without specific prior written permission.
                         if ( onInit) { return; }
                         const type = $('#node-input-flushMsgs').typedInput('type');
                         if (type === types.Undefined.value) {
-                            $('#node-input-flushMsgsValue').prop('disabled', true);
-                            $('.row-ctrlPropSet').hide();
+                            $('#node-input-flushMsgsCmpText').hide();
+                            $('#node-input-flushMsgsValue').typedInput('hide');
                         } else {
-                            $('#node-input-flushMsgsValue').prop('disabled', false);
+                            $('#node-input-flushMsgsCmpText').show();
+                            $('#node-input-flushMsgsValue').typedInput('show');
                         }
                         $('#node-input-flushMsgsValue').change();
-                        $('#node-input-ctrlPropSet').change();
+                        $('#node-input-enqueueMsg').change();
                     }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'flushMsgsValueType',
+                    valueProp: 'flushMsgsValue',
+                    width: '120px',
+                    defaultType: 'bool',
+                    defaultValue: 'true',
+                    types: [
+                        'bool',
+                        'num',
+                        'str',
+                        'json',
+                        'env'
+                    ]
                 });
 
                 setupTInput(node, {
                     typeProp: 'dropMsgsType',
                     valueProp: 'dropMsgs',
-                    width: 'calc(100% - 255px)',
+                    width: 'calc(100% - 305px)',
                     defaultType: types.Undefined.value,
                     defaultValue: 0,
                     types: [
@@ -307,19 +317,36 @@ this software without specific prior written permission.
                         if ( onInit) { return; }
                         const type = $('#node-input-dropMsgs').typedInput('type');
                         if (type === types.Undefined.value) {
-                            $('#node-input-dropMsgsValue').prop('disabled', true);
+                            $('#node-input-dropMsgsCmpText').hide();
+                            $('#node-input-dropMsgsValue').typedInput('hide');
                         } else {
-                            $('#node-input-dropMsgsValue').prop('disabled', false);
+                            $('#node-input-dropMsgsCmpText').show();
+                            $('#node-input-dropMsgsValue').typedInput('show');
                         }
                         $('#node-input-dropMsgsValue').change();
-                        $('#node-input-ctrlPropSet').change();
+                        $('#node-input-enqueueMsg').change();
                     }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'dropMsgsValueType',
+                    valueProp: 'dropMsgsValue',
+                    width: '120px',
+                    defaultType: 'bool',
+                    defaultValue: 'true',
+                    types: [
+                        'bool',
+                        'num',
+                        'str',
+                        'json',
+                        'env'
+                    ]
                 });
 
                 setupTInput(node, {
                     typeProp: 'enqueueMsgType',
                     valueProp: 'enqueueMsg',
-                    width: 'calc(100% - 255px)',
+                    width: 'calc(100% - 305px)',
                     defaultType: types.Undefined.value,
                     defaultValue: 0,
                     types: [
@@ -327,9 +354,82 @@ this software without specific prior written permission.
                         'msg'
                     ],
                     onChange(_type, _value) {
-                        $('#node-input-ctrlPropSet').change();
+                        if ( onInit) { return; }
+                        const type = $('#node-input-enqueueMsg').typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $('#node-input-enqueueMsgCmpText').hide();
+                            $('#node-input-enqueueMsgValue').typedInput('hide');
+                        } else {
+                            $('#node-input-enqueueMsgCmpText').show();
+                            $('#node-input-enqueueMsgValue').typedInput('show');
+                        }
+                        $('#node-input-enqueueMsgValue').change();
+                        $('#node-input-ctrlPropChange').change();
                     }
                 });
+
+                setupTInput(node, {
+                    typeProp: 'enqueueMsgValueType',
+                    valueProp: 'enqueueMsgValue',
+                    width: '120px',
+                    defaultType: 'bool',
+                    defaultValue: 'true',
+                    types: [
+                        'bool',
+                        'num',
+                        'str',
+                        'json',
+                        'env'
+                    ]
+                });
+
+                $('#node-input-ctrlPropChange').on('change', (_type, _value) => {
+                    if ( onInit) { return; }
+                    const typef = $('#node-input-flushMsgs').typedInput('type');
+                    const typed = $('#node-input-dropMsgs').typedInput('type');
+                    if (typef === types.Undefined.value &&
+                        typed === types.Undefined.value) {
+                        $('.row-controlMsgPropDefined').hide();
+                        $('.row-ctrlPropChange').hide();
+                    } else {
+                        $('.row-controlMsgPropDefined').show();
+                        const typee = $('#node-input-enqueueMsg').typedInput('type');
+                        if (typee === types.Undefined.value) {
+                            $('.row-ctrlPropChange').hide();
+                        } else {
+                            $('.row-ctrlPropChange').show();
+                            // $('#node-input-ctrlPropValue').prop('disabled', !$('#node-input-ctrlPropChange').is(':checked'));
+                            if ($('#node-input-ctrlPropChange').is(':checked')) {
+                                $('#node-input-ctrlPropValue').typedInput('enable');
+                            } else {
+                                $('#node-input-ctrlPropValue').typedInput('disable');
+                            }
+                        }
+                    }
+                });
+
+                setupTInput(node, {
+                    typeProp: 'ctrlPropValueType',
+                    valueProp: 'ctrlPropValue',
+                    width: '90px',
+                    defaultType: types.Delete.value,
+                    defaultValue: '',
+                    types: [
+                        types.Delete,
+                        'date',
+                        'bool',
+                        'num',
+                        'str',
+                        'json',
+                        'env',
+                        'msg',
+                        'flow',
+                        'global',
+                        'bin',
+                        'jsonata'
+                    ]
+                });
+                // #endregion controlMsgProps
 
                 // #region Enhanced settings
                 initializeValue(node, 'tsCompare', 0);
@@ -406,36 +506,42 @@ this software without specific prior written permission.
             <option value="last" data-i18n="delay-until.label.lastMsgs"></option>
         </select>
     </div>
-    <div class="form-row form-tips is-to-show-initially" data-i18n="[html]delay-until.tips.controlMsgProp"></div>
-    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]delay-until.placeholder.flushMsgs">
+    <hr>
+    <div class="form-row form-tips is-to-show-initially row-controlMsgPropsAll" data-i18n="[html]delay-until.tips.controlMsgProp"></div>
+    <div class="form-row block-indent1 is-to-show-initially row-controlMsgPropsAll" data-i18n="[title]delay-until.placeholder.flushMsgs">
         <label for="node-input-flushMsgs"><i class="fa fa-paper-plane-o"></i> <span data-i18n="delay-until.label.flushMsgs"></span></label>
         <input type="text" id="node-input-flushMsgs" />
         <input type="hidden" id="node-input-flushMsgsType">
-        <span data-i18n="delay-until.label.equals"></span>
-        <input id="node-input-flushMsgsValue" class="node-input-addpropvalue"></select>
+        <span data-i18n="delay-until.label.equals"  id="node-input-flushMsgsCmpText"></span>
+        <input type="text" id="node-input-flushMsgsValue" class="node-input-addpropvalue"/>
+        <input type="hidden" id="node-input-flushMsgsValueType">
+
     </div>
-    <div class="form-row block-indent1 is-to-show-initially" data-i18n="[title]delay-until.placeholder.dropMsgs">
+    <div class="form-row block-indent1 is-to-show-initially row-controlMsgPropsAll" data-i18n="[title]delay-until.placeholder.dropMsgs">
         <label for="node-input-dropMsgs"><i class="fa fa-trash"></i> <span data-i18n="delay-until.label.dropMsgs"></span></label>
         <input type="text" id="node-input-dropMsgs" />
         <input type="hidden" id="node-input-dropMsgsType">
-        <span data-i18n="delay-until.label.equals"></span>
-        <input id="node-input-dropMsgsValue" class="node-input-addpropvalue"></select>
+        <span data-i18n="delay-until.label.equals" id="node-input-dropMsgsCmpText"></span>
+        <input type="text" id="node-input-dropMsgsValue" class="node-input-addpropvalue"/>
+        <input type="hidden" id="node-input-dropMsgsValueType">
     </div>
-    <div class="form-row is-initial-hidden row-controlMsgPropDefined">
+    <div class="form-row is-initial-hidden row-controlMsgPropsAll row-controlMsgPropDefined">
         <span data-i18n="[html]delay-until.tips.controlMsgPropDefined" style="word-wrap:break-word;"></span>
     </div>
-    <div class="form-row block-indent1 is-initial-hidden row-controlMsgPropDefined" data-i18n="[title]delay-until.placeholder.enqueueMsg">
+    <div class="form-row block-indent1 is-initial-hidden row-controlMsgPropsAll row-controlMsgPropDefined" data-i18n="[title]delay-until.placeholder.enqueueMsg">
         <label for="node-input-enqueueMsg"><i class="fa fa-trash"></i> <span data-i18n="delay-until.label.enqueueMsg"></span></label>
         <input type="text" id="node-input-enqueueMsg" />
         <input type="hidden" id="node-input-enqueueMsgType">
-        <span data-i18n="delay-until.label.equals"></span>
-        <input id="node-input-enqueueMsgValue" class="node-input-addpropvalue"></select>
+        <span data-i18n="delay-until.label.equals" id="node-input-enqueueMsgCmpText"></span>
+        <input type="text" id="node-input-enqueueMsgValue" class="node-input-addpropvalue"/>
+        <input type="hidden" id="node-input-enqueueMsgValueType">
     </div>
-    <div class="form-row block-indent1 is-initial-hidden row-ctrlPropSet" data-i18n="[title]delay-until.placeholder.ctrlPropSet">
-        <label for="node-input-ctrlPropSet"><i class="fa fa-minus-circle"></i> <span data-i18n="delay-until.label.ctrlPropSet"></span></label>
-        <input type="checkbox" id="node-input-ctrlPropSet" />
-        <span data-i18n="delay-until.label.ctrlPropSetB"></span>
-        <input id="node-input-ctrlPropValue" class="node-input-addpropvalue"></select>
+    <div class="form-row block-indent1 is-initial-hidden row-controlMsgPropsAll row-ctrlPropChange" data-i18n="[title]delay-until.placeholder.ctrlPropChange">
+        <label for="node-input-ctrlPropChange"><i class="fa fa-minus-circle"></i> <span data-i18n="delay-until.label.ctrlPropChange"></span></label>
+        <input type="checkbox" id="node-input-ctrlPropChange" />
+        <span data-i18n="delay-until.label.ctrlPropChangeB"></span>
+        <input type="text" id="node-input-ctrlPropValue" class="node-input-addpropvalue"/>
+        <input type="hidden" id="node-input-ctrlPropValueType">
     </div>
     <hr>
     <div class="form-row is-to-show-initially">
@@ -510,12 +616,15 @@ this software without specific prior written permission.
         max-width: 125px;
         margin-left: 5px;
     }
+    .node-input-queuingBehavior {
+        width: 70% !important;
+    }
     .node-input-addpropvalue {
         width: 90px;
         max-width: 90px;
         margin-left: 5px;
     }
-    #node-input-ctrlPropSet {
+    #node-input-ctrlPropChange {
         width: auto !important;
     }
 </style>
