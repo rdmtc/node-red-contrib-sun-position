@@ -77,7 +77,7 @@ module.exports = function (RED) {
      * @param {*} data - the state data
      * @returns {boolean}
      */
-    function setstate(node, data) {
+    function setstate(node, data, reverse) {
         if (data.error) {
             node.status({
                 fill: 'red',
@@ -99,11 +99,19 @@ module.exports = function (RED) {
         } else if (data.end && data.end.error) {
             hlp.handleError(node, RED._('within-time-switch.errors.error-end-time', { message : data.end.error}), undefined, data.end.error);
         } else if (data.start && data.start.value && data.end && data.end.value) {
-            node.status({
-                fill: 'blue',
-                shape: 'dot',
-                text: '⏵' + node.positionConfig.toTimeString(data.start.value) + data.startSuffix + ' - ⏴' + node.positionConfig.toTimeString(data.end.value) + data.endSuffix
-            });
+            if (reverse) {
+                node.status({
+                    fill: 'blue',
+                    shape: 'dot',
+                    text: node.positionConfig.toTimeString(data.start.value) + data.startSuffix + '⏵ ~ 🌃 ~ ⏴' + node.positionConfig.toTimeString(data.end.value) + data.endSuffix
+                });
+            } else {
+                node.status({
+                    fill: 'blue',
+                    shape: 'dot',
+                    text: '⏵' + node.positionConfig.toTimeString(data.start.value) + data.startSuffix + ' - ⏴' + node.positionConfig.toTimeString(data.end.value) + data.endSuffix
+                });
+            }
         }
         return false;
     }
@@ -324,7 +332,8 @@ module.exports = function (RED) {
             value : config.startTime,
             offsetType : config.startOffsetType,
             offset : config.startOffset,
-            multiplier : config.startOffsetMultiplier
+            multiplier : config.startOffsetMultiplier,
+            next : false
         };
 
         node.timeEnd = {
@@ -332,7 +341,8 @@ module.exports = function (RED) {
             value : config.endTime,
             offsetType : config.endOffsetType,
             offset : config.endOffset,
-            multiplier : config.endOffsetMultiplier
+            multiplier : config.endOffsetMultiplier,
+            next : false
         };
 
         node.timeStartAlt = {
@@ -340,29 +350,31 @@ module.exports = function (RED) {
             value : config.startTimeAlt,
             offsetType : config.startOffsetAltType,
             offset : config.startOffsetAlt,
-            multiplier : config.startOffsetAltMultiplier
+            multiplier : config.startOffsetAltMultiplier,
+            next : false
         };
 
-        node.propertyStartOperator = config.propertyStartCompare || 'true';
         node.propertyStart = {
             type  : config.propertyStartType || 'none',
             value : config.propertyStart || ''
         };
-        node.propertyStartThreshold = {
-            type  : config.propertyStartThresholdType || 'none',
-            value : config.propertyStartThreshold || ''
-        };
-        if (node.positionConfig && node.propertyStart.type === 'jsonata') {
-            try {
-                node.propertyStart.expr = node.positionConfig.getJSONataExpression(node, node.propertyStart.value);
-            } catch (err) {
-                node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                node.propertyStart.expr = null;
-            }
-        }
         if (node.propertyStart.type === 'none' || node.timeStartAlt.type === 'none') {
             node.propertyStart.type = 'none';
             delete node.timeStartAlt;
+        } else {
+            node.propertyStartOperator = config.propertyStartCompare || 'true';
+            node.propertyStartThreshold = {
+                type  : config.propertyStartThresholdType || 'none',
+                value : config.propertyStartThreshold || ''
+            };
+            if (node.positionConfig && node.propertyStart.type === 'jsonata') {
+                try {
+                    node.propertyStart.expr = node.positionConfig.getJSONataExpression(node, node.propertyStart.value);
+                } catch (err) {
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                    node.propertyStart.expr = null;
+                }
+            }
         }
 
         node.timeEndAlt = {
@@ -370,29 +382,31 @@ module.exports = function (RED) {
             value : config.endTimeAlt,
             offsetType : config.endOffsetAltType,
             offset : config.endOffsetAlt,
-            multiplier : config.endOffsetAltMultiplier
+            multiplier : config.endOffsetAltMultiplier,
+            next : false
         };
 
-        node.propertyEndOperator = config.propertyEndCompare || 'true';
         node.propertyEnd = {
             type  : config.propertyEndType || 'none',
             value : config.propertyEnd || ''
         };
-        node.propertyEndThreshold = {
-            type  : config.propertyEndThresholdType || 'none',
-            value : config.propertyEndThreshold || ''
-        };
-        if (node.positionConfig && node.propertyEnd.type === 'jsonata') {
-            try {
-                node.propertyEnd.expr = node.positionConfig.getJSONataExpression(node, node.propertyEnd.value);
-            } catch (err) {
-                node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
-                node.propertyEnd.expr = null;
-            }
-        }
         if (node.propertyEnd.type === 'none' || node.timeEndAlt.type === 'none') {
             node.propertyEnd.type = 'none';
             delete node.timeEndAlt;
+        } else {
+            node.propertyEndOperator = config.propertyEndCompare || 'true';
+            node.propertyEndThreshold = {
+                type  : config.propertyEndThresholdType || 'none',
+                value : config.propertyEndThreshold || ''
+            };
+            if (node.positionConfig && node.propertyEnd.type === 'jsonata') {
+                try {
+                    node.propertyEnd.expr = node.positionConfig.getJSONataExpression(node, node.propertyEnd.value);
+                } catch (err) {
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error:err.message }));
+                    node.propertyEnd.expr = null;
+                }
+            }
         }
 
         node.timeRestrictions = {
@@ -488,8 +502,8 @@ module.exports = function (RED) {
                     msg.withinTimeStart.id = hlp.getTimeNumberUTC(result.start.value);
                     msg.withinTimeEnd.id = hlp.getTimeNumberUTC(result.end.value);
                     const cmpNow = hlp.getTimeNumberUTC(dNow);
-                    setstate(node, result);
                     if (msg.withinTimeStart.id < msg.withinTimeEnd.id) {
+                        setstate(node, result, false);
                         if (cmpNow >= msg.withinTimeStart.id && cmpNow < msg.withinTimeEnd.id) {
                             msg.withinTime = true;
                             this.debug('in time [1] - send msg to first output ' + result.startSuffix +
@@ -505,6 +519,7 @@ module.exports = function (RED) {
                             return null;
                         }
                     } else if (!(cmpNow >= msg.withinTimeEnd.id && cmpNow < msg.withinTimeStart.id)) {
+                        setstate(node, result, true);
                         msg.withinTime = true;
                         this.debug('in time [2] - send msg to first output ' + result.startSuffix +
                             node.positionConfig.toDateTimeString(dNow) + result.endSuffix + ' (' + msg.withinTimeStart.id + ' - ' + cmpNow + ' - ' + msg.withinTimeEnd.id + ')');
@@ -517,9 +532,11 @@ module.exports = function (RED) {
                         }
                         done();
                         return null;
+                    } else {
+                        setstate(node, result, true);
                     }
                 } else {
-                    setstate(node, result);
+                    setstate(node, result, false);
                 }
                 msg.withinTime = false;
                 this.debug('out of time - send msg to second output ' + result.startSuffix + node.positionConfig.toDateTimeString(dNow) + result.endSuffix);

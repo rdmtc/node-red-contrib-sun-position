@@ -26,6 +26,11 @@ This can be also used to go back to an older Version.
     - basic inject
     - time based inject
 
+- within-time-switch
+  - changed state output in case time span is over midnight, because the shown times could be not correct #416
+  - added automatic test case
+    - basic inject
+
 - new Node. delay-until which allows to delay messages until defined time
 
 ### 2.1.1: bug fixes
