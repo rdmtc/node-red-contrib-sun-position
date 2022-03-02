@@ -31,7 +31,7 @@
  * @example:
  * to run all tests: npm test
  * to run only testcases: npm run testnode
- * to run single test: mocha -g "test configuration"
+ * to run single test: mocha -g "delay until"
  */
 
 const should = require('should');
