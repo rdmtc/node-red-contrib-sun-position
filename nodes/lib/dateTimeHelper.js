@@ -82,9 +82,10 @@ module.exports = {
     initializeParser,
     getFormattedDateOut,
     parseDateFromFormat,
-    topicReplace,
+    textReplace,
     getNowTimeStamp,
-    getNowObject
+    getNowObject,
+    getDeepValue
 };
 
 /*******************************************************************************************************/
@@ -2140,32 +2141,67 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
 }
 
 /**
- * replaces placeholder in a string
- * @param {string} str - the string to replace placeholders
- * @param {object} strAttrs - an object with different propertys who are allowed as placeholders
- * @returns {string} the string with replaced placeholders
+ * get a value by a path
+ * @param {object} obj      object to get path from
+ * @param {string} path     path to property
+ * @returns the value of the property
  */
-function topicReplace(str, strAttrs) {
-    if (!str || typeof strAttrs !== 'object') {
-        return str;
+function getDeepValue(obj, path){
+    for (let i=0, p=path.split('.'), len=path.length; i<len; i++){
+        obj = obj[p[i]];
+    }
+    return obj;
+}
+
+/**
+ * replaces placeholder in a string
+ * @param {string} text - the text to replace placeholders
+ * @param {object} textAttrs - an object with different propertys who are allowed as placeholders
+ * @param {object} RED - the object for the Node-Red API
+ * @param {object} [msg] - (optional) the message object for additional replace of message properties
+ * @returns {string} the text with replaced placeholders
+ */
+function textReplace(text, textAttrs, RED, msg) {
+    if (!text || typeof textAttrs !== 'object') {
+        return text;
     }
 
-    const strAttrsLower = {};
-    Object.keys(strAttrs).forEach(k => {
-        strAttrsLower[k.toLowerCase()] = strAttrs[k];
+    const textAttrsLower = {};
+    Object.keys(textAttrs).forEach(k => {
+        textAttrsLower[k.toLowerCase()] = textAttrs[k];
     });
 
     /* eslint-disable no-useless-escape */
-    const match = str.match(/[\$#]{[^}]+}/g);
+    const match = text.match(/[\$#]{[^}]+}/g);
     if (match) {
         match.forEach(v => {
             const key = v.substr(2, v.length - 3);
             const rx = new RegExp('\[\$#]{' + key + '}', 'g');
             const rkey = key.toLowerCase();
-            const res = Object.prototype.hasOwnProperty.call(strAttrsLower, rkey) ? strAttrsLower[rkey] : '';
-            str = str.replace(rx, res);
+            if (rkey === 'now' || rkey === 'datetime') {
+                const d = new Date();
+                text = text.replace(rx, d.toLocaleString());
+            } else if (rkey === 'date') {
+                const d = new Date();
+                text = text.replace(rx, d.toLocaleDateString());
+            } else if (rkey === 'time') {
+                const d = new Date();
+                text = text.replace(rx, d.toLocaleTimeString());
+            } else if (rkey === 'isodate') {
+                const d = new Date();
+                text = text.replace(rx, d.toISOString());
+            } else if (msg && (rkey.includes('.') || rkey.includes('['))) {
+                try {
+                    text = text.replace(rx, RED.util.getMessageProperty(msg, rkey));
+                } catch (ex) {
+                    text = text.replace(rx, ex.message);
+                }
+            } else {
+                const res = Object.prototype.hasOwnProperty.call(textAttrsLower, rkey) ? textAttrsLower[rkey] : '';
+                text = text.replace(rx, res);
+            }
         });
     }
     /* eslint-enable no-useless-escape */
-    return str;
+    return text;
 }

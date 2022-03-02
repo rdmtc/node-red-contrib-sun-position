@@ -29,7 +29,34 @@ const path = require('path');
 const util = require('util');
 const hlp = require( path.resolve( __dirname, './dateTimeHelper.js') );
 
+const cRuleTime = { // deprecated
+    until : 0,
+    from : 1
+};
+
+
+const cRuleType = {
+    absolute : 0,
+    levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
+    levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
+    slatOversteer : 5,
+    topicOversteer : 8,
+    off : 9
+};
+
+const cRuleDefault = -1;
+const cRuleLogOperatorAnd = 2;
+const cRuleLogOperatorOr = 1;
+const cNBC_RULE_TYPE_UNTIL = 0;
+const cNBC_RULE_TYPE_FROM = 1;
+const cNBC_RULE_EXEC = {
+    auto: 0,
+    first:1,
+    last:2
+};
+
 module.exports = {
+    isNullOrUndefined,
     evalTempData,
     posOverwriteReset,
     setExpiringOverwrite,
@@ -39,18 +66,25 @@ module.exports = {
     getRuleTimeData,
     validPosition,
     compareRules,
-    initializeCtrl
+    checkRules,
+    initializeCtrl,
+    cRuleType,
+    cRuleDefault,
+    cRuleLogOperatorAnd,
+    cRuleLogOperatorOr,
+    cRuleTime // deprecated
 };
 
-const cRuleUntil = 0;
-const cRuleFrom = 1;
-const cRuleAbsolute = 0;
-// const cRuleNone = 0;
-// const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
-// const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
-const cRuleLogOperatorAnd = 2;
-const cRuleLogOperatorOr = 1;
 let RED = null;
+/******************************************************************************************/
+/**
+ * Returns true if the given object is null or undefined. Otherwise, returns false.
+ * @param {*} object    object to check
+ * @returns {boolean}   true if the given object is null or undefined. Otherwise, returns false.
+ */
+function isNullOrUndefined(object) {
+    return (object === null || typeof object === 'undefined'); // isNullOrUndefined(object)
+}
 
 /**
  * evaluate temporary Data
@@ -63,7 +97,7 @@ let RED = null;
 function evalTempData(node, type, value, data, tempData) {
     // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
     const name = `${type}.${value}`;
-    if (data === null || typeof data === 'undefined') {
+    if (isNullOrUndefined(data)) {
         if (typeof tempData[name] !== 'undefined') {
             if (type !== 'PlT') {
                 node.log(RED._('node-red-contrib-sun-position/position-config:errors.usingTempValue', { type, value, usedValue: tempData[name] }));
@@ -219,6 +253,9 @@ function setOverwriteReason(node) {
 function prepareRules(node, msg, tempData, dNow) {
     for (let i = 0; i < node.rules.count; ++i) {
         const rule = node.rules.data[i];
+        if (rule.time) {
+            delete rule.timeData;
+        }
         if (rule.conditional) {
             rule.conditon = {
                 result : false
@@ -273,59 +310,66 @@ function prepareRules(node, msg, tempData, dNow) {
 
 /**
  * get time constrainty of a rule
- * @param {*} node node data
- * @param {*} msg the message object
- * @param {*} rule the rule data
+ * @param {Object} node node data
+ * @param {Object} msg the message object
+ * @param {Object} rule the rule data
+ * @param {string} timep rule type
+ * @param {number} dNow base timestamp
  * @return {number} timestamp of the rule
  */
-function getRuleTimeData(node, msg, rule, dNow) {
-    rule.time.now = dNow;
-    rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.time);
-    if (rule.timeData.error) {
-        hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
-        return -1;
-    } else if (!rule.timeData.value) {
+function getRuleTimeData(node, msg, rule, timep, dNow) {
+    if (!rule.time[timep] || rule.timeData[timep]) {
+        return;
+    }
+    rule.time[timep].now = dNow;
+
+    rule.timeData[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep]);
+
+    if (rule.timeData[timep].error) {
+        hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeData[timep].error }), undefined, rule.timeData[timep].error);
+        node.debug('rule data complete');
+        node.debug(util.inspect(rule, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
+        return;
+    } else if (!rule.timeData[timep].value) {
         throw new Error('Error can not calc time!');
     }
-    rule.timeData.source = 'Default';
-    rule.timeData.ts = rule.timeData.value.getTime();
-    // node.debug(`time=${rule.timeData.value} -> ${new Date(rule.timeData.value)}`);
-    rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
-    if (rule.timeMin) {
-        rule.timeMin.now = dNow;
-        rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.timeMin);
-        const numMin = rule.timeDataMin.value.getTime();
-        rule.timeDataMin.source = 'Min';
-        if (rule.timeDataMin.error) {
-            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataAlt.error);
-        } else if (!rule.timeDataMin.value) {
+    rule.timeData[timep].source = 'Default';
+    rule.timeData[timep].ts = rule.timeData[timep].value.getTime();
+    // node.debug(`time=${rule.timeData[timep].value} -> ${new Date(rule.timeData[timep].value)}`);
+    if (rule.time[timep].min) {
+        rule.time[timep].min.now = dNow;
+        if (!rule.timeDataMin) rule.timeDataMin = { start:{}, end:{} };
+        rule.timeDataMin[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].min);
+        rule.timeDataMin[timep].ts = rule.timeDataMin[timep].value.getTime();
+        rule.timeDataMin[timep].source = 'Min';
+        if (rule.timeDataMin[timep].error) {
+            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMin[timep].error }), undefined, rule.timeDataAlt.error);
+        } else if (!rule.timeDataMin[timep].value) {
             throw new Error('Error can not calc Alt time!');
         } else {
-            if (numMin > rule.timeData.ts) {
-                [rule.timeData, rule.timeDataMin] = [rule.timeDataMin, rule.timeData];
-                rule.timeData.ts = numMin;
-                rule.timeData.dayId = hlp.getDayId(rule.timeDataMin.value);
+            if (rule.timeDataMin[timep].ts > rule.timeData[timep].ts) {
+                [rule.timeData[timep], rule.timeDataMin[timep]] = [rule.timeDataMin[timep], rule.timeData[timep]];
             }
         }
     }
-    if (rule.timeMax) {
-        rule.timeMax.now = dNow;
-        rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.timeMax);
-        const numMax = rule.timeDataMax.value.getTime();
-        rule.timeDataMax.source = 'Max';
-        if (rule.timeDataMax.error) {
-            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataAlt.error);
-        } else if (!rule.timeDataMax.value) {
+    if (rule.time[timep].max) {
+        rule.time[timep].max.now = dNow;
+        if (!rule.timeDataMax) rule.timeDataMax = { start:{}, end:{} };
+        rule.timeDataMax[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].max);
+        rule.timeDataMax[timep].ts = rule.timeDataMax[timep].value.getTime();
+        rule.timeDataMax[timep].source = 'Max';
+        if (rule.timeDataMax[timep].error) {
+            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMax[timep].error }), undefined, rule.timeDataAlt.error);
+        } else if (!rule.timeDataMax[timep].value) {
             throw new Error('Error can not calc Alt time!');
         } else {
-            if (numMax < rule.timeData.ts) {
-                [rule.timeData, rule.timeDataMax] = [rule.timeDataMax, rule.timeData];
-                rule.timeData.ts = numMax;
-                rule.timeData.dayId = hlp.getDayId(rule.timeDataMax.value);
+            if (rule.timeDataMax[timep].ts < rule.timeData[timep].ts) {
+                [rule.timeData[timep], rule.timeDataMax[timep]] = [rule.timeDataMax[timep], rule.timeData[timep]];
             }
         }
     }
-    return rule.timeData.ts;
+    rule.timeData[timep].dayId = hlp.getDayId(rule.timeData[timep].value);
+    return;
 }
 
 /*************************************************************************************************************************/
@@ -417,13 +461,119 @@ function compareRules(node, msg, rule, cmp, data) {
             }
         }
     }
-    const num = getRuleTimeData(node, msg, rule, data.now);
-    // node.debug(`compareRules ${rule.name} (${rule.pos}) type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
-    if (data.dayId === rule.timeData.dayId && num >=0 && (cmp(num) === true)) {
+
+    rule.timeData = {
+        start:{
+            ts: Number.MIN_VALUE
+        },
+        end:{
+            ts: Number.MAX_VALUE
+        },
+        now: data.now
+    };
+
+    if (rule.time.start) {
+        getRuleTimeData(node, msg, rule, 'start', data.now, Number.MIN_VALUE);
+        if (rule.time.end) {
+            getRuleTimeData(node, msg, rule, 'end', data.now, Number.MAX_VALUE);
+            if (rule.timeData.start.ts > rule.timeData.end.ts) {
+                if (data.dayId === rule.timeData.start.dayId &&
+                    rule.timeData.start.ts <= data.nowNr) {
+                    return rule;
+                }
+                if (data.dayId === rule.timeData.end.dayId &&
+                    rule.timeData.end.ts > data.nowNr) {
+                    return rule;
+                }
+                return null;
+            }
+            if (data.dayId !== rule.timeData.end.dayId) {
+                return null;
+            }
+        }
+        if (data.dayId !== rule.timeData.start.dayId) {
+            return null;
+        }
+    } else if (rule.time.end) {
+        getRuleTimeData(node, msg, rule, 'end', data.now, Number.MAX_VALUE);
+        if (data.dayId !== rule.timeData.end.dayId) {
+            return null;
+        }
+    }
+    if (rule.timeData.start.ts <= data.nowNr &&
+        rule.timeData.end.ts > data.nowNr) {
         return rule;
     }
-    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${data.dayId} rule-DayID=${rule.timeData.dayId} num=${num} cmp=${cmp(num)} invalid time`);
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${data.dayId} rule-DayID=${rule.timeData[timep].dayId} num=${num} cmp=${cmp(num)} invalid time`);
     return null;
+}
+/******************************************************************************************/
+/**
+ * check all rules and determinate the active rule
+ * @param {Object} node node data
+ * @param {Object} msg the message object
+ * @param {ITimeObject} oNow the *current* date Object
+ * @param {Object} tempData the object storing the temporary caching data
+ * @returns the active rule or null
+ */
+function checkRules(node, msg, oNow, tempData) {
+    // node.debug('checkRules --------------------');
+    prepareRules(node, msg, tempData, oNow.dNow);
+    // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
+    const result = {
+        ruleindex : -1,
+        ruleSel : null
+    };
+
+    for (let i = 0; i <= node.rules.lastUntil; ++i) {
+        const rule = node.rules.data[i];
+        node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+        if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.last) { continue; }
+        const res = compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow); // now is less time
+        if (res) {
+            node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+            if (res.level.operator === cRuleType.slatOversteer) {
+                result.ruleSlatOvs = res;
+            } else if (res.level.operator === cRuleType.topicOversteer) {
+                result.ruleTopicOvs = res;
+            } else if (res.level.operator === cRuleType.levelMinOversteer) {
+                result.ruleSelMin = res;
+            } else if (res.level.operator === cRuleType.levelMaxOversteer) {
+                result.ruleSelMax = res;
+            } else {
+                result.ruleSel = res;
+                result.ruleindex = i;
+                break;
+            }
+        }
+    }
+
+    if (!result.ruleSel) {
+        // node.debug('--------- starting second loop ' + node.rules.count);
+        for (let i = (node.rules.count - 1); i >= 0; --i) {
+            const rule = node.rules.data[i];
+            // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.first) { continue; }
+            const res = compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow); // now is greater time
+            if (res) {
+                node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                if (res.level.operator === cRuleType.slatOversteer) {
+                    result.ruleSlatOvs = res;
+                } else if (res.level.operator === cRuleType.topicOversteer) {
+                    result.ruleTopicOvs = res;
+                } else if (res.level.operator === cRuleType.levelMinOversteer) {
+                    result.ruleSelMin = res;
+                } else if (res.level.operator === cRuleType.levelMaxOversteer) {
+                    result.ruleSelMax = res;
+                } else {
+                    result.ruleSel = res;
+                    break;
+                }
+            }
+        }
+    }
+
+    return result;
 }
 /*************************************************************************************************************************/
 /**
@@ -543,10 +693,12 @@ function initializeCtrl(REDLib, node, config) {
     node.rules.firstTimeLimited = node.rules.count;
     node.rules.maxImportance = 0;
     node.rules.canResetOverwrite = false;
-
+    node.debug('all node.rules before convert');
+    node.debug(util.inspect(node.rules, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
     for (let i = 0; i < node.rules.count; ++i) {
         const rule = node.rules.data[i];
         rule.pos = i + 1;
+        rule.exec = rule.exec || cNBC_RULE_EXEC.auto;
         // Backward compatibility
         if (!rule.conditions) {
             rule.conditions = [];
@@ -593,44 +745,45 @@ function initializeCtrl(REDLib, node, config) {
         }
         if(rule.timeType) {
             if (!rule.time && rule.timeType !== 'none') {
-                rule.time = {
+                const operator = (parseInt(rule.timeOp) || cNBC_RULE_TYPE_UNTIL);
+                rule.time = { };
+                let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
+                if (operator === cNBC_RULE_TYPE_FROM) {
+                    rule.time.start = {};
+                    ttype = 'start';
+                }
+                rule.time[ttype] = {
                     type            : rule.timeType,
                     value           : (rule.timeValue || ''),
-                    operator        : (parseInt(rule.timeOp) || cRuleUntil),
                     offsetType      : (rule.offsetType || 'none'),
                     offset          : (rule.offsetValue || 1),
-                    multiplier      : (parseInt(rule.multiplier) || 60000),
-                    days            : (rule.timeDays || '*'),
-                    months          : (rule.timeMonths || '*')
+                    multiplier      : (parseInt(rule.multiplier) || 60000)
                 };
-                if (rule.timeOnlyOddDays) rule.time.onlyOddDays = rule.timeOnlyOddDays;
-                if (rule.timeOnlyEvenDays) rule.time.onlyEvenDays = rule.timeOnlyEvenDays;
-                if (rule.timeDateStart) rule.time.dateStart = rule.timeDateStart;
-                if (rule.timeDateEnd) rule.time.dateEnd = rule.timeDateEnd;
-                if (rule.timeOpText) rule.time.operatorText = rule.timeOpText;
-                if (rule.timeMinType) {
-                    if (!rule.timeMin && rule.timeMinType !== 'none') {
-                        rule.timeMin = {
-                            type            : rule.timeMinType,
-                            value           : (rule.timeMinValue || ''),
-                            offsetType      : (rule.offsetMinType || 'none'),
-                            offset          : (rule.offsetMinValue || 1),
-                            multiplier      : (parseInt(rule.multiplierMin) || 60000)
-                        };
-                    }
+                if (rule.timeMinType && rule.timeMinType !== 'none') {
+                    rule.time[ttype].min = {
+                        type            : rule.timeMinType,
+                        value           : (rule.timeMinValue || ''),
+                        offsetType      : (rule.offsetMinType || 'none'),
+                        offset          : (rule.offsetMinValue || 1),
+                        multiplier      : (parseInt(rule.multiplierMin) || 60000)
+                    };
                 }
-                if (rule.timeMaxType) {
-                    if (!rule.timeMax && rule.timeMaxType !== 'none') {
-                        rule.timeMax = {
-                            type            : rule.timeMaxType,
-                            value           : (rule.timeMaxValue || ''),
-                            offsetType      : (rule.offsetMaxType || 'none'),
-                            offset          : (rule.offsetMaxValue || 1),
-                            multiplier      : (parseInt(rule.multiplierMax) || 60000)
-                        };
-                    }
+                if (rule.timeMaxType && rule.timeMaxType !== 'none') {
+                    rule.time[ttype].max = {
+                        type            : rule.timeMaxType,
+                        value           : (rule.timeMaxValue || ''),
+                        offsetType      : (rule.offsetMaxType || 'none'),
+                        offset          : (rule.offsetMaxValue || 1),
+                        multiplier      : (parseInt(rule.multiplierMax) || 60000)
+                    };
                 }
             }
+            if (rule.timeDays && rule.timeDays !== '*') rule.time.days = rule.timeDays;
+            if (rule.timeMonths && rule.timeMonths !== '*') rule.time.months = rule.timeMonths;
+            if (rule.timeOnlyOddDays) rule.time.onlyOddDays = rule.timeOnlyOddDays;
+            if (rule.timeOnlyEvenDays) rule.time.onlyEvenDays = rule.timeOnlyEvenDays;
+            if (rule.timeDateStart) rule.time.dateStart = rule.timeDateStart;
+            if (rule.timeDateEnd) rule.time.dateEnd = rule.timeDateEnd;
             delete rule.timeType;
             delete rule.timeValue;
             delete rule.timeOp;
@@ -657,12 +810,52 @@ function initializeCtrl(REDLib, node, config) {
             delete rule.multiplierMax;
             delete rule.timeMaxOp;
         }
+        if (rule.time && (typeof rule.time.operator !== 'undefined')) {
+            let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
+            if (rule.time.operator === cNBC_RULE_TYPE_FROM) {
+                ttype = 'start';
+            }
+            rule.time[ttype] = Object.assign({
+                type            : rule.time.type,
+                value           : rule.time.value,
+                offsetType      : rule.time.offsetType,
+                offset          : rule.time.offset,
+                multiplier      : rule.time.multiplier
+            }, rule.time[ttype]);
+            if (rule.timeMin && rule.timeMin.type !== 'none' ) {
+                rule.time[ttype].min = Object.assign({
+                    type            : rule.timeMin.type,
+                    value           : (rule.timeMin.value || ''),
+                    offsetType      : (rule.timeMin.offsetType || 'none'),
+                    offset          : (rule.timeMin.offset || 1),
+                    multiplier      : (parseInt(rule.timeMin.multiplier) || 60000)
+                }, rule.time[ttype].min);
+            }
+            if (rule.timeMax && rule.timeMax.type !== 'none' ) {
+                rule.time[ttype].max = Object.assign({
+                    type            : rule.timeMax.type,
+                    value           : (rule.timeMax.value || ''),
+                    offsetType      : (rule.timeMax.offsetType || 'none'),
+                    offset          : (rule.timeMax.offset || 1),
+                    multiplier      : (parseInt(rule.timeMax.multiplier) || 60000)
+                }, rule.time[ttype].max);
+            }
+            delete rule.time.operator;
+            delete rule.time.operatorText;
+            delete rule.time.type;
+            delete rule.time.value;
+            delete rule.time.offsetType;
+            delete rule.time.offset;
+            delete rule.time.multiplier;
+            delete rule.timeMin;
+            delete rule.timeMax;
+        }
         if (rule.levelType) {
             if (!rule.level) {
                 rule.level = {
                     type            : (rule.levelType || 'levelFixed'),
                     value           : (rule.levelValue || 'closed (min)'),
-                    operator        : (parseInt(rule.levelOp) || cRuleAbsolute),
+                    operator        : (parseInt(rule.levelOp) || cRuleType.absolute),
                     operatorText    : rule.levelOpText || RED._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')
                 };
             }
@@ -703,26 +896,35 @@ function initializeCtrl(REDLib, node, config) {
         if (rule.payload && !('next' in rule)) {
             rule.payload.next = true;
         }
+        rule.execUse = cNBC_RULE_EXEC.first;
+        if (rule.exec === cNBC_RULE_EXEC.last || (rule.time && rule.time.start && !rule.time.end)) {
+            rule.execUse = cNBC_RULE_EXEC.last;
+        }
+
         /// check generic rule settings
         rule.name = rule.name || 'rule ' + rule.pos;
         rule.enabled = !(rule.enabled === false || rule.enabled === 'false');
         rule.resetOverwrite = hlp.isTrue(rule.resetOverwrite === true) ? true : false;
-        if (rule.payload || (rule.level && (rule.level.operator === cRuleAbsolute))) {
+        if (rule.payload || (rule.level && (rule.level.operator === cRuleType.absolute))) {
             rule.importance = Number(rule.importance) || 0;
             node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
             node.rules.canResetOverwrite = node.rules.canResetOverwrite || rule.resetOverwrite;
         }
         /// readout timesettings
         if (rule.time) {
-            rule.time.next = false;
-            if (rule.timeMax) { rule.timeMax.next = false; }
-            if (rule.timeMin) { rule.timeMin.next = false; }
+            const checkTimeR = id => {
+                if (rule.time[id].max) { rule.time[id].max.next = false; }
+                if (rule.time[id].min) { rule.time[id].min.next = false; }
+                rule.time[id].next = false;
+            };
             node.rules.firstTimeLimited = Math.min(i, node.rules.firstTimeLimited);
-            if (rule.time.operator === cRuleUntil) {
-                node.rules.lastUntil = i;
+            if (rule.time.start) { // cNBC_RULE_TYPE_FROM
+                node.rules.firstFrom = Math.min(i, node.rules.firstFrom);
+                checkTimeR('start');
             }
-            if (rule.time.operator === cRuleFrom) {
-                node.rules.firstFrom = Math.min(i,node.rules.firstFrom);
+            if (rule.time.end) { // cNBC_RULE_TYPE_UNTIL
+                node.rules.lastUntil = i;
+                checkTimeR('end');
             }
             if (!rule.time.days || rule.time.days === '*') {
                 delete rule.time.days;
@@ -792,6 +994,8 @@ function initializeCtrl(REDLib, node, config) {
         });
         rule.conditional = rule.conditions.length > 0;
     }
+    node.debug('all node.rules after convert');
+    node.debug(util.inspect(node.rules, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
 
     if (node.autoTrigger || (parseFloat(config.startDelayTime) > 9)) {
         let delay = parseFloat(config.startDelayTime) || (300 + Math.floor(Math.random() * 700)); // default = 300ms - 1s

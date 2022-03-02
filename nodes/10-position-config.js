@@ -1176,7 +1176,7 @@ module.exports = function (RED) {
                     path: _srcNode._path || _srcNode.id,
                     topic: ((!msg) ? '' : msg.topic)
                 };
-                result = hlp.topicReplace(''+data.value, replaceAttrs, RED, msg);
+                result = hlp.textReplace(''+data.value, replaceAttrs, RED, msg);
             } else if (data.type === 'bool') {
                 result = /^true$/i.test(data.value);
             } else if (data.type === 'date') {

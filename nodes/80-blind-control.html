@@ -27,6 +27,11 @@ this software without specific prior written permission.
         const cNBC_MODE_MAXIMIZE = 1;
         const cNBC_MODE_MINIMIZE = 3;
         const cNBC_MODE_SUN_CONTROL = 16;
+        const cNBC_RULE_EXEC = {
+            auto: 0,
+            first:1,
+            last:2
+        };
         const cNBC_RULE_TYPE_UNTIL = 0;
         const cNBC_RULE_TYPE_FROM = 1;
         const cNBC_RULE_OP = {
@@ -555,7 +560,7 @@ this software without specific prior written permission.
                     $('#node-input-sunControlMode').val(cNBC_MODE_SUN_CONTROL);
                 }
 
-                node.dialogAddData = {};
+                node.dialogAddData = { time:{ start:{ min:{}, max:{} }, end:{ min:{}, max:{} } }, timeReg:{} };
                 const setup = function(node) {
                     /* global getTypes getSelectFields setupTInput appendOptions addLabel getBackendData bdDateToTime initCheckboxesBlock getCheckboxesStr setTInputValue */
                     // #region initialize
@@ -659,6 +664,24 @@ this software without specific prior written permission.
                         label: node._('node-red-contrib-sun-position/position-config:common.types.ctrlObj'),
                         hasValue: false
                     };
+                    types.OutputCtrlObj = {
+                        value: 'ctrlObj',
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.ctrlObj'),
+                        hasValue: false
+                    };
+                    types.OutputCtrlObj = {
+                        value: 'ctrlObj',
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.ctrlObj'),
+                        hasValue: false
+                    };
+
+                    types.UndefinedTimeFrom = Object.assign({}, types.Undefined, {
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.undefinedTimeFrom')
+                    });
+                    types.UndefinedTimeUntil = Object.assign({}, types.Undefined, {
+                        label: node._('node-red-contrib-sun-position/position-config:common.types.undefinedTimeUntil')
+                    });
+
                     const selFields = getSelectFields();
                     /**
                      * save rules
@@ -833,7 +856,7 @@ this software without specific prior written permission.
                     });
                     // #endregion blind
                     // #region rules
-                    const ruleVersion = 3;
+                    const ruleVersion = 4;
                     /**
                      * get a time in millisecond as string of the format hh:mm, hh:mm:ss or hh:mm:ss.mss
                      * @param {number} s - milisecond
@@ -928,17 +951,30 @@ this software without specific prior written permission.
                         let result = '';
                         const length = (enh) ? 60 : 30;
                         try {
-                            if (typeof data.isValid === 'undefined' || typeof data.version === 'undefined' || (!data.isValid && (typeof data.valid === 'undefined' || Object.keys(data.valid).length === 0))) {
+                            if (typeof data.isValid === 'undefined' || typeof data.version === 'undefined' || (!data.isValid && !data.validationError && typeof data.validation === 'undefined')) {
                                 result += '<div>';
                                 result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.outDated');
                                 result += '</div>';
                             } else if (!data.isValid) {
                                 result += '<div>';
                                 result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.isInValid');
+                                result += '</div><div>';
+                                result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleInValidText');
+                                result += data.validationError;
                                 result += '</div>';
-                                if (data.valid && Object.keys(data.valid).length > 0) {
+                                if (data.validation && Object.keys(data.validation).length > 0) {
+                                    const lines = JSON.stringify(data.validation,
+                                        (key, value) => {
+                                            if (value === true || (Array.isArray(value) && value.length === 0) || (typeof value === 'object' && Object.keys(value).length === 0))
+                                                return undefined;
+                                            if (value === false)
+                                                return node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleInValidElement');
+                                            return value;
+                                        }, '\t').split('\n');
+                                    lines.splice(0,1); // remove first line
+                                    lines.pop(); // remove last line
                                     result += '<div><pre>';
-                                    result += JSON.stringify(data.valid, null, '\t');
+                                    result += lines.join('\n');
                                     result += '</pre></div>';
                                 }
                             }
@@ -990,154 +1026,159 @@ this software without specific prior written permission.
                                 result += '</div>';
                             }
                             if (data.time) {
-                                if (data.time.type && data.timeType !== 'none') {
-                                    result += '<div>';
-                                    result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
-                                    result += data.time.operatorText;
-                                    result += ' <var>' + RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.time.type, data.time.value, null, null, null, length) + '</var>';
-                                    result += _getOffsetText(node, data.time.offsetType, data.time.offset, data.time.multiplier);
-                                    if (enh && enh.timeReg && enh.timeReg.text) {
-                                        result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.timeReg.text + '</code>]</span>';
-                                    }
+                                const gettime = (ttype, text) => {
+                                    if (data.time[ttype] && data.time[ttype].type && data.timeType !== 'none') {
+                                        result += '<div>';
+                                        result += '<i class="fa fa-clock-o" aria-hidden="true"></i> ';
+                                        result += text;
+                                        result += ' <var>' + RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.time[ttype].type, data.time[ttype].value, null, null, null, length) + '</var>';
+                                        result += _getOffsetText(node, data.time[ttype].offsetType, data.time[ttype].offset, data.time[ttype].multiplier);
+                                        if (enh && enh.timeReg && enh.timeReg.text) {
+                                            result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.timeReg.text + '</code>]</span>';
+                                        }
 
-                                    if (data.timeMin && data.timeMin.type && data.timeMin.type !== 'none') {
-                                        result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin');
-                                        result += '</span> <var>';
-                                        result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.timeMin.type, data.timeMin.value, null, null, null, length);
-                                        result += '</var>';
-                                        result += _getOffsetText(node, data.timeMin.offsetType, data.timeMin.offset, data.timeMin.multiplier);
-                                        if (enh && enh.timeMin && enh.timeMin.text) {
-                                            result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.timeMin.text + '</code>]</span>';
+                                        if (data.time[ttype].min && data.time[ttype].min.type && data.time[ttype].min.type !== 'none') {
+                                            result += '<div class="indent-time-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
+                                            result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin');
+                                            result += '</span> <var>';
+                                            result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.time[ttype].min.type, data.time[ttype].min.value, null, null, null, length);
+                                            result += '</var>';
+                                            result += _getOffsetText(node, data.time[ttype].min.offsetType, data.time[ttype].min.offset, data.time[ttype].min.multiplier);
+                                            if (enh && enh.time[ttype].min && enh.time[ttype].min.text) {
+                                                result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.time[ttype].min.text + '</code>]</span>';
+                                            }
+                                            result += '</div>';
+                                        }
+                                        if (data.time[ttype].max && data.time[ttype].max.type && data.time[ttype].max.type !== 'none') {
+                                            result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
+                                            result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax');
+                                            result += '</span> <var>';
+                                            result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.time[ttype].max.type, data.time[ttype].max.value, null, null, null, length);
+                                            result += '</var>';
+                                            result += _getOffsetText(node, data.time[ttype].max.offsetType, data.time[ttype].max.offset, data.time[ttype].max.multiplier);
+                                            if (enh && enh.time[ttype].max && enh.time[ttype].max.text) {
+                                                result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.time[ttype].max.text + '</code>]</span>';
+                                            }
+                                            result += '</div>';
                                         }
                                         result += '</div>';
                                     }
-                                    if (data.timeMax && data.timeMax.type && data.timeMax.type !== 'none') {
-                                        result += '<div class="indent-time-text"><i class="fa fa-step-forward" aria-hidden="true"></i> <span>';
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax');
-                                        result += '</span> <var>';
-                                        result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.timeMax.type, data.timeMax.value, null, null, null, length);
-                                        result += '</var>';
-                                        result += _getOffsetText(node, data.timeMax.offsetType, data.timeMax.offset, data.timeMax.multiplier);
-                                        if (enh && enh.timeMax && enh.timeMax.text) {
-                                            result += ' <span class="indent-enh-text">[<i class="fa fa-hand-o-right" aria-hidden="true"></i>&nbsp;<code>' + enh.timeMax.text + '</code>]</span>';
+                                };
+                                gettime('start',node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeStart'));
+                                gettime('end',node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeEnd'));
+                                result += '<div>';
+                                if (data.time.days && data.time.days !== '*') {
+                                    result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeDays');
+                                    result += '</span> <var>';
+                                    const daysarr = data.time.days.split(',');
+                                    if (daysarr.length === 1) {
+                                        result += (node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
+                                    } else if (data.time.days === '5,6,0') {
+                                        result += node._('node-red-contrib-sun-position/position-config:common.days.12');
+                                        result += '-';
+                                        result += node._('node-red-contrib-sun-position/position-config:common.days.7');
+                                    } else if (daysarr.length === 2) {
+                                        result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
+                                        result += ' ';
+                                        result += node._('node-red-contrib-sun-position/position-config:common.label.and');
+                                        result += ' ';
+                                        result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
+                                    } else {
+                                        daysarr.sort((a, b) => parseInt(a) - parseInt(b));
+                                        let isok = true;
+                                        let elF = parseInt(daysarr[0]);
+                                        daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
+                                        for (let index = 1; index < daysarr.length; index++) {
+                                            const element = parseInt(daysarr[index]);
+                                            isok = isok && (element === elF+1);
+                                            elF = element;
+                                            daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
                                         }
-                                        result += '</div>';
-                                    }
-                                    if (data.time.days && data.time.days !== '*') {
-                                        result += '<div class="indent-time-days"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeDays');
-                                        result += '</span> <var>';
-                                        const daysarr = data.time.days.split(',');
-                                        if (daysarr.length === 1) {
-                                            result += (node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7)));
-                                        } else if (data.time.days === '5,6,0') {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.12');
-                                            result += '-';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.7');
-                                        } else if (daysarr.length === 2) {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[0]) + 7));
-                                            result += ' ';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.label.and');
-                                            result += ' ';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(daysarr[1]) + 7));
+                                        if (isok) {
+                                            result += (daysarr[0] + '-' + daysarr[daysarr.length-1]);
                                         } else {
-                                            daysarr.sort((a, b) => parseInt(a) - parseInt(b));
-                                            let isok = true;
-                                            let elF = parseInt(daysarr[0]);
-                                            daysarr[0] = node._('node-red-contrib-sun-position/position-config:common.days.'+(elF + 7));
-                                            for (let index = 1; index < daysarr.length; index++) {
-                                                const element = parseInt(daysarr[index]);
-                                                isok = isok && (element === elF+1);
-                                                elF = element;
-                                                daysarr[index] = node._('node-red-contrib-sun-position/position-config:common.days.'+(parseInt(element) + 7));
-                                            }
-                                            if (isok) {
-                                                result += (daysarr[0] + '-' + daysarr[daysarr.length-1]);
-                                            } else {
-                                                result += (daysarr.join(','));
-                                            }
+                                            result += (daysarr.join(','));
                                         }
-                                        result += '</var></div>';
                                     }
-                                    if (data.time.onlyEvenDays || data.time.onlyOddDays || data.time.onlyEvenWeeks || data.time.onlyOddWeeks) {
-                                        result += '<div class="indent-time-special"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimit');
-                                        result += '</span> <var>';
-                                        const resultArr = [];
-                                        if (data.time.onlyEvenDays) {
-                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays'));
-                                        }
-                                        if (data.time.onlyOddDays) {
-                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays'));
-                                        }
-                                        if (data.time.onlyEvenWeeks) {
-                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks'));
-                                        }
-                                        if (data.time.onlyOddWeeks) {
-                                            resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks'));
-                                        }
-                                        result += resultArr.join(' <b>' + node._('node-red-contrib-sun-position/position-config:common.label.and') + '</b> ');
-                                        result += '</var></div>';
-                                    }
-                                    if (data.time.months && data.time.months !== '*') {
-                                        result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMonths');
-                                        result += '</span> <var>';
-                                        const montharr = data.time.months.split(',');
-                                        if (montharr.length === 2) {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
-                                            result += ' ';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.label.and');
-                                            result += ' ';
-                                            result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[1]) + 12));
-                                        } else if (montharr.length === 1) {
-                                            result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
-                                        } else {
-                                            montharr.sort((a, b) => parseInt(a) - parseInt(b));
-                                            let isok = true;
-                                            let elF = parseInt(montharr[0]);
-                                            montharr[0] = node._('node-red-contrib-sun-position/position-config:common.months.'+(elF + 12));
-                                            for (let index = 1; index < montharr.length; index++) {
-                                                const element = parseInt(montharr[index]);
-                                                isok = isok && (element === elF+1);
-                                                elF = element;
-                                                montharr[index] = node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(element) + 12));
-                                            }
-                                            if (isok) {
-                                                result += montharr[0];
-                                                result += '-';
-                                                result += montharr[montharr.length-1];
-                                            } else {
-                                                result += montharr.join(',');
-                                            }
-                                        }
-                                        result += '</var></div>';
-                                    }
-
-                                    if (data.time.dateStart || data.time.dateEnd) {
-                                        result += '<div class="indent-time-datelimit"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimitStart');
-                                        result += '</span> <var>';
-                                        if (enh) {
-                                            const year = (new Date()).getFullYear();
-                                            result += data.time.dateStart || year + '-01-01';
-                                        } else {
-                                            result += (getDateShort(data.time.dateStart) || '01-01');
-                                        }
-                                        result += '</var> <span> ';
-                                        result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimitEnd');
-                                        result += '</span> <var>';
-                                        if (enh) {
-                                            const year = (new Date()).getFullYear();
-                                            result += data.time.dateEnd || year + '-12-31';
-                                        } else {
-                                            result += (getDateShort(data.time.dateEnd) || '12-31');
-                                        }
-                                        result += '</var></div>';
-                                    }
-                                    result += '</div>';
+                                    result += '</var></div>';
                                 }
+                                if (data.time.onlyEvenDays || data.time.onlyOddDays || data.time.onlyEvenWeeks || data.time.onlyOddWeeks) {
+                                    result += '<div class="indent-time-special"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimit');
+                                    result += '</span> <var>';
+                                    const resultArr = [];
+                                    if (data.time.onlyEvenDays) {
+                                        resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenDays'));
+                                    }
+                                    if (data.time.onlyOddDays) {
+                                        resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddDays'));
+                                    }
+                                    if (data.time.onlyEvenWeeks) {
+                                        resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyEvenWeeks'));
+                                    }
+                                    if (data.time.onlyOddWeeks) {
+                                        resultArr.push(node._('node-red-contrib-sun-position/position-config:common.label.onlyOddWeeks'));
+                                    }
+                                    result += resultArr.join(' <b>' + node._('node-red-contrib-sun-position/position-config:common.label.and') + '</b> ');
+                                    result += '</var></div>';
+                                }
+                                if (data.time.months && data.time.months !== '*') {
+                                    result += '<div class="indent-time-months"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMonths');
+                                    result += '</span> <var>';
+                                    const montharr = data.time.months.split(',');
+                                    if (montharr.length === 2) {
+                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
+                                        result += ' ';
+                                        result += node._('node-red-contrib-sun-position/position-config:common.label.and');
+                                        result += ' ';
+                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[1]) + 12));
+                                    } else if (montharr.length === 1) {
+                                        result += node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(montharr[0]) + 12));
+                                    } else {
+                                        montharr.sort((a, b) => parseInt(a) - parseInt(b));
+                                        let isok = true;
+                                        let elF = parseInt(montharr[0]);
+                                        montharr[0] = node._('node-red-contrib-sun-position/position-config:common.months.'+(elF + 12));
+                                        for (let index = 1; index < montharr.length; index++) {
+                                            const element = parseInt(montharr[index]);
+                                            isok = isok && (element === elF+1);
+                                            elF = element;
+                                            montharr[index] = node._('node-red-contrib-sun-position/position-config:common.months.'+(parseInt(element) + 12));
+                                        }
+                                        if (isok) {
+                                            result += montharr[0];
+                                            result += '-';
+                                            result += montharr[montharr.length-1];
+                                        } else {
+                                            result += montharr.join(',');
+                                        }
+                                    }
+                                    result += '</var></div>';
+                                }
+                                if (data.time.dateStart || data.time.dateEnd) {
+                                    result += '<div class="indent-time-datelimit"><i class="fa fa-calendar-o" aria-hidden="true"></i> <span>';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimitStart');
+                                    result += '</span> <var>';
+                                    if (enh) {
+                                        const year = (new Date()).getFullYear();
+                                        result += data.time.dateStart || year + '-01-01';
+                                    } else {
+                                        result += (getDateShort(data.time.dateStart) || '01-01');
+                                    }
+                                    result += '</var> <span> ';
+                                    result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeLimitEnd');
+                                    result += '</span> <var>';
+                                    if (enh) {
+                                        const year = (new Date()).getFullYear();
+                                        result += data.time.dateEnd || year + '-12-31';
+                                    } else {
+                                        result += (getDateShort(data.time.dateEnd) || '12-31');
+                                    }
+                                    result += '</var></div>';
+                                }
+                                result += '</div>';
                             }
                             result += '<div>';
                             if (data.level) {
@@ -1239,13 +1280,13 @@ this software without specific prior written permission.
                             if (data === {}) {
                                 data.description = 'please edit rule';
                                 data.name = 'empty';
+                                data.exec = cNBC_RULE_EXEC.auto;
                                 data.version = ruleVersion;
                                 data.enabled = true;
                             }
                             data.index = containerIndex;
                             data.importance = 0;
                             if (!data.conditions) {
-                                data.valid = {};
                                 data.conditions = [];
                                 if (data.validOperandAType && data.validOperandAType !== types.Unlimited.value) {
                                     data.conditions.push({
@@ -1286,7 +1327,7 @@ this software without specific prior written permission.
                                 delete data.valid2OperandBValue;
                                 delete data.valid2OperandBType;
                             }
-                            if(data.timeBType) {
+                            if (data.timeBType) {
                                 if (data.timeBType === types.TimeSun.value || data.timeBType === types.TimeMoon.value) {
                                     data.timeMinType = data.timeType;
                                     data.timeMinValue = data.timeValue;
@@ -1300,26 +1341,105 @@ this software without specific prior written permission.
                                 delete data.timeBValue;
                                 delete data.timeBOp;
                                 delete data.timeBOpText;
-                                data.isValid = false;
+                                delete data.isValid; // need retrigger of validation, because rule is outdated
                                 data.description = node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleIsOutdated');
                             }
-                            if(data.timeType) {
+                            if (data.timeMinType) {
+                                if (!data.timeMin && data.timeMinType !== types.Undefined.value) {
+                                    data.timeMin = Object.assign({
+                                        type            : data.timeMinType,
+                                        value           : (data.timeMinValue || ''),
+                                        offsetType      : (data.offsetMinType || types.Undefined.value),
+                                        offset          : (data.offsetMinValue || '1'),
+                                        multiplier      : (parseInt(data.multiplierMin) || 60000)
+                                    }, data.timeMin);
+                                }
+                                delete data.timeMinType;
+                                delete data.timeMinValue;
+                                delete data.offsetMinType;
+                                delete data.offsetMinValue;
+                                delete data.multiplierMin;
+                                delete data.timeMinOp;
+                            }
+                            if (data.timeMaxType) {
+                                if (!data.timeMax && data.timeMaxType !== types.Undefined.value) {
+                                    data.timeMax = Object.assign({
+                                        type            : data.timeMaxType,
+                                        value           : (data.timeMaxValue || ''),
+                                        offsetType      : (data.offsetMaxType || types.Undefined.value),
+                                        offset          : (data.offsetMaxValue || '1'),
+                                        multiplier      : (parseInt(data.multiplierMax) || 60000)
+                                    }, data.timeMax);
+                                }
+                                delete data.timeMaxType;
+                                delete data.timeMaxValue;
+                                delete data.offsetMaxType;
+                                delete data.offsetMaxValue;
+                                delete data.multiplierMax;
+                                delete data.timeMaxOp;
+                            }
+                            if (data.timeType) {
                                 if (!data.time && data.timeType !== types.Undefined.value) {
-                                    data.time = {
+                                    const operator = (parseInt(data.timeOp) || cNBC_RULE_TYPE_UNTIL);
+                                    data.time = { };
+                                    let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
+                                    data.exec = cNBC_RULE_EXEC.auto;
+                                    if (operator === cNBC_RULE_TYPE_FROM) {
+                                        data.time.start = {};
+                                        ttype = 'start';
+                                    }
+                                    data.time[ttype] = {
                                         type            : data.timeType,
                                         value           : (data.timeValue || ''),
-                                        operator        : (parseInt(data.timeOp) || 0),
-                                        offsetType      : (data.offsetType || types.Undefined.value),
-                                        offset          : (data.offsetValue || '1'),
-                                        multiplier      : (parseInt(data.multiplier) || 60000),
-                                        days            : (data.timeDays || '*'),
-                                        months          : (data.timeMonths || '*')
+                                        offsetType      : (data.offsetType || 'none'),
+                                        offset          : (data.offsetValue || 1),
+                                        multiplier      : (parseInt(data.multiplier) || 60000)
                                     };
+
+                                    if (data.timeMinType && data.timeMinType !== 'none') {
+                                        data.time[ttype].min = {
+                                            type            : data.timeMinType,
+                                            value           : (data.timeMinValue || ''),
+                                            offsetType      : (data.offsetMinType || 'none'),
+                                            offset          : (data.offsetMinValue || 1),
+                                            multiplier      : (parseInt(data.multiplierMin) || 60000)
+                                        };
+                                    }
+                                    if (data.timeMin) {
+                                        data.time[ttype].min = {
+                                            type            : data.timeMin.type,
+                                            value           : data.timeMin.value,
+                                            offsetType      : data.timeMin.offsetType,
+                                            offset          : data.timeMin.offset,
+                                            multiplier      : data.timeMin.multiplier
+                                        };
+                                        delete data.timeMin;
+                                    }
+                                    if (data.timeMaxType && data.timeMaxType !== 'none') {
+                                        data.time[ttype].max = {
+                                            type            : data.timeMaxType,
+                                            value           : (data.timeMaxValue || ''),
+                                            offsetType      : (data.offsetMaxType || 'none'),
+                                            offset          : (data.offsetMaxValue || 1),
+                                            multiplier      : (parseInt(data.multiplierMax) || 60000)
+                                        };
+                                    }
+                                    if (data.timeMax) {
+                                        data.time[ttype].max = {
+                                            type            : data.timeMax.type,
+                                            value           : data.timeMax.value,
+                                            offsetType      : data.timeMax.offsetType,
+                                            offset          : data.timeMax.offset,
+                                            multiplier      : data.timeMax.multiplier
+                                        };
+                                        delete data.timeMax;
+                                    }
+                                    if (data.timeDays && data.timeDays !== '*') data.time.days = data.timeDays;
+                                    if (data.timeMonths && data.timeMonths !== '*') data.time.months = data.timeMonths;
                                     if (data.timeOnlyOddDays) data.time.onlyOddDays = data.timeOnlyOddDays;
                                     if (data.timeOnlyEvenDays) data.time.onlyEvenDays = data.timeOnlyEvenDays;
                                     if (data.timeDateStart) data.time.dateStart = data.timeDateStart;
                                     if (data.timeDateEnd) data.time.dateEnd = data.timeDateEnd;
-                                    if (data.timeOpText) data.time.operatorText = data.timeOpText;
                                 }
                                 delete data.timeType;
                                 delete data.timeValue;
@@ -1339,39 +1459,46 @@ this software without specific prior written permission.
                                     delete data.time.onlyOddDays;
                                 }
                             }
-                            if (data.timeMinType) {
-                                if (!data.timeMin && data.timeMinType !== types.Undefined.value) {
-                                    data.timeMin = {
-                                        type            : data.timeMinType,
-                                        value           : (data.timeMinValue || ''),
-                                        offsetType      : (data.offsetMinType || types.Undefined.value),
-                                        offset          : (data.offsetMinValue || '1'),
-                                        multiplier      : (parseInt(data.multiplierMin) || 60000)
-                                    };
+                            if (data.time && (typeof data.time.operator !== 'undefined')) {
+                                let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
+                                data.exec = cNBC_RULE_EXEC.auto;
+                                if (data.time.operator === cNBC_RULE_TYPE_FROM) {
+                                    ttype = 'start';
                                 }
-                                delete data.timeMinType;
-                                delete data.timeMinValue;
-                                delete data.offsetMinType;
-                                delete data.offsetMinValue;
-                                delete data.multiplierMin;
-                                delete data.timeMinOp;
-                            }
-                            if (data.timeMaxType) {
-                                if (!data.timeMax && data.timeMaxType !== types.Undefined.value) {
-                                    data.timeMax = {
-                                        type            : data.timeMaxType,
-                                        value           : (data.timeMaxValue || ''),
-                                        offsetType      : (data.offsetMaxType || types.Undefined.value),
-                                        offset          : (data.offsetMaxValue || '1'),
-                                        multiplier      : (parseInt(data.multiplierMax) || 60000)
-                                    };
+                                data.time[ttype] = Object.assign({
+                                    type            : data.time.type,
+                                    value           : data.time.value,
+                                    offsetType      : data.time.offsetType,
+                                    offset          : data.time.offset,
+                                    multiplier      : data.time.multiplier
+                                }, data.time[ttype]);
+                                if (data.timeMin && data.timeMin.type !== 'none' ) {
+                                    data.time[ttype].min = Object.assign({
+                                        type            : data.timeMin.type,
+                                        value           : (data.timeMin.value || ''),
+                                        offsetType      : (data.timeMin.offsetType || 'none'),
+                                        offset          : (data.timeMin.offset || 1),
+                                        multiplier      : (parseInt(data.timeMin.multiplier) || 60000)
+                                    }, data.time[ttype].min);
                                 }
-                                delete data.timeMaxType;
-                                delete data.timeMaxValue;
-                                delete data.offsetMaxType;
-                                delete data.offsetMaxValue;
-                                delete data.multiplierMax;
-                                delete data.timeMaxOp;
+                                if (data.timeMax && data.timeMax.type !== 'none' ) {
+                                    data.time[ttype].max = Object.assign({
+                                        type            : data.timeMax.type,
+                                        value           : (data.timeMax.value || ''),
+                                        offsetType      : (data.timeMax.offsetType || 'none'),
+                                        offset          : (data.timeMax.offset || 1),
+                                        multiplier      : (parseInt(data.timeMax.multiplier) || 60000)
+                                    }, data.time[ttype].max);
+                                }
+                                delete data.time.operator;
+                                delete data.time.operatorText;
+                                delete data.time.type;
+                                delete data.time.value;
+                                delete data.time.offsetType;
+                                delete data.time.offset;
+                                delete data.time.multiplier;
+                                delete data.timeMin;
+                                delete data.timeMax;
                             }
                             if (data.levelType) {
                                 if (!data.level) {
@@ -1407,6 +1534,9 @@ this software without specific prior written permission.
                                 data.description = getRuleDescription(node, selFields, data);
                                 data.version = ruleVersion;
                             }
+                            if (typeof data.exec === 'undefined') {
+                                data.exec = cNBC_RULE_EXEC.auto;
+                            }
                             $containerRow.data('ruleData', JSON.stringify(data));
                             $containerRow.css({ overflow: 'hidden'}); // , whiteSpace: 'nowrap'
 
@@ -1416,6 +1546,14 @@ this software without specific prior written permission.
                             const $div = $('<div/>', {
                                 class: 'rdgtimer-rule-mainblock'
                             }).appendTo($row0);
+                            let exec = cNBC_RULE_EXEC.first;
+                            if (data.exec === cNBC_RULE_EXEC.last || (data.time && data.time.start && !data.time.end)) {
+                                exec = cNBC_RULE_EXEC.last;
+                            }
+                            $('<span />', {
+                                id: 'rule-exec-'+containerIndex,
+                                class: 'rdgtimer-rule-exec-span'
+                            }).append(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleExecShort.'+exec)).appendTo( $div );
                             $('<span />', {
                                 id: 'rule-name-'+containerIndex,
                                 class: 'rdgtimer-rule-name-span'
@@ -1514,6 +1652,8 @@ this software without specific prior written permission.
                             data.index = i;
                             // data.conditional = ((data.conditions.length > 0) ? 1 : 0);
                             // data.timeLimited = ((data.time && data.time.type !== 'none') ? 1 : 0);
+                            // TODO: node-input-rule-timeReg does not exists
+                            // WARNING: node-input-rule-timeReg does not exists
                             data.timeData = (parseFloat($(this).find('.node-input-rule-timeReg').attr('timedata')) || 0);
                         });
                         /**
@@ -2172,7 +2312,7 @@ this software without specific prior written permission.
                                 .css('width', 'calc(60% - 30px)')
                                 .appendTo($row1)
                                 .typedInput({
-                                    default: 'input',
+                                    default: types.OutputLevel.value,
                                     types: [
                                         types.OutputLevel,
                                         types.OutputLevelInverse,
@@ -2207,9 +2347,12 @@ this software without specific prior written permission.
                                 // const plNType = $propertyName.typedInput('type');
                                 const plVType = $propertyValue.typedInput('type');
                                 const plVValue = $propertyValue.typedInput('value');
-                                if (plVValue === 'input') {
+                                if (plVValue === types.OutputLevel.value ||
+                                    plVValue === types.OutputLevelInverse.value ||
+                                    plVValue === types.OutputSlat.value ||
+                                    plVValue === types.OutputTopic.value ||
+                                    plVValue === types.OutputCtrlObj.value) {
                                     $containerRow.attr('title', $('#node-input-input').attr('title'));
-
                                 } else {
                                     getBackendData(d => {
                                         $containerRow.attr('title', bdDateToTime(d));
@@ -2346,6 +2489,12 @@ this software without specific prior written permission.
                     });
 
                     const $dialogName = $dialog.find('#dlg-ip-btctl-rule-name');
+
+                    const $dialogExec = $dialog.find('#dlg-ip-btctl-rule-exec');
+                    $dialogExec.append($('<option></option>').val(cNBC_RULE_EXEC.auto).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleExecAuto')));
+                    $dialogExec.append($('<option></option>').val(cNBC_RULE_EXEC.first).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleExecFirst')));
+                    $dialogExec.append($('<option></option>').val(cNBC_RULE_EXEC.last).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleExecLast')));
+
                     let $dialogDataRow = null;
                     let dialogDataOnLoading = false;
                     let dialogDataIndex = -1;
@@ -2598,13 +2747,208 @@ this software without specific prior written permission.
                     }); // condition-container
                     $dialog.find('#dlg-ip-btctl-rule-condition-text').html(node._('node-red-contrib-sun-position/position-config:ruleCtrl.text.ruleCondition'));
                     // #endregion dialogConditions
-                    // #region dialogTimeReg
-                    const $dialogTimeRegOperator = $dialog.find('#dlg-ip-btctl-rule-timeReg-operator');
-                    $dialogTimeRegOperator.append($('<option></option>').val(cNBC_RULE_TYPE_UNTIL).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeUntil')));
-                    $dialogTimeRegOperator.append($('<option></option>').val(cNBC_RULE_TYPE_FROM).text(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeFrom')));
+                    // #region dialogTimeReg Start
+                    const $dialogTimeStartRegInput = $dialog.find('#dlg-ip-btctl-rule-timeStartReg');
+                    $dialogTimeStartRegInput.typedInput({
+                        default: types.Undefined.value,
+                        types: [
+                            types.UndefinedTimeFrom,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
+                        ]
+                    });
+                    $dialogTimeStartRegInput.typedInput('width', '40%');
 
-                    const $dialogTimeRegInput = $dialog.find('#dlg-ip-btctl-rule-timeReg');
-                    $dialogTimeRegInput.typedInput({
+                    const $dialogTimeStartRegMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeStartReg');
+                    appendOptions(node, $dialogTimeStartRegMultiplier, 'multiplier', data => (data.id > 0));
+
+                    const $dialogTimeStartRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeStartReg');
+                    $dialogTimeStartRegOffset.typedInput({
+                        default: types.Undefined.value,
+                        types: [
+                            types.Undefined,
+                            'num',
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
+                        ]
+                    }).change(() => {
+                        const type = $dialogTimeStartRegOffset.typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $dialogTimeStartRegMultiplier.prop('disabled', true);
+                        } else {
+                            $dialogTimeStartRegMultiplier.prop('disabled', false);
+                        }
+                        $dialogTimeStartRegInput.change();
+                    });
+                    $dialogTimeStartRegOffset.typedInput('width', '40%');
+                    // #endregion dialogTimeReg Start
+                    // #region dialogTimeMin Start
+                    const $dialogTimeStartMinInput = $dialog.find('#dlg-ip-btctl-rule-timeStartMin');
+                    $dialogTimeStartMinInput.typedInput({
+                        default: types.Undefined.value,
+                        types: [
+                            types.Undefined,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
+                        ]
+                    });
+                    $dialogTimeStartMinInput.typedInput('width', '40%');
+
+                    const $dialogTimeStartMinMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeStartMin');
+                    appendOptions(node, $dialogTimeStartMinMultiplier, 'multiplier', data => (data.id > 0));
+
+                    const $dialogTimeStartMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeStartMin');
+                    $dialogTimeStartMinOffset.typedInput({
+                        default: types.Undefined.value,
+                        types: [
+                            types.Undefined,
+                            'num',
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
+                        ]
+                    }).change(() => {
+                        const type = $dialogTimeStartMinOffset.typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $dialogTimeStartMinMultiplier.prop('disabled', true);
+                        } else {
+                            $dialogTimeStartMinMultiplier.prop('disabled', false);
+                        }
+                        $dialogTimeStartMinInput.change();
+                    });
+                    $dialogTimeStartMinOffset.typedInput('width', '40%');
+                    // #endregion dialogTimeMin Start
+                    // #region dialogTimeMax Start
+                    const $dialogTimeStartMaxInput = $dialog.find('#dlg-ip-btctl-rule-timeStartMax');
+                    $dialogTimeStartMaxInput.typedInput({
+                        default: types.Undefined.value,
+                        types: [
+                            types.Undefined,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad
+                        ]
+                    });
+                    $dialogTimeStartMaxInput.typedInput('width', '40%');
+
+                    const $dialogTimeStartMaxMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeStartMax');
+                    appendOptions(node, $dialogTimeStartMaxMultiplier, 'multiplier', data => (data.id > 0));
+
+                    const $dialogTimeStartMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeStartMax');
+                    $dialogTimeStartMaxOffset.typedInput({
+                        default: types.Undefined.value,
+                        types: [
+                            types.Undefined,
+                            'num',
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
+                        ]
+                    }).change(() => {
+                        const type = $dialogTimeStartMaxOffset.typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $dialogTimeStartMaxMultiplier.prop('disabled', true);
+                        } else {
+                            $dialogTimeStartMaxMultiplier.prop('disabled', false);
+                        }
+                        $dialogTimeStartMaxInput.change();
+                    });
+                    // #endregion dialogTimeMax  Start
+
+                    // #region dialogTimeReg End
+                    const $dialogTimeEndRegInput = $dialog.find('#dlg-ip-btctl-rule-timeEndReg');
+                    $dialogTimeEndRegInput.typedInput({
+                        default: types.Undefined.value,
+                        types: [
+                            types.UndefinedTimeUntil,
+                            types.TimeEntered,
+                            types.TimeSun,
+                            types.TimeSunNow,
+                            types.TimeMoon,
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.SunTimeByAzimuth,
+                            types.SunTimeByAzimuthRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationNextRad,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationRiseRad,
+                            types.SunTimeByElevationSet,
+                            types.SunTimeByElevationSetRad
+                        ]
+                    });
+                    $dialogTimeEndRegInput.typedInput('width', '40%');
+
+                    const $dialogTimeEndRegMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeEndReg');
+                    appendOptions(node, $dialogTimeEndRegMultiplier, 'multiplier', data => (data.id > 0));
+
+                    const $dialogTimeEndRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeEndReg');
+                    $dialogTimeEndRegOffset.typedInput({
+                        default: types.Undefined.value,
+                        types: [
+                            types.Undefined,
+                            'num',
+                            'msg',
+                            'flow',
+                            'global',
+                            'env',
+                            'jsonata',
+                            types.randmNumCachedDay,
+                            types.randmNumCachedWeek
+                        ]
+                    }).change(() => {
+                        const type = $dialogTimeEndRegOffset.typedInput('type');
+                        if (type === types.Undefined.value) {
+                            $dialogTimeEndRegMultiplier.prop('disabled', true);
+                        } else {
+                            $dialogTimeEndRegMultiplier.prop('disabled', false);
+                        }
+                        $dialogTimeEndRegInput.change();
+                    });
+                    $dialogTimeEndRegOffset.typedInput('width', '40%');
+                    // #endregion dialogTimeReg End
+                    // #region dialogTimeMin End
+                    const $dialogTimeEndMinInput = $dialog.find('#dlg-ip-btctl-rule-timeEndMin');
+                    $dialogTimeEndMinInput.typedInput({
                         default: types.Undefined.value,
                         types: [
                             types.Undefined,
@@ -2627,13 +2971,13 @@ this software without specific prior written permission.
                             types.SunTimeByElevationSetRad
                         ]
                     });
-                    $dialogTimeRegInput.typedInput('width', '40%');
+                    $dialogTimeEndMinInput.typedInput('width', '40%');
 
-                    const $dialogTimeRegMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeReg');
-                    appendOptions(node, $dialogTimeRegMultiplier, 'multiplier', data => (data.id > 0));
+                    const $dialogTimeEndMinMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeEndMin');
+                    appendOptions(node, $dialogTimeEndMinMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogTimeRegOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeReg');
-                    $dialogTimeRegOffset.typedInput({
+                    const $dialogTimeEndMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeEndMin');
+                    $dialogTimeEndMinOffset.typedInput({
                         default: types.Undefined.value,
                         types: [
                             types.Undefined,
@@ -2647,19 +2991,19 @@ this software without specific prior written permission.
                             types.randmNumCachedWeek
                         ]
                     }).change(() => {
-                        const type = $dialogTimeRegOffset.typedInput('type');
+                        const type = $dialogTimeEndMinOffset.typedInput('type');
                         if (type === types.Undefined.value) {
-                            $dialogTimeRegMultiplier.prop('disabled', true);
+                            $dialogTimeEndMinMultiplier.prop('disabled', true);
                         } else {
-                            $dialogTimeRegMultiplier.prop('disabled', false);
+                            $dialogTimeEndMinMultiplier.prop('disabled', false);
                         }
-                        $dialogTimeRegInput.change();
+                        $dialogTimeEndMinInput.change();
                     });
-                    $dialogTimeRegOffset.typedInput('width', '40%');
-                    // #endregion dialogTimeReg
-                    // #region dialogTimeMin
-                    const $dialogTimeMinInput = $dialog.find('#dlg-ip-btctl-rule-timeMin');
-                    $dialogTimeMinInput.typedInput({
+                    $dialogTimeEndMinOffset.typedInput('width', '40%');
+                    // #endregion dialogTimeMin End
+                    // #region dialogTimeMax End
+                    const $dialogTimeEndMaxInput = $dialog.find('#dlg-ip-btctl-rule-timeEndMax');
+                    $dialogTimeEndMaxInput.typedInput({
                         default: types.Undefined.value,
                         types: [
                             types.Undefined,
@@ -2682,13 +3026,13 @@ this software without specific prior written permission.
                             types.SunTimeByElevationSetRad
                         ]
                     });
-                    $dialogTimeMinInput.typedInput('width', '40%');
+                    $dialogTimeEndMaxInput.typedInput('width', '40%');
 
-                    const $dialogTimeMinMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeMin');
-                    appendOptions(node, $dialogTimeMinMultiplier, 'multiplier', data => (data.id > 0));
+                    const $dialogTimeEndMaxMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeEndMax');
+                    appendOptions(node, $dialogTimeEndMaxMultiplier, 'multiplier', data => (data.id > 0));
 
-                    const $dialogTimeMinOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMin');
-                    $dialogTimeMinOffset.typedInput({
+                    const $dialogTimeEndMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeEndMax');
+                    $dialogTimeEndMaxOffset.typedInput({
                         default: types.Undefined.value,
                         types: [
                             types.Undefined,
@@ -2702,71 +3046,16 @@ this software without specific prior written permission.
                             types.randmNumCachedWeek
                         ]
                     }).change(() => {
-                        const type = $dialogTimeMinOffset.typedInput('type');
+                        const type = $dialogTimeEndMaxOffset.typedInput('type');
                         if (type === types.Undefined.value) {
-                            $dialogTimeMinMultiplier.prop('disabled', true);
+                            $dialogTimeEndMaxMultiplier.prop('disabled', true);
                         } else {
-                            $dialogTimeMinMultiplier.prop('disabled', false);
+                            $dialogTimeEndMaxMultiplier.prop('disabled', false);
                         }
-                        $dialogTimeMinInput.change();
+                        $dialogTimeEndMaxInput.change();
                     });
-                    $dialogTimeMinOffset.typedInput('width', '40%');
-                    // #endregion dialogTimeMin
-                    // #region dialogTimeMax
-                    const $dialogTimeMaxInput = $dialog.find('#dlg-ip-btctl-rule-timeMax');
-                    $dialogTimeMaxInput.typedInput({
-                        default: types.Undefined.value,
-                        types: [
-                            types.Undefined,
-                            types.TimeEntered,
-                            types.TimeSun,
-                            types.TimeSunNow,
-                            types.TimeMoon,
-                            'msg',
-                            'flow',
-                            'global',
-                            'env',
-                            'jsonata',
-                            types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
-                            types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
-                            types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
-                        ]
-                    });
-                    $dialogTimeMaxInput.typedInput('width', '40%');
+                    // #endregion dialogTimeMax End
 
-                    const $dialogTimeMaxMultiplier = $dialog.find('#dlg-ip-btctl-rule-multiplier-timeMax');
-                    appendOptions(node, $dialogTimeMaxMultiplier, 'multiplier', data => (data.id > 0));
-
-                    const $dialogTimeMaxOffset = $dialog.find('#dlg-ip-btctl-rule-offset-timeMax');
-                    $dialogTimeMaxOffset.typedInput({
-                        default: types.Undefined.value,
-                        types: [
-                            types.Undefined,
-                            'num',
-                            'msg',
-                            'flow',
-                            'global',
-                            'env',
-                            'jsonata',
-                            types.randmNumCachedDay,
-                            types.randmNumCachedWeek
-                        ]
-                    }).change(() => {
-                        const type = $dialogTimeMaxOffset.typedInput('type');
-                        if (type === types.Undefined.value) {
-                            $dialogTimeMaxMultiplier.prop('disabled', true);
-                        } else {
-                            $dialogTimeMaxMultiplier.prop('disabled', false);
-                        }
-                        $dialogTimeMaxInput.change();
-                    });
-                    $dialogTimeMaxOffset.typedInput('width', '40%');
-                    // #endregion dialogTimeMax
                     // #region dialogTimeLimit
                     $dialog.find('#dialog-row-timeConstraints-show').click(() => {
                         $dialog.find('#dialog-row-timeConstraintsPlaceholder').hide();
@@ -2921,43 +3210,41 @@ this software without specific prior written permission.
                     $dialogTopic.change(() => { _dialogGenHelpText(); });
                     // #endregion topic
                     // #region dialogChange
-                    $dialogTimeRegInput.change(() => {
+                    $dialogTimeStartRegInput.change(() => {
                         if (dialogDataOnLoading) { return; }
-                        const opType = $dialogTimeRegInput.typedInput('type');
+                        const opType = $dialogTimeStartRegInput.typedInput('type');
                         if (opType === types.Undefined.value) {
                             node.dialogAddData.timeReg = {
                                 ts : 0,
                                 data : null,
                                 text : 'N/A'
                             };
-                            $('#dialog-row-timeReg').attr('title', node.dialogAddData.timeReg.text);
-                            $dialogTimeRegInput.attr('timedata', node.dialogAddData.timeReg.ts);
-                            $dialogTimeRegOperator.hide();
-                            $('#dialog-row-offset-timeReg').hide();
-                            $('#dialog-row-timeReg').attr('title', opType);
+                            $('#dialog-row-timeStartReg').attr('title', node.dialogAddData.timeReg.text);
+                            $dialogTimeStartRegInput.attr('timedata', node.dialogAddData.timeReg.ts);
+                            $('#dialog-row-offset-timeStartReg').hide();
+                            $('#dialog-row-timeStartReg').attr('title', opType);
 
-                            $('#dialog-row-timeMin').hide();
-                            $('#dialog-row-timeMax').hide();
-                            $('#dialog-row-offset-timeMin').hide();
-                            $('#dialog-row-offset-timeMax').hide();
-                            $('.dialog-row-timeLimits').hide();
-                            $('.dialog-row-timeLimits-ph').hide();
-                            if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
-                                $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
+                            $('#dialog-row-timeStartMin').hide();
+                            $('#dialog-row-timeStartMax').hide();
+                            $('#dialog-row-offset-timeStartMin').hide();
+                            $('#dialog-row-offset-timeStartMax').hide();
+                            $('.dialog-row-timeStartLimits').hide();
+                            $('.dialog-row-timeStartLimits-ph').hide();
+                            if ($dialogTimeStartMaxInput.typedInput('type') !== types.Undefined.value) {
+                                $dialogTimeStartMaxInput.typedInput('type', types.Undefined.value);
                             }
-                            if ($dialogTimeMaxInput.typedInput('type') !== types.Undefined.value) {
-                                $dialogTimeMaxInput.typedInput('type', types.Undefined.value);
+                            if ($dialogTimeStartMaxInput.typedInput('type') !== types.Undefined.value) {
+                                $dialogTimeStartMaxInput.typedInput('type', types.Undefined.value);
                             }
                             _dialogGenHelpText();
                             return;
                         }
-                        $dialogTimeRegOperator.show();
                         if (opType === types.TimeEntered.value ||
                            opType === types.TimeSun.value ||
                            opType === types.TimeMoon.value) {
-                            $('#dialog-row-offset-timeReg').show();
+                            $('#dialog-row-offset-timeStartReg').show();
                         } else {
-                            $('#dialog-row-offset-timeReg').hide();
+                            $('#dialog-row-offset-timeStartReg').hide();
                         }
 
                         const noLimit = getCheckboxesStr($('#dlg-ip-btctl-rule-timeDays input[type=checkbox]:checked'), 7) === '*' &&
@@ -2990,142 +3277,343 @@ this software without specific prior written permission.
                                     text : bdDateToTime(d)
                                 };
                             }
-                            $('#dialog-row-timeReg').attr('title', node.dialogAddData.timeReg.text);
-                            $dialogTimeRegInput.attr('timedata', node.dialogAddData.timeReg.ts);
+                            $('#dialog-row-timeStartReg').attr('title', node.dialogAddData.timeReg.text);
+                            $dialogTimeStartRegInput.attr('timedata', node.dialogAddData.timeReg.ts);
                             _dialogGenHelpText();
                         }, {
                             nodeId:         node.id,
                             kind:           'getTimeData',
                             config:         $nodeConfig.val(),
                             type:           opType,
-                            value:          $dialogTimeRegInput.typedInput('value'),
-                            offsetType:     $dialogTimeRegOffset.typedInput('type'),
-                            offset:         $dialogTimeRegOffset.typedInput('value'),
-                            multiplier:     parseInt($dialogTimeRegMultiplier.val()),
+                            value:          $dialogTimeStartRegInput.typedInput('value'),
+                            offsetType:     $dialogTimeStartRegOffset.typedInput('type'),
+                            offset:         $dialogTimeStartRegOffset.typedInput('value'),
+                            multiplier:     parseInt($dialogTimeStartRegMultiplier.val()),
                             noOffsetError:  true
                         });
-                        $dialogTimeMinInput.change();
-                        $dialogTimeMaxInput.change();
+                        $dialogTimeStartMinInput.change();
+                        $dialogTimeStartMaxInput.change();
                     });
 
-                    $dialogTimeMinInput.change(() => {
+                    $dialogTimeStartMinInput.change(() => {
                         if (dialogDataOnLoading) { return; }
-                        const opAType = $dialogTimeRegInput.typedInput('type');
+                        const opAType = $dialogTimeStartRegInput.typedInput('type');
                         if (opAType && opAType !== types.Undefined.value) {
-                            $('#dialog-row-timeMin').show();
-                            const opType = $dialogTimeMinInput.typedInput('type');
+                            $('#dialog-row-timeStartMin').show();
+                            const opType = $dialogTimeStartMinInput.typedInput('type');
                             if (opType === types.Undefined.value) {
-                                $('#dialog-row-offset-timeMin').hide();
-                                node.dialogAddData.timeMin = {
+                                $('#dialog-row-offset-timeStartMin').hide();
+                                node.dialogAddData.time.start.min = {
                                     ts : 0,
                                     data : null,
                                     text : 'N/A'
                                 };
-                                $('#dialog-row-timeMin').attr('title', node.dialogAddData.timeMin.text);
-                                $dialogTimeMinInput.attr('timedata', node.dialogAddData.timeMin.ts);
+                                $('#dialog-row-timeStartMin').attr('title', node.dialogAddData.time.start.min.text);
+                                $dialogTimeStartMinInput.attr('timedata', node.dialogAddData.time.start.min.ts);
                                 _dialogGenHelpText();
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
                                        opType === types.TimeMoon.value) {
-                                $('#dialog-row-offset-timeMin').show();
+                                $('#dialog-row-offset-timeStartMin').show();
                             } else {
-                                $('#dialog-row-offset-timeMin').hide();
+                                $('#dialog-row-offset-timeStartMin').hide();
                             }
                             getBackendData(d => {
                                 if (d.value && d.value !== 'none') {
                                     const dv = new Date(d.value);
-                                    node.dialogAddData.timeMin = {
+                                    node.dialogAddData.time.start.min = {
                                         ts : dv.getTime(),
                                         data : d,
                                         text : bdDateToTime(dv)
                                     };
                                 } else {
-                                    node.dialogAddData.timeMin = {
+                                    node.dialogAddData.time.start.min = {
                                         ts : 0,
                                         data : null,
                                         text : bdDateToTime(d)
                                     };
                                 }
-                                $('#dialog-row-timeMin').attr('title', node.dialogAddData.timeMin.text);
-                                $dialogTimeMinInput.attr('timedata', node.dialogAddData.timeMin.ts);
+                                $('#dialog-row-timeStartMin').attr('title', node.dialogAddData.time.start.min.text);
+                                $dialogTimeStartMinInput.attr('timedata', node.dialogAddData.time.start.min.ts);
                                 _dialogGenHelpText();
                             }, {
                                 nodeId:         node.id,
                                 kind:           'getTimeData',
                                 config:         $nodeConfig.val(),
                                 type:           opType,
-                                value:          $dialogTimeMinInput.typedInput('value'),
-                                offsetType:     $dialogTimeMinOffset.typedInput('type'),
-                                offset:         $dialogTimeMinOffset.typedInput('value'),
-                                multiplier:     parseInt($dialogTimeMinMultiplier.val()),
+                                value:          $dialogTimeStartMinInput.typedInput('value'),
+                                offsetType:     $dialogTimeStartMinOffset.typedInput('type'),
+                                offset:         $dialogTimeStartMinOffset.typedInput('value'),
+                                multiplier:     parseInt($dialogTimeStartMinMultiplier.val()),
                                 noOffsetError:  true
                             });
                         }
                         _dialogGenHelpText();
                     });
 
-                    $dialogTimeMaxInput.change(() => {
+                    $dialogTimeStartMaxInput.change(() => {
                         if (dialogDataOnLoading) { return; }
-                        const opAType = $dialogTimeRegInput.typedInput('type');
+                        const opAType = $dialogTimeStartRegInput.typedInput('type');
                         if (opAType && opAType !== types.Undefined.value) {
-                            $('#dialog-row-timeMax').show();
-                            const opType = $dialogTimeMaxInput.typedInput('type');
+                            $('#dialog-row-timeStartMax').show();
+                            const opType = $dialogTimeStartMaxInput.typedInput('type');
                             if (opType === types.Undefined.value) {
-                                $('#dialog-row-offset-timeMax').hide();
-                                node.dialogAddData.timeMax = {
+                                $('#dialog-row-offset-timeStartMax').hide();
+                                node.dialogAddData.time.start.max = {
                                     ts : 0,
                                     data : null,
                                     text : 'N/A'
                                 };
-                                $('#dialog-row-timeMax').attr('title', node.dialogAddData.timeMax.text);
-                                $dialogTimeMaxInput.attr('timedata', node.dialogAddData.timeMax.ts);
+                                $('#dialog-row-timeStartMax').attr('title', node.dialogAddData.time.start.max.text);
+                                $dialogTimeStartMaxInput.attr('timedata', node.dialogAddData.time.start.max.ts);
                                 _dialogGenHelpText();
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
                                        opType === types.TimeMoon.value) {
-                                $('#dialog-row-offset-timeMax').show();
+                                $('#dialog-row-offset-timeStartMax').show();
                             } else {
-                                $('#dialog-row-offset-timeMax').hide();
+                                $('#dialog-row-offset-timeStartMax').hide();
                             }
                             getBackendData(d => {
                                 if (d.value && d.value !== 'none') {
                                     const dv = new Date(d.value);
-                                    node.dialogAddData.timeMax = {
+                                    node.dialogAddData.time.start.max = {
                                         ts : dv.getTime(),
                                         data : d,
                                         text : bdDateToTime(dv)
                                     };
                                 } else {
-                                    node.dialogAddData.timeMax = {
+                                    node.dialogAddData.time.start.max = {
                                         ts : 0,
                                         data : null,
                                         text : bdDateToTime(d)
                                     };
                                 }
-                                $('#dialog-row-timeMax').attr('title', node.dialogAddData.timeMax.text);
-                                $dialogTimeMaxInput.attr('timedata', node.dialogAddData.timeMax.ts);
+                                $('#dialog-row-timeStartMax').attr('title', node.dialogAddData.time.start.max.text);
+                                $dialogTimeStartMaxInput.attr('timedata', node.dialogAddData.time.start.max.ts);
                                 _dialogGenHelpText();
                             }, {
                                 nodeId:         node.id,
                                 kind:           'getTimeData',
                                 config:         $nodeConfig.val(),
                                 type:           opType,
-                                value:          $dialogTimeMaxInput.typedInput('value'),
-                                offsetType:     $dialogTimeMaxOffset.typedInput('type'),
-                                offset:         $dialogTimeMaxOffset.typedInput('value'),
-                                multiplier:     parseInt($dialogTimeMaxMultiplier.val()),
+                                value:          $dialogTimeStartMaxInput.typedInput('value'),
+                                offsetType:     $dialogTimeStartMaxOffset.typedInput('type'),
+                                offset:         $dialogTimeStartMaxOffset.typedInput('value'),
+                                multiplier:     parseInt($dialogTimeStartMaxMultiplier.val()),
                                 noOffsetError:  true
                             });
                         }
                         _dialogGenHelpText();
                     });
+
+                    $dialogTimeEndRegInput.change(() => {
+                        if (dialogDataOnLoading) { return; }
+                        const opType = $dialogTimeEndRegInput.typedInput('type');
+                        if (opType === types.Undefined.value) {
+                            node.dialogAddData.timeReg = {
+                                ts : 0,
+                                data : null,
+                                text : 'N/A'
+                            };
+                            $('#dialog-row-timeEndReg').attr('title', node.dialogAddData.timeReg.text);
+                            $dialogTimeEndRegInput.attr('timedata', node.dialogAddData.timeReg.ts);
+                            $('#dialog-row-timeEndReg-offset').hide();
+                            $('#dialog-row-timeEndReg').attr('title', opType);
+
+                            $('#dialog-row-timeEndMin').hide();
+                            $('#dialog-row-timeEndMax').hide();
+                            $('#dialog-row-timeEndMin-offset').hide();
+                            $('#dialog-row-timeEndMax-offset').hide();
+                            $('.dialog-row-timeEndLimits').hide();
+                            $('.dialog-row-timeEndLimits-ph').hide();
+                            if ($dialogTimeEndMaxInput.typedInput('type') !== types.Undefined.value) {
+                                $dialogTimeEndMaxInput.typedInput('type', types.Undefined.value);
+                            }
+                            if ($dialogTimeEndMaxInput.typedInput('type') !== types.Undefined.value) {
+                                $dialogTimeEndMaxInput.typedInput('type', types.Undefined.value);
+                            }
+                            _dialogGenHelpText();
+                            return;
+                        }
+                        if (opType === types.TimeEntered.value ||
+                           opType === types.TimeSun.value ||
+                           opType === types.TimeMoon.value) {
+                            $('#dialog-row-timeEndReg-offset').show();
+                        } else {
+                            $('#dialog-row-timeEndReg-offset').hide();
+                        }
+
+                        const noLimit = getCheckboxesStr($('#dlg-ip-btctl-rule-timeDays input[type=checkbox]:checked'), 7) === '*' &&
+                                        getCheckboxesStr($('#dlg-ip-btctl-rule-timeMonths input[type=checkbox]:checked'), 12) === '*' &&
+                                        $dialogTimeLimitOnlyEvenDays.is(':checked') !== true &&
+                                        $dialogTimeLimitOnlyOddDays.is(':checked') !== true &&
+                                        $dialogTimeLimitOnlyEvenWeeks.is(':checked') !== true &&
+                                        $dialogTimeLimitOnlyOddWeeks.is(':checked') !== true &&
+                                        $dialogTimeLimitDateStart.val() === '' &&
+                                        $dialogTimeLimitDateEnd.val() === '';
+                        if (noLimit) {
+                            $('.dialog-row-timeLimits').hide();
+                            $('.dialog-row-timeLimits-ph').show();
+                        } else {
+                            $('.dialog-row-timeLimits').show();
+                            $('.dialog-row-timeLimits-ph').hide();
+                        }
+                        getBackendData(d => {
+                            if (d.value && d.value !== 'none') {
+                                const dv = new Date(d.value);
+                                node.dialogAddData.timeReg = {
+                                    ts : dv.getTime(),
+                                    data : d,
+                                    text : bdDateToTime(dv)
+                                };
+                            } else {
+                                node.dialogAddData.timeReg = {
+                                    ts : 0,
+                                    data : null,
+                                    text : bdDateToTime(d)
+                                };
+                            }
+                            $('#dialog-row-timeEndReg').attr('title', node.dialogAddData.timeReg.text);
+                            $dialogTimeEndRegInput.attr('timedata', node.dialogAddData.timeReg.ts);
+                            _dialogGenHelpText();
+                        }, {
+                            nodeId:         node.id,
+                            kind:           'getTimeData',
+                            config:         $nodeConfig.val(),
+                            type:           opType,
+                            value:          $dialogTimeEndRegInput.typedInput('value'),
+                            offsetType:     $dialogTimeEndRegOffset.typedInput('type'),
+                            offset:         $dialogTimeEndRegOffset.typedInput('value'),
+                            multiplier:     parseInt($dialogTimeEndRegMultiplier.val()),
+                            noOffsetError:  true
+                        });
+                        $dialogTimeEndMinInput.change();
+                        $dialogTimeEndMaxInput.change();
+                    });
+
+                    $dialogTimeEndMinInput.change(() => {
+                        if (dialogDataOnLoading) { return; }
+                        const opAType = $dialogTimeEndRegInput.typedInput('type');
+                        if (opAType && opAType !== types.Undefined.value) {
+                            $('#dialog-row-timeEndMin').show();
+                            const opType = $dialogTimeEndMinInput.typedInput('type');
+                            if (opType === types.Undefined.value) {
+                                $('#dialog-row-timeEndMin-offset').hide();
+                                node.dialogAddData.time.end.min = {
+                                    ts : 0,
+                                    data : null,
+                                    text : 'N/A'
+                                };
+                                $('#dialog-row-timeEndMin').attr('title', node.dialogAddData.time.end.min.text);
+                                $dialogTimeEndMinInput.attr('timedata', node.dialogAddData.time.end.min.ts);
+                                _dialogGenHelpText();
+                                return;
+                            } else if (opType === types.TimeEntered.value ||
+                                       opType === types.TimeSun.value ||
+                                       opType === types.TimeMoon.value) {
+                                $('#dialog-row-timeEndMin-offset').show();
+                            } else {
+                                $('#dialog-row-timeEndMin-offset').hide();
+                            }
+                            getBackendData(d => {
+                                if (d.value && d.value !== 'none') {
+                                    const dv = new Date(d.value);
+                                    node.dialogAddData.time.end.min = {
+                                        ts : dv.getTime(),
+                                        data : d,
+                                        text : bdDateToTime(dv)
+                                    };
+                                } else {
+                                    node.dialogAddData.time.end.min = {
+                                        ts : 0,
+                                        data : null,
+                                        text : bdDateToTime(d)
+                                    };
+                                }
+                                $('#dialog-row-timeEndMin').attr('title', node.dialogAddData.time.end.min.text);
+                                $dialogTimeEndMinInput.attr('timedata', node.dialogAddData.time.end.min.ts);
+                                _dialogGenHelpText();
+                            }, {
+                                nodeId:         node.id,
+                                kind:           'getTimeData',
+                                config:         $nodeConfig.val(),
+                                type:           opType,
+                                value:          $dialogTimeEndMinInput.typedInput('value'),
+                                offsetType:     $dialogTimeEndMinOffset.typedInput('type'),
+                                offset:         $dialogTimeEndMinOffset.typedInput('value'),
+                                multiplier:     parseInt($dialogTimeEndMinMultiplier.val()),
+                                noOffsetError:  true
+                            });
+                        }
+                        _dialogGenHelpText();
+                    });
+
+                    $dialogTimeEndMaxInput.change(() => {
+                        if (dialogDataOnLoading) { return; }
+                        const opAType = $dialogTimeEndRegInput.typedInput('type');
+                        if (opAType && opAType !== types.Undefined.value) {
+                            $('#dialog-row-timeEndMax').show();
+                            const opType = $dialogTimeEndMaxInput.typedInput('type');
+                            if (opType === types.Undefined.value) {
+                                $('#dialog-row-timeEndMax-offset').hide();
+                                node.dialogAddData.time.end.max = {
+                                    ts : 0,
+                                    data : null,
+                                    text : 'N/A'
+                                };
+                                $('#dialog-row-timeEndMax').attr('title', node.dialogAddData.time.end.max.text);
+                                $dialogTimeEndMaxInput.attr('timedata', node.dialogAddData.time.end.max.ts);
+                                _dialogGenHelpText();
+                                return;
+                            } else if (opType === types.TimeEntered.value ||
+                                       opType === types.TimeSun.value ||
+                                       opType === types.TimeMoon.value) {
+                                $('#dialog-row-timeEndMax-offset').show();
+                            } else {
+                                $('#dialog-row-timeEndMax-offset').hide();
+                            }
+                            getBackendData(d => {
+                                if (d.value && d.value !== 'none') {
+                                    const dv = new Date(d.value);
+                                    node.dialogAddData.time.end.max = {
+                                        ts : dv.getTime(),
+                                        data : d,
+                                        text : bdDateToTime(dv)
+                                    };
+                                } else {
+                                    node.dialogAddData.time.end.max = {
+                                        ts : 0,
+                                        data : null,
+                                        text : bdDateToTime(d)
+                                    };
+                                }
+                                $('#dialog-row-timeEndMax').attr('title', node.dialogAddData.time.end.max.text);
+                                $dialogTimeEndMaxInput.attr('timedata', node.dialogAddData.time.end.max.ts);
+                                _dialogGenHelpText();
+                            }, {
+                                nodeId:         node.id,
+                                kind:           'getTimeData',
+                                config:         $nodeConfig.val(),
+                                type:           opType,
+                                value:          $dialogTimeEndMaxInput.typedInput('value'),
+                                offsetType:     $dialogTimeEndMaxOffset.typedInput('type'),
+                                offset:         $dialogTimeEndMaxOffset.typedInput('value'),
+                                multiplier:     parseInt($dialogTimeEndMaxMultiplier.val()),
+                                noOffsetError:  true
+                            });
+                        }
+                        _dialogGenHelpText();
+                    });
+
                     $('.dialog-row-timeLimits :input').change(() => {
                         if (node.dialogAddData.timeout2) { clearTimeout(node.dialogAddData.timeout2); }
                         node.dialogAddData.timeout2 = setTimeout(() => {
                             delete node.dialogAddData.timeout2;
-                            $dialogTimeRegInput.change();
+                            $dialogTimeStartRegInput.change();
+                            $dialogTimeEndRegInput.change();
                         },1000);
                     });
                     // #endregion dialogChange
@@ -3150,6 +3638,8 @@ this software without specific prior written permission.
                             dialogDataIndex = containerIndex;
                             const data = JSON.parse($dialogDataRow.data('ruleData'));
                             $dialogName.val(data.name);
+                            $dialogExec.val(data.exec);
+
                             $dialogRuleEnableBtn.attr('is_enabled', data.enabled);
                             $dialogRuleEnableBtn.trigger('setRuleEnabledState');
                             dialogDataOnLoading = true;
@@ -3157,11 +3647,69 @@ this software without specific prior written permission.
                             for (let i = 0; i < data.conditions.length; i++) {
                                 $dialogConditionContainer.editableList('addItem', data.conditions[i]);
                             }
+                            $dialogTimeStartRegMultiplier.val(60000);
+                            $dialogTimeEndRegMultiplier.val(60000);
+                            setTInputValue($dialogTimeStartRegInput, '', types.Undefined.value);
+                            setTInputValue($dialogTimeStartRegOffset, 1, types.Undefined.value);
+                            setTInputValue($dialogTimeEndRegInput, '', types.Undefined.value);
+                            setTInputValue($dialogTimeEndRegOffset, 1, types.Undefined.value);
+                            initCheckboxesBlock('#dlg-ip-btctl-rule-timeDays', '*');
+                            initCheckboxesBlock('#dlg-ip-btctl-rule-timeMonths', '*');
+                            $dialogTimeLimitOnlyEvenDays.prop('checked', false);
+                            $dialogTimeLimitOnlyOddDays.prop('checked', false);
+                            $dialogTimeLimitOnlyEvenWeeks.prop('checked', false);
+                            $dialogTimeLimitOnlyOddWeeks.prop('checked', false);
+                            $dialogTimeLimitDateStart.val('');
+                            $dialogTimeLimitDateEnd.val('');
+
+                            setTInputValue($dialogTimeEndMinInput, '', types.Undefined.value);
+                            setTInputValue($dialogTimeEndMinOffset, 1, types.Undefined.value);
+                            $dialogTimeEndMinMultiplier.val(60000);
+                            setTInputValue($dialogTimeEndMaxInput, '', types.Undefined.value);
+                            setTInputValue($dialogTimeEndMaxOffset, 1, types.Undefined.value);
+                            $dialogTimeEndMaxMultiplier.val(60000);
+
+                            setTInputValue($dialogTimeStartMinInput, '', types.Undefined.value);
+                            setTInputValue($dialogTimeStartMinOffset, 1, types.Undefined.value);
+                            $dialogTimeStartMinMultiplier.val(60000);
+                            setTInputValue($dialogTimeStartMaxInput, '', types.Undefined.value);
+                            setTInputValue($dialogTimeStartMaxOffset, 1, types.Undefined.value);
+                            $dialogTimeStartMaxMultiplier.val(60000);
+
                             if (data.time) {
-                                $dialogTimeRegOperator.val(data.time.operator);
-                                $dialogTimeRegMultiplier.val(data.time.multiplier);
-                                setTInputValue($dialogTimeRegInput, data.time.value, data.time.type);
-                                setTInputValue($dialogTimeRegOffset, data.time.offset, data.time.offsetType);
+                                if (data.time.start) {
+                                    $dialogTimeStartRegMultiplier.val(data.time.start.multiplier);
+                                    setTInputValue($dialogTimeStartRegInput, data.time.start.value, data.time.start.type);
+                                    setTInputValue($dialogTimeStartRegOffset, data.time.start.offset, data.time.start.offsetType);
+
+                                    if (data.time.start.min) {
+                                        $dialogTimeStartMinMultiplier.val(data.time.start.min.multiplier || 60000);
+                                        setTInputValue($dialogTimeStartMinInput, data.time.start.min.value, data.time.start.min.type);
+                                        setTInputValue($dialogTimeStartMinOffset, data.time.start.min.offset, data.time.start.min.offsetType);
+                                    }
+                                    if (data.time.start.max) {
+                                        $dialogTimeStartMaxMultiplier.val(data.time.start.max.multiplier || 60000);
+                                        setTInputValue($dialogTimeStartMaxInput, data.time.start.max.value, data.time.start.max.type);
+                                        setTInputValue($dialogTimeStartMaxOffset, data.time.start.max.offset, data.time.start.max.offsetType);
+                                    }
+                                }
+                                if (data.time.end) {
+                                    $dialogTimeEndRegMultiplier.val(data.time.end.multiplier);
+                                    setTInputValue($dialogTimeEndRegInput, data.time.end.value, data.time.end.type);
+                                    setTInputValue($dialogTimeEndRegOffset, data.time.end.offset, data.time.end.offsetType);
+
+                                    if (data.time.end.min) {
+                                        $dialogTimeEndMinMultiplier.val(data.time.end.min.multiplier || 60000);
+                                        setTInputValue($dialogTimeEndMinInput, data.time.end.min.value, data.time.end.min.type);
+                                        setTInputValue($dialogTimeEndMinOffset, data.time.end.min.offset, data.time.end.min.offsetType);
+                                    }
+                                    if (data.time.end.max) {
+                                        $dialogTimeEndMaxMultiplier.val(data.time.end.max.multiplier || 60000);
+                                        setTInputValue($dialogTimeEndMaxInput, data.time.end.max.value, data.time.end.max.type);
+                                        setTInputValue($dialogTimeEndMaxOffset, data.time.end.max.offset, data.time.end.max.offsetType);
+                                    }
+                                }
+
                                 initCheckboxesBlock('#dlg-ip-btctl-rule-timeDays', data.time.days);
                                 initCheckboxesBlock('#dlg-ip-btctl-rule-timeMonths', data.time.months);
                                 if (!!data.time.onlyEvenDays && !!data.time.onlyOddDays) {
@@ -3206,37 +3754,6 @@ this software without specific prior written permission.
                                 }
                                 $dialogTimeLimitDateStart.change();
                                 $dialogTimeLimitDateEnd.change();
-                            } else {
-                                $dialogTimeRegOperator.val(0);
-                                $dialogTimeRegMultiplier.val(60000);
-                                setTInputValue($dialogTimeRegInput, '', types.Undefined.value);
-                                setTInputValue($dialogTimeRegOffset, 1, types.Undefined.value);
-                                initCheckboxesBlock('#dlg-ip-btctl-rule-timeDays', '*');
-                                initCheckboxesBlock('#dlg-ip-btctl-rule-timeMonths', '*');
-                                $dialogTimeLimitOnlyEvenDays.prop('checked', false);
-                                $dialogTimeLimitOnlyOddDays.prop('checked', false);
-                                $dialogTimeLimitOnlyEvenWeeks.prop('checked', false);
-                                $dialogTimeLimitOnlyOddWeeks.prop('checked', false);
-                                $dialogTimeLimitDateStart.val('');
-                                $dialogTimeLimitDateEnd.val('');
-                            }
-                            if (data.timeMin) {
-                                $dialogTimeMinMultiplier.val(data.timeMin.multiplier || 60000);
-                                setTInputValue($dialogTimeMinInput, data.timeMin.value, data.timeMin.type);
-                                setTInputValue($dialogTimeMinOffset, data.timeMin.offset, data.timeMin.offsetType);
-                            } else {
-                                setTInputValue($dialogTimeMinInput, '', types.Undefined.value);
-                                setTInputValue($dialogTimeMinOffset, 1, types.Undefined.value);
-                                $dialogTimeMinMultiplier.val(60000);
-                            }
-                            if (data.timeMax) {
-                                $dialogTimeMaxMultiplier.val(data.timeMax.multiplier || 60000);
-                                setTInputValue($dialogTimeMaxInput, data.timeMax.value, data.timeMax.type);
-                                setTInputValue($dialogTimeMaxOffset, data.timeMax.offset, data.timeMax.offsetType);
-                            } else {
-                                setTInputValue($dialogTimeMaxInput, '', types.Undefined.value);
-                                setTInputValue($dialogTimeMaxOffset, 1, types.Undefined.value);
-                                $dialogTimeMaxMultiplier.val(60000);
                             }
                             if (data.level) {
                                 $dialogLevelOperator.val(data.level.operator || 0);
@@ -3256,7 +3773,8 @@ this software without specific prior written permission.
 
                             _dialogGenHelpText();
                             dialogDataOnLoading = false;
-                            $dialogTimeRegInput.change();
+                            $dialogTimeStartRegInput.change();
+                            $dialogTimeEndRegInput.change();
                             $dialogLevelOperator.change();
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
@@ -3267,16 +3785,34 @@ this software without specific prior written permission.
                     }
 
                     /**
+                     * checks if all properties of an object are true
+                     */
+                    function checkObj(obj, path) {
+                        for (const [key, value] of Object.entries(obj)) {
+                            if (value === true || key === 'index') continue; // return path;
+                            if (typeof value === 'object') {
+                                const val = checkObj(value, path + key + '.');
+                                if (val !== '') return val;
+                                continue;
+                            }
+                            return path + key;
+                        }
+                        return '';
+                    }
+
+                    /**
                      * Get the data object for a rule
                      */
                     function _dialogGetData() {
                         const result = {
                             index: dialogDataIndex,
                             name:$dialogName.val(),
+                            exec: $dialogExec.val(),
                             version: ruleVersion,
                             enabled: !($dialogRuleEnableBtn.attr('is_enabled') === false || $dialogRuleEnableBtn.attr('is_enabled') === 'false'),
-                            isValid: true,
-                            valid:{
+                            isValid: false,
+                            validationError: '',
+                            validation:{
                                 conditions : []
                             },
                             conditions: [],
@@ -3294,6 +3830,7 @@ this software without specific prior written permission.
                             resetOverwrite: $dialogResetOverwrite.is(':checked'),
                             importance: parseInt($dialogImportance.val())
                         };
+
                         try {
                             const setval = (param, name, val) => { if (val) param[name] = val; };
                             if (result.level.type === types.LevelND.value) {
@@ -3343,28 +3880,103 @@ this software without specific prior written permission.
                                     delete p.conditionText;
                                 }
                                 result.conditions.push(p);
-                                const isCValid = {
+                                result.validation.conditions.push({
                                     index       : _i,
                                     value       : $cond.find('.dlg-ip-btctl-rule-condOperand').typedInput('validate'),
                                     threshold   : $cond.find('.dlg-ip-btctl-rule-condThreshold').typedInput('validate')
-                                };
-                                result.valid.conditions.push(isCValid);
-                                result.isValid = result.isValid && isCValid.value && isCValid.threshold;
+                                });
                             });
-                            const timeType = $dialogTimeRegInput.typedInput('type');
-                            result.valid.time = $dialogTimeRegInput.typedInput('validate');
-                            if (timeType !== 'none') {
-                                result.time = {
-                                    type            : timeType,
-                                    value           : $dialogTimeRegInput.typedInput('value'),
-                                    operator        : parseInt($dialogTimeRegOperator.val()),
-                                    operatorText    : $dialogTimeRegOperator.find('option:selected').text(),
-                                    offsetType      : $dialogTimeRegOffset.typedInput('type'),
-                                    offset          : $dialogTimeRegOffset.typedInput('value'),
-                                    multiplier      : parseInt($dialogTimeRegMultiplier.val()),
-                                    days            : getCheckboxesStr($('#dlg-ip-btctl-rule-timeDays input[type=checkbox]:checked'),7),
-                                    months          : getCheckboxesStr($('#dlg-ip-btctl-rule-timeMonths input[type=checkbox]:checked'), 12)
+                            const timeTypeStart = $dialogTimeStartRegInput.typedInput('type');
+                            const timeTypeEnd = $dialogTimeEndRegInput.typedInput('type');
+
+                            if (timeTypeStart !== 'none' || timeTypeEnd !== 'none') {
+                                result.time = { };
+                                result.validation.time = {
+                                    start : {
+                                        value : $dialogTimeStartRegInput.typedInput('validate')
+                                    },
+                                    end : {
+                                        value : $dialogTimeEndRegInput.typedInput('validate')
+                                    }
                                 };
+
+                                if (timeTypeStart !== 'none') {
+                                    result.time.start = {
+                                        type            : timeTypeStart,
+                                        value           : $dialogTimeStartRegInput.typedInput('value'),
+                                        offsetType      : $dialogTimeStartRegOffset.typedInput('type'),
+                                        offset          : $dialogTimeStartRegOffset.typedInput('value'),
+                                        multiplier      : parseInt($dialogTimeStartRegMultiplier.val())
+                                    };
+                                    result.validation.time.start.offset = $dialogTimeStartRegOffset.typedInput('validate');
+                                    result.validation.time.start.multiplier = !isNaN(result.time.start.multiplier);
+                                    const minType = $dialogTimeStartMinInput.typedInput('type');
+                                    result.validation.time.start.min = $dialogTimeStartMinInput.typedInput('validate');
+                                    if (minType !== 'none') {
+                                        result.time.start.min = {
+                                            type        : minType,
+                                            value       : $dialogTimeStartMinInput.typedInput('value'),
+                                            offsetType  : $dialogTimeStartMinOffset.typedInput('type'),
+                                            offset      : $dialogTimeStartMinOffset.typedInput('value'),
+                                            multiplier  : parseInt($dialogTimeStartMinMultiplier.val())
+                                        };
+                                        result.validation.time.start.minOffset = $dialogTimeStartMinOffset.typedInput('validate');
+                                        result.validation.time.start.minMultiplier = !isNaN(result.time.start.min.multiplier);
+                                    }
+                                    const maxType = $dialogTimeStartMaxInput.typedInput('type');
+                                    result.validation.time.start.max = $dialogTimeStartMaxInput.typedInput('validate');
+                                    if (maxType !== 'none') {
+                                        result.time.start.max = {
+                                            type        : maxType,
+                                            value       : $dialogTimeStartMaxInput.typedInput('value'),
+                                            offsetType  : $dialogTimeStartMaxOffset.typedInput('type'),
+                                            offset      : $dialogTimeStartMaxOffset.typedInput('value'),
+                                            multiplier  :  parseInt($dialogTimeStartMaxMultiplier.val())
+                                        };
+                                        result.validation.time.start.maxOffset = $dialogTimeStartMaxOffset.typedInput('validate');
+                                        result.validation.time.start.maxMultiplier = !isNaN(result.time.start.max.multiplier);
+                                    }
+                                }
+                                if (timeTypeEnd !== 'none') {
+                                    result.time.end = {
+                                        type            : timeTypeEnd,
+                                        value           : $dialogTimeEndRegInput.typedInput('value'),
+                                        offsetType      : $dialogTimeEndRegOffset.typedInput('type'),
+                                        offset          : $dialogTimeEndRegOffset.typedInput('value'),
+                                        multiplier      : parseInt($dialogTimeEndRegMultiplier.val())
+                                    };
+                                    result.validation.time.end.offset = $dialogTimeEndRegOffset.typedInput('validate');
+                                    result.validation.time.end.multiplier = !isNaN(result.time.end.multiplier);
+                                    const minType = $dialogTimeEndMinInput.typedInput('type');
+                                    result.validation.time.end.min = $dialogTimeEndMinInput.typedInput('validate');
+                                    if (minType !== 'none') {
+                                        result.time.end.min = {
+                                            type        : minType,
+                                            value       : $dialogTimeEndMinInput.typedInput('value'),
+                                            offsetType  : $dialogTimeEndMinOffset.typedInput('type'),
+                                            offset      : $dialogTimeEndMinOffset.typedInput('value'),
+                                            multiplier  : parseInt($dialogTimeEndMinMultiplier.val())
+                                        };
+                                        result.validation.time.end.minOffset = $dialogTimeEndMinOffset.typedInput('validate');
+                                        result.validation.time.end.minMultiplier = !isNaN(result.time.end.min.multiplier);
+                                    }
+                                    const maxType = $dialogTimeEndMaxInput.typedInput('type');
+                                    result.validation.time.end.max = $dialogTimeEndMaxInput.typedInput('validate');
+                                    if (maxType !== 'none') {
+                                        result.time.end.max = {
+                                            type        : maxType,
+                                            value       : $dialogTimeEndMaxInput.typedInput('value'),
+                                            offsetType  : $dialogTimeEndMaxOffset.typedInput('type'),
+                                            offset      : $dialogTimeEndMaxOffset.typedInput('value'),
+                                            multiplier  :  parseInt($dialogTimeEndMaxMultiplier.val())
+                                        };
+                                        result.validation.time.end.maxOffset = $dialogTimeEndMaxOffset.typedInput('validate');
+                                        result.validation.time.end.maxMultiplier = !isNaN(result.time.end.max.multiplier);
+                                    }
+                                }
+
+                                result.time.days = getCheckboxesStr($('#dlg-ip-btctl-rule-timeDays input[type=checkbox]:checked'),7);
+                                result.time.months = getCheckboxesStr($('#dlg-ip-btctl-rule-timeMonths input[type=checkbox]:checked'), 12);
                                 setval(result.time,'onlyEvenDays', $dialogTimeLimitOnlyEvenDays.is(':checked'));
                                 setval(result.time,'onlyOddDays', $dialogTimeLimitOnlyOddDays.is(':checked'));
                                 setval(result.time,'onlyEvenWeeks', $dialogTimeLimitOnlyEvenWeeks.is(':checked'));
@@ -3372,67 +3984,56 @@ this software without specific prior written permission.
                                 setval(result.time,'dateStart', $dialogTimeLimitDateStart.val());
                                 setval(result.time,'dateEnd', $dialogTimeLimitDateEnd.val());
 
-                                result.valid.time = result.valid.time && $dialogTimeRegOffset.typedInput('validate') && result.time.multiplier;
                                 if (result.time.onlyEvenDays && result.time.onlyOddDays) {
                                     delete result.time.onlyEvenDays;
                                     delete result.time.onlyOddDays;
+                                    result.validation.time.noEvenAndOddDaysAllowed = false;
                                 }
                                 if (result.time.onlyEvenWeeks && result.time.onlyOddWeeks) {
                                     delete result.time.onlyEvenWeeks;
                                     delete result.time.onlyOddWeeks;
+                                    result.validation.time.noEvenAndOddWeeksAllowed = false;
                                 }
                                 if (!result.time.days || !result.time.months) {
-                                    result.valid.time = false;
+                                    result.validation.time.noDaysAllowed = false;
                                 }
-                                const minType = $dialogTimeMinInput.typedInput('type');
-                                result.valid.timeMin = $dialogTimeMinInput.typedInput('validate');
-                                if (minType !== 'none') {
-                                    result.timeMin = {
-                                        type        : minType,
-                                        value       : $dialogTimeMinInput.typedInput('value'),
-                                        offsetType  : $dialogTimeMinOffset.typedInput('type'),
-                                        offset      : $dialogTimeMinOffset.typedInput('value'),
-                                        multiplier  : parseInt($dialogTimeMinMultiplier.val())
-                                    };
-                                    result.valid.timeMin = result.valid.timeMin &&
-                                        $dialogTimeMinOffset.typedInput('validate') &&
-                                        result.timeMin.multiplier;
+                                if (!result.time.days || !result.time.months) {
+                                    result.validation.time.noMonthAllowed = false;
                                 }
-                                const maxType = $dialogTimeMaxInput.typedInput('type');
-                                result.valid.timeMax = $dialogTimeMaxInput.typedInput('validate');
-                                if (maxType !== 'none') {
-                                    result.timeMax = {
-                                        type        : maxType,
-                                        value       : $dialogTimeMaxInput.typedInput('value'),
-                                        offsetType  : $dialogTimeMaxOffset.typedInput('type'),
-                                        offset      : $dialogTimeMaxOffset.typedInput('value'),
-                                        multiplier  :  parseInt($dialogTimeMaxMultiplier.val())
-                                    };
-                                    result.valid.timeMax =result.valid.timeMax &&
-                                        result.timeMax.multiplier;
-                                }
-                                result.isValid = result.isValid && result.valid.time && result.valid.timeMin && result.valid.timeMax;
                             }
-                            result.valid.level = (result.level.operator === cNBC_RULE_OP.off) ||
-                                                 (result.level.operator === cNBC_RULE_OP.slatOversteer) ||
-                                                 (result.level.operator === cNBC_RULE_OP.topicOversteer) ||
-                                                 $dialogLevel.typedInput('validate');
-                            result.valid.slat = (result.level.operator === cNBC_RULE_OP.off) ||
-                                                (result.level.operator === cNBC_RULE_OP.topicOversteer) ||
-                                                (result.level.operator === cNBC_RULE_OP.levelMaxOversteer) ||
-                                                (result.level.operator === cNBC_RULE_OP.levelMinOversteer) ||
-                                                $dialogSlat.typedInput('validate');
-                            result.isValid = result.isValid && result.valid.level && result.valid.slat;
+                            switch (result.level.operator) {
+                                case cNBC_RULE_OP.off:
+                                    break;
+                                case cNBC_RULE_OP.topicOversteer:
+                                    result.validation.topicIsMissing = (result.topic !== '');
+                                    break;
+                                case cNBC_RULE_OP.levelAbsolute:
+                                case cNBC_RULE_OP.levelMinOversteer:
+                                case cNBC_RULE_OP.levelMaxOversteer:
+                                    result.validation.level = $dialogLevel.typedInput('validate');
+                                    result.validation.slat = $dialogSlat.typedInput('validate');
+                                    break;
+                                case cNBC_RULE_OP.slatOversteer:
+                                    result.validation.slat = $dialogSlat.typedInput('validate');
+                                    break;
+                                default:
+                                    result.validation.ruleOperator = false;
+                                    break;
+                            }
+                            result.validationError = checkObj(result.validation, '');
+                            result.isValid = (result.validationError === '');
                         } catch (err) {
                             console.log(err.message); // eslint-disable-line no-console
                             console.log(err.stack); // eslint-disable-line no-console
                             result.isValid = false;
-                            result.valid.error = err.message;
+                            result.validationError = err.message;
                         }
                         if (!result.isValid) {
-                            console.log('rule validation:',result.isValid, result.valid); // eslint-disable-line
+                            console.warn('Rule validation failed! Wrong element:', result.validationError, result.validation); // eslint-disable-line
+                            console.log('Rule Data:', result); // eslint-disable-line
                         } else {
-                            delete result.valid; // if valid, not needed
+                            delete result.validation; // if valid, not needed
+                            // delete result.validationError;
                         }
                         return result;
                     }
@@ -3973,44 +4574,72 @@ this software without specific prior written permission.
             </div>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0">
-        <div class="dialog-row pt-0" id="dialog-row-timeReg">
-            <label for="dlg-ip-btctl-rule-timeReg"><i class="fa fa-clock-o"></i> <span data-i18n="blind-control.label.time"></span></label>
-            <select id="dlg-ip-btctl-rule-timeReg-operator" class="ipadd dlg-ip-btctl-rule-timeReg-operator" >
-            </select>
-            <input type="text" id="dlg-ip-btctl-rule-timeReg" class="ipMain dlg-ip-btctl-rule-timeReg" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
+        <div class="dialog-row pt-0" id="dialog-row-timeStartReg">
+            <label for="dlg-ip-btctl-rule-timeStartReg"><i class="fa fa-clock-o"></i><i class="fa fa-hourglass-start"></i><span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeStart"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeStartReg" class="ipMain dlg-ip-btctl-rule-timeStartReg" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
         </div>
-        <div class="dialog-row block-indent2" id="dialog-row-offset-timeReg">
-            <label for="dlg-ip-btctl-rule-offset-timeReg"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset"></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-offset-timeReg" class="ipMain dlg-ip-btctl-rule-offset-timeReg" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
-            <select  id="dlg-ip-btctl-rule-multiplier-timeReg" class="ipadd dlg-ip-btctl-rule-multiplier-timeReg" >
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeStartReg">
+            <label for="dlg-ip-btctl-rule-offset-timeStartReg"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeOffset"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeStartReg" class="ipMain dlg-ip-btctl-rule-offset-timeStartReg" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
+            <select  id="dlg-ip-btctl-rule-multiplier-timeStartReg" class="ipadd dlg-ip-btctl-rule-multiplier-timeStartReg" >
             </select>
         </div>
-        <div class="dialog-row block-indent1" id="dialog-row-timeMin">
-            <label for="dlg-ip-btctl-rule-timeMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin"></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-timeMin" class="ipMain dlg-ip-btctl-rule-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
+        <div class="dialog-row block-indent1" id="dialog-row-timeStartMin">
+            <label for="dlg-ip-btctl-rule-timeStartMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeStartMin" class="ipMain dlg-ip-btctl-rule-timeStartMin" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
         </div>
-        <div class="dialog-row block-indent2" id="dialog-row-offset-timeMin">
-            <label for="dlg-ip-btctl-rule-offset-timeMin"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeMin"></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-offset-timeMin" class="ipMain dlg-ip-btctl-rule-offset-timeMin" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
-            <select  id="dlg-ip-btctl-rule-multiplier-timeMin" class="ipadd dlg-ip-btctl-rule-multiplier-timeMin">
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeStartMin">
+            <label for="dlg-ip-btctl-rule-offset-timeStartMin"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMinOffset"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeStartMin" class="ipMain dlg-ip-btctl-rule-offset-timeStartMin" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
+            <select  id="dlg-ip-btctl-rule-multiplier-timeStartMin" class="ipadd dlg-ip-btctl-rule-multiplier-timeStartMin">
             </select>
         </div>
-        <div class="dialog-row block-indent1" id="dialog-row-timeMax">
-            <label for="dlg-ip-btctl-rule-timeMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax"></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-timeMax" class="ipMain dlg-ip-btctl-rule-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
+        <div class="dialog-row block-indent1" id="dialog-row-timeStartMax">
+            <label for="dlg-ip-btctl-rule-timeStartMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeStartMax" class="ipMain dlg-ip-btctl-rule-timeStartMax" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
         </div>
-        <div class="dialog-row block-indent2" id="dialog-row-offset-timeMax">
-            <label for="dlg-ip-btctl-rule-offset-timeMax"><i class="fa fa-plus"></i> <span data-i18n="blind-control.label.offset-timeMax"></span></label>
-            <input type="text" id="dlg-ip-btctl-rule-offset-timeMax" class="ipMain dlg-ip-btctl-rule-offset-timeMax" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
-            <select  id="dlg-ip-btctl-rule-multiplier-timeMax" class="ipadd dlg-ip-btctl-rule-multiplier-timeMax">
+        <div class="dialog-row block-indent2" id="dialog-row-offset-timeStartMax">
+            <label for="dlg-ip-btctl-rule-offset-timeStartMax"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMaxOffset"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeStartMax" class="ipMain dlg-ip-btctl-rule-offset-timeStartMax" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
+            <select  id="dlg-ip-btctl-rule-multiplier-timeStartMax" class="ipadd dlg-ip-btctl-rule-multiplier-timeStartMax">
             </select>
         </div>
-        <div class="dialog-row dialog-row-timeLimits-ph is-to-show-initially" id="dialog-row-timeConstraintsPlaceholder">
+        <div class="dialog-row pt-2" id="dialog-row-timeEndReg">
+            <label for="dlg-ip-btctl-rule-timeEndReg"><i class="fa fa-clock-o"></i><i class="fa fa-hourglass-end"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeEnd"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeEndReg" class="ipMain dlg-ip-btctl-rule-timeEndReg" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
+        </div>
+        <div class="dialog-row block-indent2" id="dialog-row-timeEndReg-offset">
+            <label for="dlg-ip-btctl-rule-offset-timeEndReg"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeOffset"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeEndReg" class="ipMain dlg-ip-btctl-rule-offset-timeEndReg" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
+            <select  id="dlg-ip-btctl-rule-multiplier-timeEndReg" class="ipadd dlg-ip-btctl-rule-multiplier-timeEndReg" >
+            </select>
+        </div>
+        <div class="dialog-row block-indent1" id="dialog-row-timeEndMin">
+            <label for="dlg-ip-btctl-rule-timeEndMin"><i class="fa fa-step-backward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMin"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeEndMin" class="ipMain dlg-ip-btctl-rule-timeEndMin" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
+        </div>
+        <div class="dialog-row block-indent2" id="dialog-row-timeEndMin-offset">
+            <label for="dlg-ip-btctl-rule-offset-timeEndMin"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMinOffset"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeEndMin" class="ipMain dlg-ip-btctl-rule-offset-timeEndMin" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
+            <select  id="dlg-ip-btctl-rule-multiplier-timeEndMin" class="ipadd dlg-ip-btctl-rule-multiplier-timeEndMin">
+            </select>
+        </div>
+        <div class="dialog-row block-indent1" id="dialog-row-timeEndMax">
+            <label for="dlg-ip-btctl-rule-timeEndMax"><i class="fa fa-step-forward" aria-hidden="true"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMax"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-timeEndMax" class="ipMain dlg-ip-btctl-rule-timeEndMax" value="" data-i18n="[placeholder]blind-control.placeholder.time"/>
+        </div>
+        <div class="dialog-row block-indent2" id="dialog-row-timeEndMax-offset">
+            <label for="dlg-ip-btctl-rule-offset-timeEndMax"><i class="fa fa-plus"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleTimeMaxOffset"></span></label>
+            <input type="text" id="dlg-ip-btctl-rule-offset-timeEndMax" class="ipMain dlg-ip-btctl-rule-offset-timeEndMax" value="" data-i18n="[placeholder]blind-control.placeholder.offset"/>
+            <select  id="dlg-ip-btctl-rule-multiplier-timeEndMax" class="ipadd dlg-ip-btctl-rule-multiplier-timeEndMax">
+            </select>
+        </div>
+        <div class="dialog-row dialog-row-timeLimits-ph is-to-show-initially pt-2" id="dialog-row-timeConstraintsPlaceholder">
             <div class="dlg-ip-btctl-rule-timecontraintctrl" id="dialog-row-timeConstraints-show">
                 <button class="dialog-element-clickable" data-i18n="blind-control.label.timeconstraintshow"></button>
             </div>
         </div>
-        <div class="dialog-row dialog-row-timeLimits is-initial-hidden" id="dialog-row-timeConstraints">
+        <div class="dialog-row dialog-row-timeLimits is-initial-hidden pt-2" id="dialog-row-timeConstraints">
             <div class="dlg-ip-btctl-rule-timecontraintctrl" id="dialog-row-timeConstraints-hide">
                 <button class="dialog-element-clickable" data-i18n="blind-control.label.timeconstrainthide"></button>
             </div>
@@ -4083,6 +4712,11 @@ this software without specific prior written permission.
             <input type="text" id="dlg-ip-btctl-rule-topic" class="ipalone" data-i18n="[placeholder]node-red:common.label.topic"/>
         </div>
         <hr class="mt-1 mb-1 pt-0 pb-0" id="dialog-hr-overwrite">
+        <div class="dialog-row pt-0" id="dialog-row-exec" data-i18n="[title]blind-control.placeholder.exec">
+            <label for="dlg-ip-btctl-rule-exec"><i class="fa fa-sort"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleExec"></span></label>
+            <select  id="dlg-ip-btctl-rule-exec" class="ipalone dlg-ip-btctl-rule-exec" >
+            </select>
+        </div>
         <div class="dialog-row pt-0 is-initial-hidden" id="dialog-row-resetOverwrite" data-i18n="[title]blind-control.placeholder.ruleResetOverwrite">
             <label for="dlg-ip-btctl-rule-resetOverwrite"><i class="fa fa-thumbs-o-down"></i> <span data-i18n="node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleOverwrite"></span></label>
             <input type="checkbox" id="dlg-ip-btctl-rule-resetOverwrite" style="width: auto;"/>
@@ -4320,6 +4954,11 @@ this software without specific prior written permission.
     .rdgtimer-rule-name-span {
         width: 30%; /* width: 120px; */
         float: left;
+    }
+    .rdgtimer-rule-exec-span {
+        margin-right: 5px;
+        float: left;
+        box-shadow: 1px 1px 1px 1px rgb(0 0 0 / 20%);
     }
     .rdgtimer-rule-description-span {
         font-size: 10px;

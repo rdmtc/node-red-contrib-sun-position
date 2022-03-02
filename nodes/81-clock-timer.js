@@ -23,8 +23,6 @@
 /********************************************
  * clock-timer:
  *********************************************/
-
-/******************************************************************************************/
 module.exports = function (RED) {
     'use strict';
     const path = require('path');
@@ -34,10 +32,6 @@ module.exports = function (RED) {
     const util = require('util');
     const clonedeep = require('lodash.clonedeep');
     const isEqual = require('lodash.isequal');
-
-    const cRuleUntil = 0;
-    const cRuleFrom = 1;
-    const cRuleDefault = -1;
 
     /******************************************************************************************/
     /**
@@ -185,9 +179,9 @@ module.exports = function (RED) {
         // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
         for (let i = 0; i <= node.rules.lastUntil; ++i) {
             const rule = node.rules.data[i];
-            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== cRuleFrom) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== ctrlLib.cRuleTime.from) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
             if (!rule.enabled) { continue; }
-            if (rule.time && rule.time.operator === cRuleFrom) { continue; }
+            if (rule.time && rule.time.operator === ctrlLib.cRuleTime.from) { continue; }
             // const res = fktCheck(rule, r => (r >= nowNr));
             const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
             if (res) {
@@ -198,13 +192,13 @@ module.exports = function (RED) {
             }
         }
 
-        if (!ruleSel || (ruleSel.time && ruleSel.time.operator === cRuleFrom) ) {
+        if (!ruleSel || (ruleSel.time && ruleSel.time.operator === ctrlLib.cRuleTime.from) ) {
             // node.debug('--------- starting second loop ' + node.rules.count);
             for (let i = (node.rules.count - 1); i >= 0; --i) {
                 const rule = node.rules.data[i];
                 // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noUntil=${rule.time.operator !== cRuleUntil} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
                 if (!rule.enabled) { continue; }
-                if (rule.time && rule.time.operator === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
+                if (rule.time && rule.time.operator === ctrlLib.cRuleTime.until) { continue; } // - From: timeOp === ctrlLib.cRuleTime.from
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
                     // node.debug(`2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
@@ -288,7 +282,7 @@ module.exports = function (RED) {
             return livingRuleData;
         }
         livingRuleData.active = false;
-        livingRuleData.id = cRuleDefault;
+        livingRuleData.id = ctrlLib.cRuleDefault;
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
         livingRuleData.payloadData = {
@@ -592,7 +586,7 @@ module.exports = function (RED) {
                     payload: msg.payload
                 };
                 if (topic) {
-                    topic = hlp.topicReplace(topic, replaceAttrs);
+                    topic = hlp.textReplace(topic, replaceAttrs, RED, msg);
                 }
 
                 if ((!node.startDelayTimeOut) &&
@@ -612,7 +606,7 @@ module.exports = function (RED) {
                         } else if (prop.type === 'ctrlObj') {
                             resultObj = timeCtrl;
                         } else if (prop.type === 'strPlaceholder') {
-                            resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
+                            resultObj = hlp.textReplace(''+prop.value, replaceAttrs, RED, msg);
                         } else {
                             resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.now);
                         }
