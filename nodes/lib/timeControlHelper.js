@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * This code is licensed under the Apache License Version 2.0.
  *
@@ -24,10 +25,44 @@
  * dateTimeHelper.js:
  *********************************************/
 'use strict';
-const path = require('path');
+/** --- Type Defs ---
+ * @typedef {import('../types/typedefs.js').runtimeRED} runtimeRED
+ * @typedef {import('../types/typedefs.js').runtimeNode} runtimeNode
+ * @typedef {import('../types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+ * @typedef {import("./dateTimeHelper.js").ITimeObject} ITimeObject
+ * @typedef {import("../10-position-config.js").IPositionConfigNode} IPositionConfigNode
+ */
+
+/**
+ * @typedef {Object} ITimeControlNodeInstance Extensions for the nodeInstance object type
+ * @property {IPositionConfigNode} positionConfig    -   tbd
+ * @property {string} addId internal used additional id
+ * @property {Object} nodeData get/set generic Data of the node
+ * @property {Object} reason    -   tbd
+ * @property {string} contextStore    -   used context store
+ * @property {Object} rules    -   tbd
+ *
+ * @property {boolean} [levelReverse]    -   indicator if the Level is in reverse order
+ * @property {Object} [sunData]    -   the sun data Object
+ * @property {Object} nowarn    -   tbd
+ *
+ * @property {Object} autoTrigger autotrigger options
+ * @property {NodeJS.Timeout} autoTriggerObj autotrigger options
+ *
+ * @property {Object} startDelayTimeOut    -   tbd
+ * @property {NodeJS.Timeout} startDelayTimeOutObj    -   tbd
+ * @property {NodeJS.Timeout} timeOutObj    -   Overwrite Reset TimeOut Object
+ *
+ * @property {function} setState function for settign the state of the node
+ * ... obviously there are more ...
+ */
+
+/**
+ * @typedef {ITimeControlNodeInstance & runtimeNode} ITimeControlNode Combine nodeInstance with additional, optional functions
+ */
 
 const util = require('util');
-const hlp = require( path.resolve( __dirname, './dateTimeHelper.js') );
+const hlp = require( './dateTimeHelper.js' );
 
 const cRuleTime = { // deprecated
     until : 0,
@@ -78,6 +113,15 @@ module.exports = {
 let RED = null;
 /******************************************************************************************/
 /**
+* Timestamp compare function
+* @callback ICompareTimeStamp
+* @param {number} timeStamp The timestamp which should be compared
+* @returns {Boolean} return true if if the timestamp is valid, otherwise false
+*/
+
+/******************************************************************************************/
+
+/**
  * Returns true if the given object is null or undefined. Otherwise, returns false.
  * @param {*} object    object to check
  * @returns {boolean}   true if the given object is null or undefined. Otherwise, returns false.
@@ -88,10 +132,11 @@ function isNullOrUndefined(object) {
 
 /**
  * evaluate temporary Data
- * @param {*} node   node Data
+ * @param {ITimeControlNode} node   node Data
  * @param {string} type  type of type input
  * @param {string} value  value of typeinput
  * @param {*} data  data to cache
+ * @param {Object} tempData  object which holding the chached data
  * @returns {*}  data which was cached
  */
 function evalTempData(node, type, value, data, tempData) {
@@ -117,7 +162,7 @@ function evalTempData(node, type, value, data, tempData) {
 /******************************************************************************************/
 /**
 * clears expire object properties
-* @param {*} node node data
+* @param {ITimeControlNode} node node data
 */
 function deleteExpireProp(node) {
     delete node.nodeData.overwrite.expires;
@@ -131,7 +176,7 @@ function deleteExpireProp(node) {
 
 /**
 * reset any existing override
-* @param {*} node node data
+* @param {ITimeControlNode} node node data
 */
 function posOverwriteReset(node) {
     node.debug(`posOverwriteReset expire=${node.nodeData.overwrite.expireTs}`);
@@ -149,7 +194,7 @@ function posOverwriteReset(node) {
 
 /**
 * setup the expiring of n override or update an existing expiring
-* @param {*} node node data
+* @param {ITimeControlNode} node node data
 * @param {ITimeObject} oNow the *current* date Object
 * @param {number} dExpire the expiring time, (if it is NaN, default time will be tried to use) if it is not used, nor a Number or less than 1 no expiring activated
 */
@@ -191,7 +236,7 @@ function setExpiringOverwrite(node, oNow, dExpire, reason) {
 
 /**
 * check if an override can be reset
-* @param {*} node node data
+* @param {ITimeControlNode} node node data
 * @param {*} msg message object
 * @param {ITimeObject} oNow the *current* date Object
 */
@@ -217,7 +262,7 @@ function checkOverrideReset(node, msg, oNow, isSignificant) {
 }
 /**
 * setting the reason for override
-* @param {*} node node data
+* @param {ITimeControlNode} node node data
 */
 function setOverwriteReason(node) {
     if (node.nodeData.overwrite.active) {
@@ -246,7 +291,7 @@ function setOverwriteReason(node) {
 /******************************************************************************************/
 /**
  * pre-checking conditions to may be able to store temp data
- * @param {*} node node data
+ * @param {ITimeControlNode} node node data
  * @param {*} msg the message object
  * @param {*} tempData the temporary storage object
  */
@@ -314,7 +359,7 @@ function prepareRules(node, msg, tempData, dNow) {
  * @param {Object} msg the message object
  * @param {Object} rule the rule data
  * @param {string} timep rule type
- * @param {number} dNow base timestamp
+ * @param {Date} dNow base timestamp
  * @return {number} timestamp of the rule
  */
 function getRuleTimeData(node, msg, rule, timep, dNow) {
@@ -374,26 +419,6 @@ function getRuleTimeData(node, msg, rule, timep, dNow) {
 
 /*************************************************************************************************************************/
 /**
-* Timestamp compare function
-* @name ICompareTimeStamp
-* @function
-* @param {number} timeStamp The timestamp which should be compared
-* @returns {Boolean} return true if if the timestamp is valid, otherwise false
-*/
-
-/**
-* support timeData
-* @name ITimeObject Data
-* @param {Date} now
-* @param {number} nowNr
-* @param {number} dayNr
-* @param {number} monthNr
-* @param {number} dateNr
-* @param {number} yearNr
-* @param {number} dayId
-*/
-
-/**
  * function to check a rule
  * @param {Object} node the node object
  * @param {Object} msg the message object
@@ -412,7 +437,7 @@ function compareRules(node, msg, rule, cmp, data) {
             }
         } catch (err) {
             node.warn(RED._('node-red-contrib-sun-position/position-config:errors.getPropertyData', err));
-            node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.debug(util.inspect(err));
             return null;
         }
     }
@@ -473,9 +498,9 @@ function compareRules(node, msg, rule, cmp, data) {
     };
 
     if (rule.time.start) {
-        getRuleTimeData(node, msg, rule, 'start', data.now, Number.MIN_VALUE);
+        getRuleTimeData(node, msg, rule, 'start', data.now);
         if (rule.time.end) {
-            getRuleTimeData(node, msg, rule, 'end', data.now, Number.MAX_VALUE);
+            getRuleTimeData(node, msg, rule, 'end', data.now);
             if (rule.timeData.start.ts > rule.timeData.end.ts) {
                 if (data.dayId === rule.timeData.start.dayId &&
                     rule.timeData.start.ts <= data.nowNr) {
@@ -495,7 +520,7 @@ function compareRules(node, msg, rule, cmp, data) {
             return null;
         }
     } else if (rule.time.end) {
-        getRuleTimeData(node, msg, rule, 'end', data.now, Number.MAX_VALUE);
+        getRuleTimeData(node, msg, rule, 'end', data.now);
         if (data.dayId !== rule.timeData.end.dayId) {
             return null;
         }
@@ -518,7 +543,7 @@ function compareRules(node, msg, rule, cmp, data) {
  */
 function checkRules(node, msg, oNow, tempData) {
     // node.debug('checkRules --------------------');
-    prepareRules(node, msg, tempData, oNow.dNow);
+    prepareRules(node, msg, tempData, oNow.now);
     // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
     const result = {
         ruleindex : -1,
@@ -578,18 +603,14 @@ function checkRules(node, msg, oNow, tempData) {
 /*************************************************************************************************************************/
 /**
  * check if a level has a valid value
- * @param {*} node the node data
+ * @param {ITimeControlNode} node the node data
  * @param {number} level the level to check
  * @returns {boolean} true if the level is valid, otherwise false
  */
 function validPosition(node, level, allowRound) {
     // node.debug('validPosition level='+level);
-    if (level === '' || level === null || typeof level === 'undefined') {
-        node.warn(`Position is empty!`);
-        return false;
-    }
-    if (isNaN(level)) {
-        node.warn(`Position: "${level}" is NaN!`);
+    if (typeof level !== 'number' || level === null || typeof level === 'undefined' || isNaN(level)) {
+        node.warn(`Position: "${String(level)}" is empty or not a valid number!`);
         return false;
     }
 

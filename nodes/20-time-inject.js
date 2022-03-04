@@ -24,24 +24,125 @@
  * time-inject:
  *********************************************/
 'use strict';
-module.exports = function (RED) {
+/** --- Type Defs ---
+ * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
+ * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
+ * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+ * @typedef {import("./lib/dateTimeHelper.js").ITimeObject} ITimeObject
+ * @typedef {import("./lib/dateTimeHelper.js").ILimitationsObj} ILimitationsObj
+ * @typedef {import("./10-position-config.js").ITypedValue} ITypedValue
+ * @typedef {import("./10-position-config.js").IValuePropertyType} IValuePropertyType
+ * @typedef {import("./10-position-config.js").ITimePropertyType} ITimePropertyType
+ * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+ * @typedef {import("./10-position-config.js").IOffsetData} IOffsetData
+ */
+
+/**
+ * @typedef {Object} ITIPropertyTypeInt
+ * @property {string} outType - valid days
+ * @property {*} outValue - valid days
+ * @property {string} outType - valid days
+ * @property {string} [expr] - optional prepared Jsonata expression
+ *
+ * @typedef {ILimitationsObj & ITypedValue & IOffsetData & ITIPropertyTypeInt} ITIPropertyType
+ */
+
+/**
+ * @typedef {Object} ITimeInjectNodeInstance Extensions for the nodeInstance object type
+ * @property {IPositionConfigNode} positionConfig    -   tbd
+ * @property {string} addId internal used additional id
+ *
+ * @property {number} injType type of the inject node
+ * @property {number} intervalCount     -   count of the interval
+ * @property {string} intervalCountType     -   ??
+ * @property {number} intervalCountMultiplier     -   ??
+ * @property {Date} intervalStart     -   ??
+ * @property {number} intervalAmount     -   ??
+ * @property {number} intervalCountCurrent     -   ??
+ * @property {number} intervalCountMax     -   ??
+ * @property {string} intervalText     -   the text of the interval
+ *
+ * @property {ITimePropertyType} timeStartData     -   ??
+ * @property {IValuePropertyType} property     -   ??
+ * @property {ITypedValue} propertyThreshold     -   ??
+ * @property {string} propertyOperator     -   ??
+ * @property {ITimePropertyType} timeStartAltData     -   ??
+ * @property {ITimePropertyType} timeEndData     -   ??
+ * @property {*} cronJobObj     -   ??
+ * @property {string} cronExpr     -   ??
+ *
+ * @property {Array.<ITIPropertyType>} props     -   output data
+ *
+ * @property {number} recalcTime     -   ??
+ *
+ * @property {NodeJS.Timeout} timeOutStartObj     -   ??
+ * @property {NodeJS.Timeout} timeOutEndObj     -   ??
+ * @property {NodeJS.Timer} intervalObj     -   ??
+ * @property {NodeJS.Timeout} onceTimeOutObj     -   ??
+ *
+ * @property {number} intervalTime     -   ??
+ * @property {Date} nextStartTime     -   ??
+ * @property {Date} nextStartTimeAlt     -   ??
+ * @property {Date} nextEndTime     -   ??
+ * @property {number} onceDelay     -   ??
+ * @property {Date} timedatestart     -   ??
+ * @property {Date} timedateend     -   ??
+ * @property {boolean} isAltAvailable     -   ??
+ * @property {boolean} isAltFirst     -   ??
+ *
+ *
+ * @property {number} cacheYear     -   ??
+ * @property {Date} cacheStart     -   ??
+ * @property {Date} cacheEnd     -   ??
+ *
+ * @property {function} getTimeLimitation           - get the limitation for time
+ * @property {function} initializeStartTimer        - initializes the start timer
+ * @property {function} initialize                  - initializes the node itself
+ * @property {IGetTimeAsMillisecond} getMillisecEnd - get the end time in millisecond
+ * @property {function} doCreateStartTimeout        - creates the start timeout
+ * @property {function} doCreateEndTimeout          - creates the end timeout
+ * @property {function} doCreateCRONSetup           - creates the CRON interval
+ * @property {function} doRecalcStartTimeOut        - Recalculate the Start timeout
+ * @property {function} doStartInterval             - start an Intervall
+ * @property {function} getIntervalText             - creates the text for an interval
+ * @property {function} createNextInterval          - Recalculate the Interval
+ * @property {function} prepOutMsg                  - Prepares a message object for sending
+ * @property {function} getIntervalTime             - get and validate a given interval
+ * @property {function} doSetStatus                 - get and validate a given interval
+ * ... obviously there are more ...
+ */
+
+/**
+ * Description of the function
+ * @typedef {function} IGetTimeAsMillisecond
+ * @param {ITIPropertyType} node the node Data
+ * @return {number} the time in millisecond
+*/
+
+/**
+ * @typedef {ITimeInjectNodeInstance & runtimeNode} ITimeInjectNode Combine nodeInstance with additional, optional functions
+ */
+/******************************************************************************************/
+/** Export the function that defines the node
+ * @type {runtimeRED} */
+module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
 
     const util = require('util');
-    const path = require('path');
     const {scheduleTask} = require('cronosjs');
 
-    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+    const hlp = require('./lib/dateTimeHelper.js');
 
+    /******************************************************************************************/
     /**
-     * timeInjectNode
-     * @param {*} config - configuration
+     * standard Node-Red Node handler for the timeInjectNode
+     * @param {*} config the Node-Red Configuration property of the Node
      */
     function timeInjectNode(config) {
         /**
          * get the output properies
          * @param {object} props - the property array
-         * @returns {object} the nw property object
+         * @returns {Array.<ITIPropertyType>} the nw property object
          */
         function prepareProps(node, props) {
             // node.debug('prepareProps ' + util.inspect(props, { colors: true, compact: 10, breakLength: Infinity }));
@@ -95,8 +196,14 @@ module.exports = function (RED) {
             cron : 6
         };
         const intervalMax = 24*60*60*1000 * 3; // 3 Tage
+
+        RED.nodes.createNode(this, config);
+
+        /** Copy 'this' object in case we need it in context of callbacks of other functions.
+         * @type {ITimeInjectNode}
+         */
+        // @ts-ignore
         const node = this;
-        RED.nodes.createNode(node, config);
         // Retrieve the config node
         node.positionConfig = RED.nodes.getNode(config.positionConfig);
         if (!node.positionConfig) {
@@ -162,6 +269,7 @@ module.exports = function (RED) {
             };
 
             if (!node.timeStartData.offsetType) {
+                // @ts-ignore
                 node.timeStartData.offsetType = ((node.timeStartData.offset === 0) ? 'none' : 'num');
             }
             if (node.timeStartData.days === '') {
@@ -217,6 +325,7 @@ module.exports = function (RED) {
                     onlyEvenWeeks: hlp.isTrue(config.timeAltOnlyEvenWeeks),
                     onlyOddWeeks : hlp.isTrue(config.timeAltOnlyOddWeeks)
                 };
+                // @ts-ignore
                 if (!node.timeStartAltData.offsetType) { node.timeStartAltData.offsetType = ((node.timeStartAltData.offset === 0) ? 'none' : 'num'); }
 
                 if (node.timeStartAltData.days === '') {
@@ -252,6 +361,7 @@ module.exports = function (RED) {
                 onlyOddWeeks : hlp.isTrue(config.timeOnlyOddWeeks)
             };
             if (!node.timeEndData.offsetType) {
+                // @ts-ignore
                 node.timeEndData.offsetType = ((node.timeEndData.offset === 0) ? 'none' : 'num');
             }
             if (node.timeEndData.days === '') {
@@ -269,7 +379,7 @@ module.exports = function (RED) {
                 node.timeEndData.onlyOddWeeks = false;
             }
         } // timeEndData
-        node.cronjob = null;
+        node.cronJobObj = null;
         if (node.injType === tInj.cron) {
             node.cronExpr = config.cron || '';
         } // cron
@@ -436,6 +546,7 @@ module.exports = function (RED) {
 
         /**
          * get the limitation for time
+         * @param {Date} dNow base Date
          */
         node.getTimeLimitation = dNow => {
             const result = {
@@ -483,7 +594,10 @@ module.exports = function (RED) {
             return result;
         };
 
-        node.initializeStartTimer = node => {
+        /**
+         * initializes the start timer
+         */
+        node.initializeStartTimer = () => {
             // node.debug(`initializeStartTimer`);
             if (!node.timeStartData) {
                 // node.debug('initializeStartTimer - no start time data');
@@ -540,15 +654,19 @@ module.exports = function (RED) {
                 node.getIntervalTime();
                 node.doStartInterval(); // starte Interval
             } else if (node.injType === tInj.intervalAmount) {
-                node.IntervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
-                node.intervalTime = Math.floor((millisecEnd - millisecStart) / node.IntervalCountMax);
-                node.IntervalCountCurrent = 0;
+                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+                node.intervalTime = Math.floor((millisecEnd - millisecStart) / node.intervalCountMax);
+                node.intervalCountCurrent = 0;
                 node.doStartInterval(); // starte Interval
             }
             return true;
         };
 
-        node.initialize = (node, doEmit) => {
+        /**
+         * get the end time in millisecond
+         * @param {boolean} doEmit if true directly send Data
+         */
+        node.initialize = doEmit => {
             switch (node.injType) {
                 case tInj.interval:
                     if (doEmit === true) {
@@ -567,7 +685,7 @@ module.exports = function (RED) {
                             _inject_type: 'once/startup'
                         }); // will create timeout
                     } else {
-                        node.doCreateStartTimeout(node, 'initial');
+                        node.doCreateStartTimeout('initial');
                     }
                     break;
                 case tInj.intervalBtwStartEnd:
@@ -578,8 +696,8 @@ module.exports = function (RED) {
                             _inject_type: 'once/startup'
                         }); // will create timeout
                     }
-                    if (!node.initializeStartTimer(node)) {
-                        node.doCreateStartTimeout(node, 'initial');
+                    if (!node.initializeStartTimer()) {
+                        node.doCreateStartTimeout('initial');
                     }
                     break;
                 case tInj.cron:
@@ -589,11 +707,11 @@ module.exports = function (RED) {
                             _inject_type: 'once/startup'
                         }); // will create timeout
                     }
-                    node.doCreateCRONSetup(node);
+                    node.doCreateCRONSetup();
                     break;
                 default:
                     // node.debug('initialize - default');
-                    node.doSetStatus(node, 'green');
+                    node.doSetStatus('green');
                     if (doEmit === true) {
                         node.emit('input', {
                             _inject_type: 'once/startup'
@@ -604,9 +722,9 @@ module.exports = function (RED) {
 
         /**
          * get the end time in millisecond
-         * @param {*} node the node Data
+         * @return {number} the time in millisecond
          */
-        node.getMillisecEnd = node => {
+        node.getMillisecEnd = () => {
             if (!node.timeEndData) {
                 return null;
             }
@@ -634,11 +752,11 @@ module.exports = function (RED) {
 
         /**
          * creates the end timeout
-         * @param {*} node - the node representation
+         * @param {number} [millisecEnd] - the end timestamp
          * @returns {object} state or error
          */
-        node.doCreateEndTimeout = (node, millisecEnd) => {
-            millisecEnd = millisecEnd || node.getMillisecEnd(node);
+        node.doCreateEndTimeout = millisecEnd => {
+            millisecEnd = millisecEnd || node.getMillisecEnd();
             if (millisecEnd === null) {
                 return;
             }
@@ -646,7 +764,7 @@ module.exports = function (RED) {
             if (millisecEnd > 345600000) {
                 millisecEnd = Math.min((millisecEnd - 129600000), 2147483646);
                 node.timeOutEndObj = setTimeout(() => {
-                    node.doCreateEndTimeout(node);
+                    node.doCreateEndTimeout();
                 }, millisecEnd); // 1,5 days before
                 return;
             }
@@ -654,7 +772,7 @@ module.exports = function (RED) {
                 node.timeOutEndObj = null;
                 clearInterval(node.intervalObj);
                 node.intervalObj = null;
-                node.doCreateStartTimeout(node, 'timeOutEnd');
+                node.doCreateStartTimeout('timeOutEnd');
             }, millisecEnd);
         }; // doCreateEndTimeout
 
@@ -664,10 +782,10 @@ module.exports = function (RED) {
         node.doRecalcStartTimeOut = () => {
             try {
                 node.debug('performing a recalc of the next inject time');
-                node.doCreateStartTimeout(node, 'timeOutRecalc');
+                node.doCreateStartTimeout('timeOutRecalc');
             } catch (err) {
                 node.error(err.message);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 node.status({
                     fill: 'red',
                     shape: 'dot',
@@ -676,6 +794,12 @@ module.exports = function (RED) {
             }
         };
 
+        /**
+         * creates the text for an interval
+         * @param {number} mstime - time stamp
+         * @param {number} val - value
+         * @returns {string} the text of the interval
+         */
         node.getIntervalText = (mstime, val) => {
             if (mstime === 604800000) {
                 if (val === 1) {
@@ -754,6 +878,7 @@ module.exports = function (RED) {
 
         /**
          * Prepares a message object for sending
+         * @param {*} msg - the message object
          */
         node.prepOutMsg = msg => {
             // node.debug(`prepOutMsg node.msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
@@ -804,35 +929,35 @@ module.exports = function (RED) {
          */
         node.doStartInterval = () => {
             node.timeOutStartObj = null;
-            node.doCreateEndTimeout(node);
+            node.doCreateEndTimeout();
             clearInterval(node.intervalObj);
-            node.doSetStatus(node, 'green');
+            node.doSetStatus('green');
             node.send(node.prepOutMsg({ _inject_type: 'interval-time-start' }));
             node.intervalObj = setInterval(() => {
-                node.IntervalCountCurrent++;
+                node.intervalCountCurrent++;
                 if (node.injType !== node.intervalAmount) {
                     node.send(node.prepOutMsg({ _inject_type: 'interval-time' }));
-                } else if (node.IntervalCountCurrent < node.IntervalCountMax) {
+                } else if (node.intervalCountCurrent < node.intervalCountMax) {
                     node.send(node.prepOutMsg({ _inject_type: 'interval-amount' }));
                 }
             }, node.intervalTime);
         };
 
+        /** creates the CRON interval */
         node.doCreateCRONSetup = function () {
-            node.cronjob = scheduleTask(node.cronExpr,() => {
+            node.cronJobObj = scheduleTask(node.cronExpr, () => {
                 node.emit('input', { _inject_type: 'cron' });
-                node.doSetStatus(node);
-            });
-            node.doSetStatus(node);
+                node.doSetStatus();
+            }, {});
+            node.doSetStatus();
         };
 
         /**
          * creates the timeout
-         * @param {*} node - the node representation
-         * @param {boolean} [_onInit] - _true_ if is in initialisation
+         * @param {string} [reason] - name of the reason
          * @returns {object} state or error
          */
-        node.doCreateStartTimeout = (node, reason) => {
+        node.doCreateStartTimeout = reason => {
             // node.debug(`doCreateStartTimeout ${reason} node.timeStartData=${util.inspect(node.timeStartData, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (node.injType === tInj.none ||
                 node.injType === tInj.interval) {
@@ -849,20 +974,20 @@ module.exports = function (RED) {
             delete node.intervalTime;
 
             if (node.injType === tInj.intervalBtwStartEnd) {
-                node.IntervalCountMax = 0;
+                node.intervalCountMax = 0;
                 node.getIntervalTime();
             }
 
             if (node.injType === tInj.intervalAmount) {
-                node.IntervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
                 delete node.intervalTime;
             }
 
             let fill = 'yellow';
             let shape = 'dot';
 
-            node.timeStartData.isAltAvailable = false;
-            node.timeStartData.isAltFirst = false;
+            node.isAltAvailable = false;
+            node.isAltFirst = false;
             let isFixedTime = true;
 
             node.timeStartData.now = new Date();
@@ -895,7 +1020,7 @@ module.exports = function (RED) {
                     if (!hlp.isValidDate(node.nextStartTimeAlt)) {
                         hlp.handleError(this, 'Invalid time format of alternate time "' + node.nextStartTimeAlt + '"', undefined, 'internal error! (' + reason +')');
                     } else {
-                        node.timeStartData.isAltAvailable = true;
+                        node.isAltAvailable = true;
                     }
                 }
             } else {
@@ -915,12 +1040,12 @@ module.exports = function (RED) {
                 }
 
                 let millisec = hlp.getTimeOut(node.timeStartData.now, node.nextStartTime);
-                if (node.timeStartData.isAltAvailable) {
+                if (node.isAltAvailable) {
                     shape = 'ring';
                     const millisecAlt = hlp.getTimeOut(node.timeStartData.now, node.nextStartTimeAlt);
                     if (millisecAlt < millisec) {
                         millisec = millisecAlt;
-                        node.timeStartData.isAltFirst = true;
+                        node.isAltFirst = true;
                     }
                 }
 
@@ -939,35 +1064,37 @@ module.exports = function (RED) {
                     }, millisec); // 1,5 days before
                     fill = 'blue';
                 } else if (node.injType === tInj.intervalBtwStartEnd) {
-                    // node.debug('intervalTime - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
+                    // node.debug('intervalTime - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.isAltAvailable + ' isAltFirst=' + node.isAltFirst + ')');
+                    // @ts-ignore
                     node.timeOutStartObj = setTimeout(node.doStartInterval, millisec);
                     fill = 'grey';
                 } else if (node.injType === tInj.intervalAmount) {
-                    // node.debug('intervalAmount - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
-                    const millisecEnd = node.getMillisecEnd(node);
-                    node.intervalTime = Math.floor((millisecEnd - millisec) / node.IntervalCountMax);
-                    node.IntervalCountCurrent = 0;
+                    // node.debug('intervalAmount - timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.isAltAvailable + ' isAltFirst=' + node.isAltFirst + ')');
+                    const millisecEnd = node.getMillisecEnd();
+                    node.intervalTime = Math.floor((millisecEnd - millisec) / node.intervalCountMax);
+                    node.intervalCountCurrent = 0;
+                    // @ts-ignore
                     node.timeOutStartObj = setTimeout(node.doStartInterval, millisec);
                     fill = 'grey';
                 } else { // node.injType === tInj.timer
-                    // node.debug('timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.timeStartData.isAltAvailable + ' isAltFirst=' + node.timeStartData.isAltFirst + ')');
+                    // node.debug('timeout ' + node.nextStartTime + ' is in ' + millisec + 'ms (isAlt=' + node.isAltAvailable + ' isAltFirst=' + node.isAltFirst + ')');
                     node.timeOutStartObj = setTimeout(() => {
-                        // node.debug(`timeOutStartObj isAlt=${isAlt} isAltFirst=${node.timeStartData.isAltFirst}`);
+                        // node.debug(`timeOutStartObj isAlt=${isAlt} isAltFirst=${node.isAltFirst}`);
 
                         const msg = {
                             _inject_type: 'time'
                         };
                         node.timeOutStartObj = null;
                         let useAlternateTime = false;
-                        if (node.timeStartData.isAltAvailable) {
+                        if (node.isAltAvailable) {
                             let needsRecalc = false;
                             try {
                                 useAlternateTime = node.positionConfig.comparePropValue(node, msg, node.property, node.propertyOperator, node.propertyThreshold);
-                                needsRecalc = (node.timeStartData.isAltFirst && !useAlternateTime) || (!node.timeStartData.isAltFirst && useAlternateTime);
-                                // node.debug(`timeOutStartObj isAltAvailable=${node.timeStartData.isAltAvailable} isAltFirst=${node.timeStartData.isAltFirst} needsRecalc=${needsRecalc}`);
+                                needsRecalc = (node.isAltFirst && !useAlternateTime) || (!node.isAltFirst && useAlternateTime);
+                                // node.debug(`timeOutStartObj isAltAvailable=${node.isAltAvailable} isAltFirst=${node.isAltFirst} needsRecalc=${needsRecalc}`);
 
                             } catch (err) {
-                                needsRecalc = node.timeStartData.isAltFirst;
+                                needsRecalc = node.isAltFirst;
                                 hlp.handleError(node, RED._('time-inject.errors.invalid-property-type', node.property),  err);
                             }
 
@@ -986,7 +1113,7 @@ module.exports = function (RED) {
                     if (!isFixedTime && !node.intervalObj) {
                         node.intervalObj = setInterval(() => {
                             node.debug('retriggered');
-                            node.doCreateStartTimeout(node, 'retriggered');
+                            node.doCreateStartTimeout('retriggered');
                         }, node.recalcTime);
                     } else if (isFixedTime && node.intervalObj) {
                         clearInterval(node.intervalObj);
@@ -994,12 +1121,16 @@ module.exports = function (RED) {
                     }
                 }
             }
-            node.doSetStatus(node, fill, shape);
+            node.doSetStatus(fill, shape);
         };
 
-        node.doSetStatus = (node, fill, shape) => {
-            if (node.cronjob) {
-                const d = node.cronjob.nextRun;
+        /** sets the node status
+         * @param {string} [fill] - fill of the state icon
+         * @param {string} [shape] - sape of the state icon
+         */
+        node.doSetStatus = (fill, shape) => {
+            if (node.cronJobObj) {
+                const d = node.cronJobObj.nextRun;
                 if (d) {
                     node.status({
                         fill: fill || 'green',
@@ -1014,7 +1145,7 @@ module.exports = function (RED) {
                     });
                 }
             } else if (node.nextStartTimeAlt && node.timeOutStartObj) {
-                if (node.timeStartData.isAltFirst) {
+                if (node.isAltFirst) {
                     node.status({
                         fill,
                         shape,
@@ -1070,7 +1201,7 @@ module.exports = function (RED) {
                     throw new Error('Configuration missing or wrong!');
                 }
                 if (node.injType === tInj.timer) {
-                    node.doCreateStartTimeout(node, 'on Input');
+                    node.doCreateStartTimeout('on Input');
                 }
                 send(node.prepOutMsg(msg));
                 if (msg.payload && msg.payload.error) {
@@ -1081,7 +1212,7 @@ module.exports = function (RED) {
                 return null;
             } catch (err) {
                 node.log(err.message);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -1099,12 +1230,12 @@ module.exports = function (RED) {
                     shape: 'ring',
                     text: RED._('time-inject.message.onceDelay', { seconds: (node.onceDelay)})
                 });
-                node.onceTimeout = setTimeout(() => {
+                node.onceTimeOutObj = setTimeout(() => {
                     try {
-                        node.initialize(node, true);
+                        node.initialize(true);
                     } catch (err) {
                         node.error(err.message);
-                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                        node.log(util.inspect(err));
                         node.status({
                             fill: 'red',
                             shape: 'ring',
@@ -1116,12 +1247,12 @@ module.exports = function (RED) {
             }
             node.status({});
 
-            node.onceTimeout = setTimeout(() => {
+            node.onceTimeOutObj = setTimeout(() => {
                 try {
-                    node.initialize(node, false);
+                    node.initialize(false);
                 } catch (err) {
                     node.error(err.message);
-                    node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                    node.log(util.inspect(err));
                     node.status({
                         fill: 'red',
                         shape: 'ring',
@@ -1131,7 +1262,7 @@ module.exports = function (RED) {
             }, 100 + Math.floor(Math.random() * 500));
         } catch (err) {
             node.error(err.message);
-            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err));
             node.status({
                 fill: 'red',
                 shape: 'ring',
@@ -1143,32 +1274,31 @@ module.exports = function (RED) {
     RED.nodes.registerType('time-inject', timeInjectNode);
 
     timeInjectNode.prototype.close = function () {
-        if (this.onceTimeout) {
-            clearTimeout(this.onceTimeout);
-            this.onceTimeout = null;
-        }
-        if (this.onceTimeout2) {
-            clearTimeout(this.onceTimeout2);
-            this.onceTimeout2 = null;
+        if (this.onceTimeOutObj) {
+            clearTimeout(this.onceTimeOutObj);
+            this.onceTimeOutObj = null;
         }
         if (this.timeOutStartObj) {
             clearTimeout(this.timeOutStartObj);
             this.timeOutStartObj = null;
+            // @ts-ignore
             if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
         }
         if (this.intervalObj) {
             clearInterval(this.intervalObj);
             this.intervalObj = null;
+            // @ts-ignore
             if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
         }
         if (this.timeOutEndObj) {
             clearTimeout(this.timeOutEndObj);
             this.timeOutEndObj = null;
+            // @ts-ignore
             if (RED.settings.verbose) { this.log(RED._('inject.stopped')); }
         }
-        if (this.cronjob !== null) {
-            this.cronjob.stop();
-            delete this.cronjob;
+        if (this.cronJobObj !== null) {
+            this.cronJobObj.stop();
+            delete this.cronJobObj;
         }
     };
 

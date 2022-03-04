@@ -23,42 +23,83 @@
 /********************************************
  * sun-position:
  *********************************************/
-module.exports = function (RED) {
-    'use strict';
-    const path = require('path');
+'use strict';
+/** --- Type Defs ---
+  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
+  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
+  * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+  * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+  */
 
-    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+/**
+ * @typedef {Object} ISunPositionNodeInstance Extensions for the nodeInstance object type
+ * @property {IPositionConfigNode} positionConfig    -   tbd
+ *
+ * @property {string} topic output topic
+ * @property {Array} rules output topic
+ *
+ * @property {*} start type of start value
+ * @property {string} startType start value
+ * @property {*} startOffset start offset value
+ * @property {string} startOffsetType type of the start offset value
+ * @property {number} startOffsetMultiplier start offset multipier
+ *
+ * @property {*} end type of end value
+ * @property {string} endType end value
+ * @property {*} endOffset end offset value
+ * @property {string} endOffsetType type of the end offset value
+ * @property {number} endOffsetMultiplier end offset multipier
+ *
+ * @property {*} azimuthPos end offset multipier
+ */
+
+
+/**
+ * @typedef {ISunPositionNodeInstance & runtimeNode} ISunPositionNode Combine nodeInstance with additional, optional functions
+ */
+/******************************************************************************************/
+/** Export the function that defines the node
+ * @type {runtimeRED} */
+module.exports = function (/** @type {runtimeRED} */ RED) {
+    'use strict';
+    const hlp = require('./lib/dateTimeHelper.js');
     const util = require('util');
 
+    /******************************************************************************************/
     /**
-     * sunPositionNode
-     * @param {*} config - configuration
+     * standard Node-Red Node handler for the sunPositionNode
+     * @param {*} config the Node-Red Configuration property of the Node
      */
     function sunPositionNode(config) {
         RED.nodes.createNode(this, config);
-        // Retrieve the config node
-        this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        this.topic = config.topic || '';
-        this.rules = config.rules || [];
-        this.azimuthPos = {};
-        this.start = config.start;
-        this.startType = config.startType || 'none';
-        this.startOffset = config.startOffset || 0;
-        this.startOffsetType = config.startOffsetType || 'none';
-        this.startOffsetMultiplier = config.startOffsetMultiplier || 60;
-        this.end = config.end;
-        this.endType = config.endType || 'none';
-        this.endOffset = config.endOffset || 0;
-        this.endOffsetType = config.endOffsetType || 'none';
-        this.endOffsetMultiplier = config.endOffsetMultiplier || 60;
+        /** Copy 'this' object in case we need it in context of callbacks of other functions.
+         * @type {ISunPositionNode}
+         */
+        // @ts-ignore
         const node = this;
-        if (!this.positionConfig) {
+        // Retrieve the config node
+        node.positionConfig = RED.nodes.getNode(config.positionConfig);
+        node.topic = config.topic || '';
+        node.rules = config.rules || [];
+        node.azimuthPos = {};
+        node.start = config.start;
+        node.startType = config.startType || 'none';
+        node.startOffset = config.startOffset || 0;
+        node.startOffsetType = config.startOffsetType || 'none';
+        node.startOffsetMultiplier = config.startOffsetMultiplier || 60;
+        node.end = config.end;
+        node.endType = config.endType || 'none';
+        node.endOffset = config.endOffset || 0;
+        node.endOffsetType = config.endOffsetType || 'none';
+        node.endOffsetMultiplier = config.endOffsetMultiplier || 60;
+
+        if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
         }
 
-        this.on('input', function (msg, send, done) {
+        node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
@@ -67,19 +108,19 @@ module.exports = function (RED) {
                 let errorStatus = '';
                 const dNow = hlp.getNowTimeStamp(this, msg);
 
-                if (!this.positionConfig) {
+                if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
                     node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     return null;
                 }
-                const ports = new Array(this.rules.length);
+                const ports = new Array(node.rules.length);
 
                 ports[0] = RED.util.cloneMessage(msg);
-                ports[0].payload = this.positionConfig.getSunCalc(dNow, true, false, msg.latitude || msg.lat,  msg.longitude || msg.lon);
-                ports[0].topic = this.topic;
+                ports[0].payload = node.positionConfig.getSunCalc(dNow, true, false, msg.latitude || msg.lat,  msg.longitude || msg.lon);
+                ports[0].topic = node.topic;
                 if (!ports[0].payload.azimuth) {
-                    // this.error('Azimuth could not calculated!');
-                    send(ports); // this.send(ports);
+                    // node.error('Azimuth could not calculated!');
+                    send(ports); // node.send(ports);
                     done('Azimuth could not calculated!', msg);
                     return null;
                 }
@@ -137,8 +178,8 @@ module.exports = function (RED) {
                     ports[0].payload.sunInSky = nowMillis > ports[0].payload.startTime && nowMillis < ports[0].payload.endTime;
                 }
 
-                for (let i = 0; i < this.rules.length; i += 1) {
-                    const rule = this.rules[i];
+                for (let i = 0; i < node.rules.length; i += 1) {
+                    const rule = node.rules[i];
                     const low = getNumProp(node, msg, rule.valueLowType, rule.valueLow);
                     const high = getNumProp(node, msg, rule.valueHighType, rule.valueHigh);
                     const chk = hlp.checkLimits(ports[0].payload.azimuth, low, high);
@@ -155,7 +196,7 @@ module.exports = function (RED) {
                 node.azimuthPos = ports[0].payload.pos;
 
                 if (errorStatus) {
-                    this.status({
+                    node.status({
                         fill:   'red',
                         shape:  'dot',
                         text:   errorStatus
@@ -186,18 +227,18 @@ module.exports = function (RED) {
                         text = azimuth + '/' + altitude + ' - ' + node.positionConfig.toDateTimeString(ports[0].payload.lastUpdate);
                         fill = 'grey';
                     }
-                    this.status({
+                    node.status({
                         fill,
                         shape:  'dot',
                         text
                     });
                 }
-                send(ports); // this.send(ports);
+                send(ports); // node.send(ports);
                 done();
                 return null;
             } catch (err) {
                 node.log(err.message);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 node.status({
                     fill: 'red',
                     shape: 'ring',

@@ -24,13 +24,40 @@
  * time-span:
  *********************************************/
 'use strict';
+/** --- Type Defs ---
+  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
+  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
+  * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+  * @typedef {import("./10-position-config.js").ITimePropertyType} ITimePropertyType
+  * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+  */
 
-module.exports = function (RED) {
+
+/**
+  * @typedef {Object} ITimeSpanNodeInstance Extensions for the nodeInstance object type
+  * @property {IPositionConfigNode} positionConfig    -   tbd
+  *
+ * @property {ITimePropertyType} operand1      -   operand1 data
+ * @property {ITimePropertyType} operand2      -   operand2 data
+ * @property {number} operand                  -   operand
+ * operand
+ * @property {Array} results                -   output data
+ * @property {Array} rules                  -   input data
+ * @property {boolean|string} checkall      -   define if check all rules
+ *
+ */
+
+/**
+  * @typedef {ITimeSpanNodeInstance & runtimeNode} ITimeSpanNode Combine nodeInstance with additional, optional functions
+  */
+/******************************************************************************************/
+/** Export the function that defines the node
+  * @type {runtimeRED} */
+module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
 
     const util = require('util');
-    const path = require('path');
-    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+    const hlp = require('./lib/dateTimeHelper.js');
 
     const perSecond = 1000;
     const perMinute = 60000;
@@ -173,6 +200,7 @@ module.exports = function (RED) {
             tt: H < 12 ? 'am' : 'pm',
             T: H < 12 ? 'A' : 'P',
             TT: H < 12 ? 'AM' : 'PM',
+            // @ts-ignore
             S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10]
         };
 
@@ -185,13 +213,14 @@ module.exports = function (RED) {
      * get a formated timespan
      * @param {Date} date1 - Date 1
      * @param {Date} date2 - Date 2
-     * @param {string} format - the out format
-     * @returns {string} the formatet timespan
+     * @param {number|string} format - the out format
+     * @returns {number|object} the formatet timespan
      */
     function getFormattedTimeSpanOut(node, date1, date2, format) {
         const timeSpan = date1.getTime() - date2.getTime();
 
         format = format || 0;
+        // @ts-ignore
         if (isNaN(format)) {
             return formatTS(date1, date2, String(format));
         }
@@ -279,26 +308,32 @@ module.exports = function (RED) {
     }
 
     /**
-     * timeSpanNode
-     * @param {*} config - configuration
+     * standard Node-Red Node handler for the timeSpanNode
+     * @param {*} config the Node-Red Configuration property of the Node
      */
     function timeSpanNode(config) {
         RED.nodes.createNode(this, config);
+        /** Copy 'this' object in case we need it in context of callbacks of other functions.
+         * @type {ITimeSpanNode}
+         */
+        // @ts-ignore
+        const node = this;
+
         // Retrieve the config node
-        this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        if (!this.positionConfig) {
+        node.positionConfig = RED.nodes.getNode(config.positionConfig);
+        if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
             return;
         }
-        if (this.positionConfig.checkNode(
+        if (node.positionConfig.checkNode(
             error => {
                 node.error(error);
                 node.status({fill: 'red', shape: 'dot', text: error });
             }, false)) {
             return;
         }
-        this.operand1 = {
+        node.operand1 = {
             type: config.operand1Type,
             value: config.operand1,
             format: config.operand1Format,
@@ -307,7 +342,7 @@ module.exports = function (RED) {
             multiplier: config.operand1OffsetMultiplier
         };
 
-        this.operand2 = {
+        node.operand2 = {
             type: config.operand2Type,
             value: config.operand2,
             format: config.operand2Format,
@@ -348,7 +383,7 @@ module.exports = function (RED) {
             delete config.result1OffsetMultiplier;
         }
 
-        this.results = [];
+        node.results = [];
         config.results.forEach(prop => {
             const propNew = {
                 outType         : prop.pt,
@@ -369,22 +404,21 @@ module.exports = function (RED) {
                 onlyOddWeeks    : prop.onlyOddWeeks
             };
 
-            if (this.positionConfig && propNew.type === 'jsonata') {
+            if (node.positionConfig && propNew.type === 'jsonata') {
                 try {
-                    propNew.expr = this.positionConfig.getJSONataExpression(this, propNew.value);
+                    propNew.expr = node.positionConfig.getJSONataExpression(this, propNew.value);
                 } catch (err) {
-                    this.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error: err.message }));
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error: err.message }));
                     propNew.expr = null;
                 }
             }
-            this.results.push(propNew);
+            node.results.push(propNew);
         });
-        this.operand = config.operand;
-        this.rules = config.rules;
-        this.checkall = config.checkall;
-        const node = this;
+        node.operand = config.operand;
+        node.rules = config.rules;
+        node.checkall = config.checkall;
 
-        this.on('input', (msg, send, done) => {
+        node.on('input', (msg, send, done) => {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
@@ -438,9 +472,9 @@ module.exports = function (RED) {
                     }
 
                     if (resultObj === null || (typeof resultObj === 'undefined')) {
-                        this.error('Could not evaluate ' + prop.type + '.' + prop.value + '. - Maybe settings outdated (open and save again)!');
+                        node.error('Could not evaluate ' + prop.type + '.' + prop.value + '. - Maybe settings outdated (open and save again)!');
                     } else if (resultObj.error) {
-                        this.error('error on getting result: "' + resultObj.error + '"');
+                        node.error('error on getting result: "' + resultObj.error + '"');
                     } else {
                         node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
                     }
@@ -491,7 +525,7 @@ module.exports = function (RED) {
                         }
                     } catch (err) {
                         node.error(err.message);
-                        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                        node.log(util.inspect(err));
                         node.status({
                             fill: 'red',
                             shape: 'ring',
@@ -515,7 +549,7 @@ module.exports = function (RED) {
                 return null;
             } catch (err) {
                 node.log(err.message);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 node.status({
                     fill: 'red',
                     shape: 'ring',

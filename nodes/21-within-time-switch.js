@@ -24,8 +24,61 @@
  * within-time-switch:
  *********************************************/
 'use strict';
+/** --- Type Defs ---
+  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
+  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
+  * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+  * @typedef {import("./lib/dateTimeHelper.js").ITimeObject} ITimeObject
+  * @typedef {import("./lib/dateTimeHelper.js").ILimitationsObj} ILimitationsObj
+  * @typedef {import("./10-position-config.js").ITypedValue} ITypedValue
+  * @typedef {import("./10-position-config.js").IValuePropertyType} IValuePropertyType
+  * @typedef {import("./10-position-config.js").ITimePropertyType} ITimePropertyType
+  * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+  */
 
-module.exports = function (RED) {
+/**
+ * @typedef {Object} IWithinTimeNodeInstance Extensions for the nodeInstance object type
+ * @property {IPositionConfigNode} positionConfig    -   tbd
+ *
+ * @property {ITimePropertyType} timeStart     -   ??
+ * @property {ITimePropertyType} timeStartAlt     -   ??
+ * @property {IValuePropertyType} propertyStart     -   ??
+ * @property {string} propertyStartOperator     -   ??
+ * @property {IValuePropertyType} propertyStartThreshold     -   ??
+ *
+ * @property {ITimePropertyType} timeEnd     -   ??
+ * @property {ITimePropertyType} timeEndAlt     -   ??
+ * @property {IValuePropertyType} propertyEnd     -   ??
+ * @property {string} propertyEndOperator     -   ??
+ * @property {IValuePropertyType} propertyEndThreshold     -   ??
+ *
+ * @property {IValuePropertyType} timeRestrictions     -   ??
+ * @property {ITypedValue} withinTimeValue     -   ??
+ * @property {ITypedValue} outOfTimeValue     -   ??
+ *
+ * @property {boolean} timeOnlyEvenDays     -   ??
+ * @property {boolean} timeOnlyOddDays     -   ??
+ * @property {boolean} timeOnlyEvenWeeks     -   ??
+ * @property {boolean} timeOnlyOddWeeks     -   ??
+ * @property {Date} timeStartDate     -   ??
+ * @property {Date} timeEndDate     -   ??
+ * @property {Array.<number>} timeDays     -   ??
+ * @property {Array.<number>} timeMonths     -   ??
+ *
+ *
+ * @property {NodeJS.Timer} timeOutObj     -   ??
+ * @property {*} lastMsgObj     -   ??
+ *
+ * @property {number} tsCompare     -   ??
+ */
+
+/**
+ * @typedef {IWithinTimeNodeInstance & runtimeNode} IWithinTimeNode Combine nodeInstance with additional, optional functions
+ */
+/******************************************************************************************/
+/** Export the function that defines the node
+ * @type {runtimeRED} */
+module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
 
     const util = require('util');
@@ -190,17 +243,17 @@ module.exports = function (RED) {
                     }
                 }
             } catch (err) {
-                node.debug(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.debug(util.inspect(err));
                 node.error(err);
             }
         }
         if ((typeof node.timeDays !== 'undefined') && !node.timeDays.includes(dNow.getDay())) {
-            node.debug('invalid Day config. today=' + dNow.getDay() + ' timeDays=' + util.inspect(node.timeDays, Object.getOwnPropertyNames(node.timeDays)));
+            node.debug('invalid Day config. today=' + dNow.getDay() + ' timeDays=' + util.inspect(node.timeDays));
             result.warn = RED._('within-time-switch.errors.invalid-day');
             return result;
         }
         if ((typeof node.timeMonths !== 'undefined') && !node.timeMonths.includes(dNow.getMonth())) {
-            node.debug('invalid Month config. today=' + dNow.getMonth() + ' timeMonths=' + util.inspect(node.timeMonths, Object.getOwnPropertyNames(node.timeMonths)));
+            node.debug('invalid Month config. today=' + dNow.getMonth() + ' timeMonths=' + util.inspect(node.timeMonths));
             result.warn = RED._('within-time-switch.errors.invalid-month');
             return result;
         }
@@ -267,7 +320,7 @@ module.exports = function (RED) {
             } catch (err) {
                 result.altStartTime = false;
                 hlp.handleError(node, RED._('within-time-switch.errors.invalid-propertyStart-type', node.propertyStart), err);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
             }
         }
 
@@ -305,12 +358,17 @@ module.exports = function (RED) {
         return result;
     }
 
+    /******************************************************************************************/
     /**
-     * withinTimeSwitchNode
-     * @param {*} config - configuration
+     * standard Node-Red Node handler for the withinTimeSwitchNode
+     * @param {*} config the Node-Red Configuration property of the Node
      */
     function withinTimeSwitchNode(config) {
         RED.nodes.createNode(this, config);
+        /** Copy 'this' object in case we need it in context of callbacks of other functions.
+         * @type {IWithinTimeNode}
+         */
+        // @ts-ignore
         const node = this;
         // Retrieve the config node
         node.positionConfig = RED.nodes.getNode(config.positionConfig);
@@ -450,8 +508,8 @@ module.exports = function (RED) {
                 // config.timeDays = null;
                 delete node.timeDays;
             } else {
-                node.timeDays = config.timeDays.split(',');
-                node.timeDays = node.timeDays.map( e => parseInt(e) );
+                const tmp = config.timeDays.split(',');
+                node.timeDays = tmp.map( e => parseInt(e) );
             }
 
             if (config.timeMonths === '') {
@@ -460,8 +518,8 @@ module.exports = function (RED) {
                 // config.timeMonths = null;
                 delete node.timeMonths;
             } else {
-                node.timeMonths = config.timeMonths.split(',');
-                node.timeMonths = node.timeMonths.map( e => parseInt(e) );
+                const tmp = config.timeMonths.split(',');
+                node.timeMonths = tmp.map( e => parseInt(e) );
             }
         }
         node.withinTimeValue = {
@@ -551,7 +609,7 @@ module.exports = function (RED) {
                 return null;
             } catch (err) {
                 node.log(err.message);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 setstate(node, { error: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
                 done('internal error within-time-switch:' + err.message, msg);
             }

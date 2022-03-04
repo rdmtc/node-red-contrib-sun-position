@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * This code is licensed under the Apache License Version 2.0.
  *
@@ -23,12 +24,47 @@
 /********************************************
  * clock-timer:
  *********************************************/
-module.exports = function (RED) {
-    'use strict';
-    const path = require('path');
+/** --- Type Defs ---
+ * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
+ * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
+ * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+ * @typedef {import("./lib/dateTimeHelper").ITimeObject} ITimeObject
+ * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+ * @typedef {import("./lib/timeControlHelper.js").ITimeControlNodeInstance} ITimeControlNodeInstance
+ */
 
-    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-    const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
+// IClockTimerNodeInstance
+/**
+ * @typedef {Object} IClockTimerNodeInstance Extensions for the nodeInstance object type
+ * @property {Object} nodeData get/set generic Data of the node
+ * @property {Object} reason    -   tbd
+ * @property {string} contextStore    -   used context store
+ * @property {Object} oversteer    -   tbd
+ * @property {Object} rules    -   tbd
+ * @property {Object} payload    -   tbd
+ * @property {Object} previousData    -   tbd
+ * @property {Array.<Object>} results    -   tbd
+ *
+ * @property {Object} autoTrigger autotrigger options
+ * @property {NodeJS.Timeout} autoTriggerObj autotrigger options
+ *
+ * @property {Object} startDelayTimeOut    -   tbd
+ * @property {NodeJS.Timeout} startDelayTimeOutObj    -   tbd
+
+ * @property {function} setState function for settign the state of the node
+ * ... obviously there are more ...
+ */
+
+/**
+ * @typedef {ITimeControlNodeInstance & IClockTimerNodeInstance & runtimeNode} IClockTimerNode Combine nodeInstance with additional, optional functions
+ */
+/******************************************************************************************/
+/** Export the function that defines the node
+ * @type {runtimeRED} */
+module.exports = function (/** @type {runtimeRED} */ RED) {
+    'use strict';
+    const hlp = require('./lib/dateTimeHelper.js');
+    const ctrlLib = require('./lib/timeControlHelper.js');
     const util = require('util');
     const clonedeep = require('lodash.clonedeep');
     const isEqual = require('lodash.isequal');
@@ -147,7 +183,7 @@ module.exports = function (RED) {
      * @param {Object} node node data
      * @param {number} [rulePos] the position of the rule which should be changed
      * @param {string} [ruleName] the name of the rule which should be changed
-     * @param {Object} ruleData the properties of the rule which should be changed
+     * @param {Object} [ruleData] the properties of the rule which should be changed
      */
     function changeRules(node, rulePos, ruleName, ruleData) {
         // node.debug(`changeRules: ${ node.rules.count } ruleData:' ${util.inspect(ruleData, {colors:true, compact:10})}`);
@@ -321,6 +357,10 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
         this.outputs = Number(config.outputs || 1);
+        /** Copy 'this' object in case we need it in context of callbacks of other functions.
+         * @type {IClockTimerNode}
+         */
+        // @ts-ignore
         const node = this;
         if (!this.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
@@ -433,7 +473,7 @@ module.exports = function (RED) {
         /**
          * handles the input of a message object to the node
          */
-        this.on('input', function (msg, send, done) {
+        node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) {if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
@@ -498,7 +538,6 @@ module.exports = function (RED) {
                 }
 
                 // initialize
-                node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.contextStore) || {};
                 const previousData = node.context().get('lastData', node.contextStore) || {
                     reasonCode: -1,
@@ -650,7 +689,7 @@ module.exports = function (RED) {
                 done();
                 return null;
             } catch (err) {
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -661,7 +700,7 @@ module.exports = function (RED) {
             return null;
         });
 
-        this.on('close', () => {
+        node.on('close', () => {
             if (node.autoTriggerObj) {
                 clearTimeout(node.autoTriggerObj);
                 delete node.autoTriggerObj;
@@ -677,7 +716,7 @@ module.exports = function (RED) {
             ctrlLib.initializeCtrl(RED, node, config);
         } catch (err) {
             node.error(err.message);
-            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err));
             node.status({
                 fill: 'red',
                 shape: 'ring',

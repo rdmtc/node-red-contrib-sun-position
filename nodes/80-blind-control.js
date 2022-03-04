@@ -23,14 +23,43 @@
 /********************************************
  * blind-control:
  *********************************************/
+'use strict';
+/** --- Type Defs ---
+ * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
+ * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
+ * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+ * @typedef {import("./lib/dateTimeHelper").ITimeObject} ITimeObject
+ * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+ * @typedef {import("./lib/timeControlHelper.js").ITimeControlNodeInstance} ITimeControlNodeInstance
+ */
+
+/**
+ * @typedef {Object} IBlindControlNodeInstance Extensions for the nodeInstance object type
+ * @property {Object} nodeData get/set generic Data of the node
+ * @property {Object} sunData    -   the sun data Object
+ * @property {Object} windowSettings    -   the window settings Object
+ * @property {number} smoothTime smoothTime
+ * @property {boolean} levelReverse    -   indicator if the Level is in reverse order
+ * @property {Array.<Object>} oversteers    -   tbd
+ * @property {Object} oversteer    -   tbd
+ * @property {Object} level    -   tbd
+ * @property {Object} previousData    -   tbd
+ * @property {Array.<Object>} results    -   tbd
+ * ... obviously there are more ...
+ */
+
+/**
+ * @typedef {ITimeControlNodeInstance & IBlindControlNodeInstance & runtimeNode} IBlindControlNode Combine nodeInstance with additional, optional functions
+ */
 
 /******************************************************************************************/
-module.exports = function (RED) {
+/** Export the function that defines the node
+ * @type {runtimeRED} */
+module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
-    const path = require('path');
 
-    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
-    const ctrlLib = require(path.join(__dirname, '/lib/timeControlHelper.js'));
+    const hlp = require('./lib/dateTimeHelper.js');
+    const ctrlLib = require('./lib/timeControlHelper.js');
     const util = require('util');
     const clonedeep = require('lodash.clonedeep');
     const isEqual = require('lodash.isequal');
@@ -44,7 +73,7 @@ module.exports = function (RED) {
     /**
      * get the absolute level from percentage level
      * @param {*} node the node settings
-     * @param {*} percentPos the level in percentage (0-1)
+     * @param {*} levelPercent the level in percentage (0-1)
      */
     function posPrcToAbs_(node, levelPercent) {
         return posRound_(node, ((node.nodeData.levelTop - node.nodeData.levelBottom) * levelPercent) + node.nodeData.levelBottom);
@@ -61,7 +90,7 @@ module.exports = function (RED) {
     /**
      * get the absolute inverse level
      * @param {*} node the node settings
-     * @param {*} levelAbsolute the level absolute
+     * @param {*} level the level absolute
      * @return {number} get the inverse level
      */
     function getInversePos_(node, level) {
@@ -141,7 +170,7 @@ module.exports = function (RED) {
                     }, false, oNow.now)));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
-            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err));
         }
         // node.debug('node.oversteers=' + util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity }));
         return undefined;
@@ -168,7 +197,7 @@ module.exports = function (RED) {
                         return node.nodeData.levelBottom;
                     } else if (value.includes('open')) {
                         return node.nodeData.levelTop;
-                    } else if (val === '') {
+                    } else if (value === '') {
                         return def;
                     }
                 } else {
@@ -188,7 +217,7 @@ module.exports = function (RED) {
             return res;
         } catch (err) {
             node.error(RED._('blind-control.errors.getBlindPosData', err));
-            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err));
         }
         return def;
     }
@@ -502,7 +531,7 @@ module.exports = function (RED) {
      * @param {Object} node node data
      * @param {number} [rulePos] the position of the rule which should be changed
      * @param {string} [ruleName] the name of the rule which should be changed
-     * @param {Object} ruleData the properties of the rule which should be changed
+     * @param {Object} [ruleData] the properties of the rule which should be changed
      */
     function changeRules(node, rulePos, ruleName, ruleData) {
         // node.debug(`changeRules: ${ node.rules.count } ruleData:' ${util.inspect(ruleData, {colors:true, compact:10})}`);
@@ -827,6 +856,10 @@ module.exports = function (RED) {
     function sunBlindControlNode(config) {
         RED.nodes.createNode(this, config);
         this.positionConfig = RED.nodes.getNode(config.positionConfig);
+        /** Copy 'this' object in case we need it in context of callbacks of other functions.
+         * @type {IBlindControlNode}
+         */
+        // @ts-ignore
         const node = this;
         if (!this.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
@@ -1152,7 +1185,7 @@ module.exports = function (RED) {
         /**
          * handles the input of a message object to the node
          */
-        this.on('input', function (msg, send, done) {
+        node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) {if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
@@ -1267,7 +1300,6 @@ module.exports = function (RED) {
                 }
 
                 // initialize
-                node.nowarn = {};
                 const tempData = node.context().get('cacheData',node.contextStore) || {};
                 if (!isNaN(node.level.current)) {
                     node.previousData.level = node.level.current;
@@ -1504,7 +1536,7 @@ module.exports = function (RED) {
                 done();
                 return null;
             } catch (err) {
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
@@ -1515,7 +1547,7 @@ module.exports = function (RED) {
             return null;
         });
 
-        this.on('close', () => {
+        node.on('close', () => {
             if (node.autoTriggerObj) {
                 clearTimeout(node.autoTriggerObj);
                 delete node.autoTriggerObj;
@@ -1531,7 +1563,7 @@ module.exports = function (RED) {
             ctrlLib.initializeCtrl(RED, node, config);
         } catch (err) {
             node.error(err.message);
-            node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+            node.log(util.inspect(err));
             node.status({
                 fill: 'red',
                 shape: 'ring',
