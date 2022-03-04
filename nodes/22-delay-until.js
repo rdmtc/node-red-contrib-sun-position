@@ -24,21 +24,72 @@
  * delay-until:
  *********************************************/
 'use strict';
+/** --- Type Defs ---
+  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
+  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
+  * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+  * @typedef {import("./lib/dateTimeHelper.js").ITimeObject} ITimeObject
+  * @typedef {import("./lib/dateTimeHelper.js").ILimitationsObj} ILimitationsObj
+  * @typedef {import("./10-position-config.js").ITypedValue} ITypedValue
+  * @typedef {import("./10-position-config.js").IValuePropertyType} IValuePropertyType
+  * @typedef {import("./10-position-config.js").ITimePropertyType} ITimePropertyType
+  * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+  * @typedef {import("./10-position-config.js").ITimePropertyResult} ITimePropertyResult
+  */
 
-module.exports = function(RED) {
+/**
+ * @typedef {Object} IDUPropertyTypeInst
+ * @property {*} compare - valid days
+ *
+ * @typedef {ITypedValue & IDUPropertyTypeInst} IDUPropertyType
+ */
+
+/**
+ * @typedef {Object} IDelayUntilNodeInstance Extensions for the nodeInstance object type
+ * @property {IPositionConfigNode} positionConfig    -   tbd
+ *
+ * @property {ITimePropertyType} timeData       -   time definition
+ * @property {('all'|'first'|'last')} queuingBehavior           -   kind of queue messages
+ * @property {IDUPropertyType} flushMsgs        -   flush mesage control property definition
+ * @property {IDUPropertyType} dropMsgs         -   drop mesage control property definition
+ * @property {IDUPropertyType} enqueueMsg       -   enqueue mesage control property definition
+ * @property {ITypedValue} ctrlProp             -   control property handling
+ *
+ * @property {number} tsCompare                 -   base time definition
+ *
+ * @property {Array} msgQueue                   -   the message queue
+ *
+ * @property {NodeJS.Timer} delayTimer          -   the message queue
+ *
+ * @property {ITimePropertyResult} nextTime     -   next time object
+ * @property {boolean} nextTimeIntermedia       -   indicator if intermedia node state
+ * @property {boolean} calcByMsg                -   indicator if time is calculared by message
+ *
+ */
+
+/**
+ * @typedef {IDelayUntilNodeInstance & runtimeNode} IDelayUntilNode Combine nodeInstance with additional, optional functions
+ */
+/******************************************************************************************/
+/** Export the function that defines the node
+ * @type {runtimeRED} */
+module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
     /**
-     * withinTimeSwitchNode
-     * @param {*} config - configuration
+     * standard Node-Red Node handler for the rdgDelayUntilNode
+     * @param {*} config the Node-Red Configuration property of the Node
      */
     function rdgDelayUntilNode(config) {
         const util = require('util');
-        const path = require('path');
 
-        const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+        const hlp = require('./lib/dateTimeHelper.js');
+
+        RED.nodes.createNode(this, config);
+        /** Copy 'this' object in case we need it in context of callbacks of other functions.
+         * @type {IDelayUntilNode}
+         */
+        // @ts-ignore
         const node = this;
-        RED.nodes.createNode(node, config);
-        node.locale = require('os-locale').sync();
         // Retrieve the config node
         node.positionConfig = RED.nodes.getNode(config.positionConfig);
         // node.debug('initialize rdgDelayUntilNode ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
@@ -60,11 +111,11 @@ module.exports = function(RED) {
             offsetType : config.offsetType || 'none',
             offset : config.offset,
             multiplier : config.offsetMultiplier || 60000,
-            next: true,
-            calcByMsg: (config.timeType === 'msg' ||
-                        config.timeType === 'flow' ||
-                        config.timeType === 'global')
+            next: true
         };
+        node.calcByMsg = (config.timeType === 'msg' ||
+            config.timeType === 'flow' ||
+            config.timeType === 'global');
         if (node.timeData.type === 'jsonata') {
             try {
                 node.timeData.expr = node.positionConfig.getJSONataExpression(node, node.timeData.value);
@@ -157,7 +208,7 @@ module.exports = function(RED) {
                 return null;
             } catch (err) {
                 node.log(err.message);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.error-title') });
                 done('internal error delay-until until:' + err.message, msg);
             }
@@ -278,7 +329,7 @@ module.exports = function(RED) {
                     delete node.delayTimer;
                     recalcTimeOut(qObj);
                 }, millisec); // 1,5 days before
-                node.nextTime.intermedia = true;
+                node.nextTimeIntermedia = true;
             } else {
                 node.debug('set timeout to ' + millisec);
                 node.delayTimer = setTimeout(() => {
@@ -307,7 +358,7 @@ module.exports = function(RED) {
             const qObj = {msg, done};
             node.msgQueue.push(qObj);
             node.debug('test 4');
-            if (!node.delayTimer || node.timeData.calcByMsg) {
+            if (!node.delayTimer || node.calcByMsg) {
                 recalcTimeOut(qObj);
             }
         }
@@ -344,8 +395,6 @@ module.exports = function(RED) {
 
         /**
          * adds a new message tot he queue
-         * @param {*} msg - message object
-         * @param {*} done - done object
          */
         function setStatus() {
             if (node.msgQueue.length > 0) {
@@ -354,7 +403,7 @@ module.exports = function(RED) {
                         node.debug('set state ' + util.inspect(node.nextTime, { colors: true, compact: 10, breakLength: Infinity }));
                         if (node.nextTime.error ) {
                             node.status({fill: 'red', shape: 'ring', text: node.nextTime.error });
-                        } else if (node.nextTime.intermedia) {
+                        } else if (node.nextTimeIntermedia) {
                             node.status({
                                 fill: 'yellow',
                                 shape: 'dot',

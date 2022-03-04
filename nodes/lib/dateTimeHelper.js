@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * This code is licensed under the Apache License Version 2.0.
  *
@@ -24,6 +25,38 @@
  * dateTimeHelper.js:
  *********************************************/
 'use strict';
+
+/**
+* support timeData
+* @typedef {Object} ITimeObject Data
+* @param {Date} now
+* @param {number} nowNr
+* @param {number} dayNr
+* @param {number} monthNr
+* @param {number} dateNr
+* @param {number} yearNr
+* @param {number} dayId
+*/
+
+/**
+ * @typedef {Object} ILimitationsObj
+ * @property {boolean} [next]                   - if __true__ the next date will be delivered starting from now, otherwise the matching date of the date from now
+ * @property {Array.<number>|string} [days]     - days for which should be calculated the sun time
+ * @property {Array.<number>|string} [months]   - months for which should be calculated the sun time
+ * @property {boolean} [onlyOddDays]            - if true only odd days will be used
+ * @property {boolean} [onlyEvenDays]           - if true only even days will be used
+ * @property {boolean} [onlyOddWeeks]           - if true only odd weeks will be used
+ * @property {boolean} [onlyEvenWeeks]          - if true only even weeks will be used
+ */
+
+
+/**
+ * @typedef {Object} ILimitedDate
+ * @property {Date} date - The limited Date
+ * @property {boolean} hasChanged - indicator if the input Date has changed
+ * @property {string} error - if an error occurs the string is not empty
+ */
+
 const util = require('util');
 const TIME_WEEK = 604800000;
 const TIME_24h = 86400000;
@@ -223,7 +256,7 @@ function pad2(n) { // always returns a string
 
 /**
  * creates a string from a number with leading zeros
- * @param {string|number|boolean} n number to format
+ * @param {any} val number to format
  * @param {number} [len] length of number (default 2)
  * @returns {string} number with minimum digits as defined in length
  */
@@ -248,8 +281,8 @@ function pad(val, len) {
  * generic function for handle a error in a node
  * @param {any} node the node where the error occurs
  * @param {String} messageText the message text
- * @param {Error} err the error object
- * @param {string} stateText the state text which should be set to the node
+ * @param {Error} [err] the error object
+ * @param {string} [stateText] the state text which should be set to the node
  */
 function handleError(node, messageText, err, stateText) {
     if (!err) {
@@ -264,7 +297,7 @@ function handleError(node, messageText, err, stateText) {
 
     if (node && messageText) {
         node.error(messageText);
-        node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+        node.log(util.inspect(err));
         node.status({
             fill: 'red',
             shape: 'ring',
@@ -273,7 +306,7 @@ function handleError(node, messageText, err, stateText) {
     } else if (console) {
         /* eslint-disable no-console */
         console.error(messageText);
-        console.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+        console.log(util.inspect(err));
         console.trace(); // eslint-disable-line
         /* eslint-enable no-console */
     }
@@ -357,9 +390,9 @@ function getLastDayOfMonth(year, month, dayOfWeek) {
 
 /**
  * get a date for the special day in the given month
- * @param {string} year year to check
+ * @param {number} year year to check
  * @param {number} month month to check
- * @param {number} dayName  Name of the special day
+ * @param {string} dayName  Name of the special day
  * @returns {Date|null} last day of given month or null
  */
 function getSpecialDayOfMonth(year, month, dayName) {
@@ -425,7 +458,7 @@ function getWeekOfYear(date) {
     // Get first day of year
     const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
     // Calculate full weeks to nearest Thursday
-    const weekNo = Math.ceil(( ( (date - yearStart) / TIME_24h) + 1)/7);
+    const weekNo = Math.ceil(( ( (date.getTime() - yearStart.getTime()) / TIME_24h) + 1)/7);
     // Return array of year and week number
     return [date.getUTCFullYear(), weekNo];
 }
@@ -437,7 +470,7 @@ function getWeekOfYear(date) {
  */
 function getDayOfYear(date) {
     const start = new Date(date.getFullYear(), 0, 0);
-    const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * TIME_1min);
+    const diff = (date.getTime() - start.getTime()) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * TIME_1min);
     return [date.getUTCFullYear(),  Math.floor(diff / TIME_24h)];
 }
 
@@ -483,19 +516,6 @@ function getNowTimeStamp(node, msg) {
     node.error(`Error can not get a valid timestamp from "${value}"! Will use current timestamp!`);
     return new Date();
 }
-
-
-/**
-* support timeData
-* @name ITimeObject Data
-* @param {Date} now
-* @param {number} nowNr
-* @param {number} dayNr
-* @param {number} monthNr
-* @param {number} dateNr
-* @param {number} yearNr
-* @param {number} dayId
-*/
 
 /**
 * the definition of the time to compare
@@ -545,14 +565,14 @@ function getTimeOut(base, time) {
 /**
  * check if a given number is in given limits
  * @param {number} num number angle to compare
- * @param {number} low low limit
- * @param {number} high high limit
- * @return {bool}  **true** if the number is inside given limits, at least one limit must be validate, otherwise returns **false**
+ * @param {number} [low] low limit
+ * @param {number} [high] high limit
+ * @return {boolean}  **true** if the number is inside given limits, at least one limit must be validate, otherwise returns **false**
  */
 function checkLimits(num, low, high) {
     // console.debug('checkLimits num=' + num + ' low=' + low + ' high=' + high); // eslint-disable-line
-    if (typeof low !== 'undefined' && low !== '' && !isNaN(low) && low >= 0) {
-        if (typeof high !== 'undefined' && high !== '' && !isNaN(high) && high >= 0) {
+    if (typeof low === 'number' && !isNaN(low)) {
+        if (typeof high === 'number' && !isNaN(high)) {
             if (high > low) {
                 return (num > low) && (num < high);
             }
@@ -561,16 +581,31 @@ function checkLimits(num, low, high) {
         return (num > low);
     }
 
-    if (typeof high !== 'undefined' && high !== '' && !isNaN(high)) {
+    if (typeof high === 'number' && !isNaN(high)) {
         return (num < high);
     }
     return false;
 }
 
 /**
+ * @callback IIsFoundNumberFunc
+ * @param  {number} res -   Value of the found value
+ */
+
+/**
+ * @callback INotFoundFunc
+ * @param  {*} msg  -   message
+ *  @return {any}
+ */
+
+/**
  * check the type of the message
  * @param {*} msg message
- * @param {*} name property name
+ * @param {string|Array.<string>} ids property names to check
+ * @param {string|Array.<string>} [names] topic names to check
+ * @param {IIsFoundNumberFunc} [isFound] if the topic is found this function will be called with the found value
+ * @param {INotFoundFunc} [notFound] topic names to check
+ * @return {number|any}
  */
 function getMsgNumberValue(msg, ids, names, isFound, notFound) {
     if (ids && msg) {
@@ -626,7 +661,10 @@ function getMsgNumberValue(msg, ids, names, isFound, notFound) {
 /**
  * check the type of the message
  * @param {*} msg message
- * @param {*} name property name
+ * @param {string|Array.<string>} ids property names to check
+ * @param {IIsFoundNumberFunc} [isFound] if the topic is found this function will be called with the found value
+ * @param {INotFoundFunc} [notFound] topic names to check
+ * @return {number|any}
  */
 function getMsgNumberValue2(msg, ids, isFound, notFound) {
     if (ids && msg) {
@@ -653,10 +691,22 @@ function getMsgNumberValue2(msg, ids, isFound, notFound) {
     }
     return notFound;
 }
+
+/**
+ * @callback IIsFoundBoolFunc
+ * @param  {boolean} result -   found value converted to boolean
+ * @param  {*} realResult   -   real value which was found or the complete payload
+ * @param  {string} topic   -   topic of the message
+ */
+
 /**
  * check if the msg or msg.property contains a property with value true or the topic contains the given name
  * @param {*} msg message
- * @param {*} name property name
+ * @param {string|Array.<string>} ids property names to check
+ * @param {string|Array.<string>} [names] topic names to check
+ * @param {IIsFoundBoolFunc} [isFound] if the topic is found this function will be called with the found value
+ * @param {INotFoundFunc} [notFound] topic names to check
+ * @return {boolean|any}
  */
 function getMsgBoolValue(msg, ids, names, isFound, notFound) {
     if (ids && msg) {
@@ -685,7 +735,10 @@ function getMsgBoolValue(msg, ids, names, isFound, notFound) {
 /**
  * check if the msg contains a property with value true (no payload check)
  * @param {*} msg message
- * @param {*} name property name
+ * @param {string|Array.<string>} ids property names to check
+ * @param {IIsFoundBoolFunc} [isFound] if the topic is found this function will be called with the found value
+ * @param {INotFoundFunc} [notFound] topic names to check
+ * @return {boolean|any}
  */
 function getMsgBoolValue2(msg, ids, isFound, notFound) {
     if (ids && msg) {
@@ -713,10 +766,13 @@ function getMsgBoolValue2(msg, ids, isFound, notFound) {
 /**
  * check if thetopic contains one of the given names
  * @param {*} msg message
- * @param {*} name property name
+ * @param {string|Array.<string>} [names] topic names to check
+ * @param {IIsFoundBoolFunc} [isFound] if the topic is found this function will be called with the found value
+ * @param {INotFoundFunc} [notFound] topic names to check
+ * @return {boolean}
  */
 function getMsgTopicContains(msg, names, isFound, notFound) {
-    if (msg) { // && msg.topic
+    if (msg && names) {
         if (!Array.isArray(names)) {
             names = [names];
         }
@@ -762,7 +818,7 @@ function isDSTObserved(d) {
 
 /**
  * changes the time based on a timezone
- * @param {date} date Javascript Date object
+ * @param {Date} date Javascript Date object
  * @param {number} timeZoneOffset Offset in Minutes
   * @return {date} new date object with changed timezone to use with .toLocaleString()
  */
@@ -780,6 +836,7 @@ function convertDateTimeZone(date, timeZoneOffset) {
  * @returns {boolean} returns __true__ if it is a valid Date, otherwhise __false__
  */
 function isValidDate(d) {
+    // @ts-ignore
     return d instanceof Date && !isNaN(d);
     // d !== 'Invalid Date' && !isNaN(d)
 }
@@ -808,7 +865,7 @@ function isoStringToDate( isoString ) {
 
     // The month numbers are one "off" from what normal humans would expect
     // because January == 0.
-    returnDate.setUTCMonth( parseInt( dateParts[ 1 ] - 1 ) );
+    returnDate.setUTCMonth( parseInt( dateParts[ 1 ] ) - 1 );
     returnDate.setUTCDate( parseInt( dateParts[ 2 ] ) );
 
     // Set the time parts of the date object.
@@ -867,8 +924,8 @@ const parseDate = dateString => {
 
 /**
  * Round a date to the nearest full Hour
- * @param {DATE} date Date to round
- * @returns {DATE} Date round to next full Hour
+ * @param {Date} date Date to round
+ * @returns {Date} Date round to next full Hour
  */
 function roundToHour(date) {
     return new Date(Math.round(date.getTime() / TIME_1h ) * TIME_1h);
@@ -942,29 +999,18 @@ function calcMonthOffset(months, monthstart) {
 
 /*******************************************************************************************************/
 /**
- * @typedef {Object} limitationsObj
- * @property {number} [next] if greater than 0 the number of days in the future
- * @property {string} [days] days for which should be calculated the sun time
- * @property {string} [months] months for which should be calculated the sun time
- * @property {boolean} [onlyOddDays] - if true only odd days will be used
- * @property {boolean} [onlyEvenDays] - if true only even days will be used
- * @property {boolean} [onlyOddWeeks] - if true only odd weeks will be used
- * @property {boolean} [onlyEvenWeeks] - if true only even weeks will be used
- */
-
-/**
  * normalize date by adding offset, get only the next valid date, etc...
- * @param {Date} d input Date to normalize
+ * @param {Date|number|object} d input Date to normalize
  * @param {number} offset offset to add tot he Date object
  * @param {number} multiplier multiplier for the offset
- * @param {limitationsObj} [limit] additional limitations for the calculation
+ * @param {ILimitationsObj} [limit] additional limitations for the calculation
  * @return {Date} a normalized date moved tot the future to fulfill all conditions
  */
 function normalizeDate(d, offset, multiplier, limit) {
     // console.debug(`normalizeDate d=${d} offset=${ offset }, multiplier=${multiplier}, limit=${limit}`); // eslint-disable-line
     if (d === null || typeof d === 'undefined') { return d; }
     if (d.value) { d = d.value; }
-    if (!(d instanceof Date)) { d = Date(d); }
+    if (!(d instanceof Date)) { d = new Date(d); }
     d = addOffset(d, offset, multiplier);
     if (limit.next) {
         const dNow = new Date();
@@ -984,14 +1030,29 @@ function normalizeDate(d, offset, multiplier, limit) {
 
 /**
  * calculates limitation of a date
- * @param {limitationsObj} limit limitation object
- * @param {Date} date Date to check
- * @returns [date, hasChanged, error]
+ * @param {ILimitationsObj} limit    -   limitation object
+ * @param {Date} d  -   Date to check
+ * @returns {ILimitedDate} result limited Date Object.
  */
 function limitDate(limit, d) {
     let hasChanged = false;
     let error = '';
-    if (limit.days && (limit.days !== '*') && (limit.days !== '')) {
+    if (typeof(limit.days) === 'string') {
+        if ((limit.days === '*') || (limit.days === '')) {
+            delete limit.months;
+        } else {
+            const tmp = limit.days.split(',');
+            limit.days = [];
+            tmp.forEach(element => {
+                const el = parseInt(element.trim());
+                if (!isNaN(el)) {
+                    // @ts-ignore
+                    limit.days.push(el);
+                }
+            });
+        }
+    }
+    if (limit.days && Array.isArray(limit.days)) {
         const dayx = calcDayOffset(limit.days, d.getDay());
         if (dayx > 0) {
             d.setDate(d.getDate() + dayx);
@@ -1000,8 +1061,22 @@ function limitDate(limit, d) {
             error = 'No valid day of week found!';
         }
     }
-
-    if (limit.months && (limit.months !== '*') && (limit.months !== '')) {
+    if (typeof(limit.months) === 'string') {
+        if ((limit.months === '*') || (limit.months === '')) {
+            delete limit.months;
+        } else {
+            const tmp = limit.months.split(',');
+            limit.months = [];
+            tmp.forEach(element => {
+                const el = parseInt(element.trim());
+                if (!isNaN(el)) {
+                    // @ts-ignore
+                    limit.months.push(el);
+                }
+            });
+        }
+    }
+    if (limit.months && Array.isArray(limit.months)) {
         const monthx = calcMonthOffset(limit.months, d.getMonth());
         if (monthx > 0) {
             d.setMonth(d.getMonth() + monthx);
@@ -1137,6 +1212,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset, dNow) {
 
         let dto = new Date(dt);
         if (utc || timeZoneOffset === 0) {
+            // @ts-ignore
             dto = Date.UTC(dt);
         } else if (timeZoneOffset) {
             dto = convertDateTimeZone(dto, timeZoneOffset);
@@ -1147,6 +1223,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset, dNow) {
         }
     }
 
+    // @ts-ignore
     const result = getTimeOfText(String(dt), utc, timeZoneOffset);
     if (result !== null && typeof result !== 'undefined') {
         return result;
@@ -1157,6 +1234,7 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset, dNow) {
         if (res !== null && typeof res !== 'undefined') { return res; }
         res = _parseDate(dt, preferMonthFirst, utc, timeZoneOffset, dNow);
         if (res !== null && typeof res !== 'undefined') { return res; }
+        // @ts-ignore
         res = _parseArray(dt, _dateFormat.parseTimes, utc, timeZoneOffset, dNow);
         if (res !== null && typeof res !== 'undefined') { return res; }
         if (utc || timeZoneOffset === 0) {
@@ -1174,7 +1252,9 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset, dNow) {
             }
         }
 
+        // @ts-ignore
         res = Date.parse(dt);
+        // @ts-ignore
         if (!isNaN(res)) { return res; }
     }
     throw new Error('could not evaluate ' + String(dt) + ' as a valid Date or time.');
@@ -1234,6 +1314,7 @@ const _dateFormat = (function () {
             date = convertDateTimeZone(date, timeZoneOffset);
         }
 
+        // @ts-ignore
         mask = String(mask || _dateFormat.isoDateTime);
 
         // Allow setting the utc argument via the mask
@@ -1256,14 +1337,21 @@ const _dateFormat = (function () {
         const flags = {
             d,
             dd: pad2(d),
+            // @ts-ignore
             ddd: dF.i18n.dayNames[D + 7],
+            // @ts-ignore
             dddd: dF.i18n.dayNames[D],
+            // @ts-ignore
             E: dF.i18n.dayNames[D + 7],
+            // @ts-ignore
             EE: dF.i18n.dayNames[D],
             M: M + 1,
             MM: pad2(M + 1),
+            // @ts-ignore
             MMM: dF.i18n.monthNames[M + 12],
+            // @ts-ignore
             MMMM: dF.i18n.monthNames[M],
+            // @ts-ignore
             NNN: dF.i18n.monthNames[M],
             yy: String(y).slice(2),
             yyyy: y,
@@ -1300,8 +1388,10 @@ const _dateFormat = (function () {
             oo: (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
             ooo: utc ? 'Z' : (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
             oooo: utc ? 'UTC' : (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+            // @ts-ignore
             S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (d % 100 - d % 10 !== 10) * d % 10],
             x: dayDiff,
+            // @ts-ignore
             xx: ((dayDiff >= -7) && ((dayDiff + 7) < dF.i18n.dayDiffNames.length)) ? dF.i18n.dayDiffNames[dayDiff + 7] : dF.i18n.dayNames[D]
         };
 
@@ -1312,26 +1402,27 @@ const _dateFormat = (function () {
 })();
 
 // Some common format strings
+// @ts-ignore
 _dateFormat.isoDateTime = 'yyyy-MM-dd\'T\'HH:mm:ss';
+// @ts-ignore
 _dateFormat.parseDates = {
     monthFirst : ['MMM d, y', 'MMM d,y', 'M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'MMM d', 'M-d'],
     dateFirst : ['d-MMM-y', 'd/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M', 'd MMM'],
     general : ['y-M-d', 'y-MMM-d']
 };
 
+// @ts-ignore
 _dateFormat.parseTimes = ['h:m:s:lt', 'h:m:s.lt', 'h:m:st', 'h:mt', 'h:m:s t', 'h:m:s.t', 'H:m:s:l', 'H:m:s.l', 'H:m:s', 'H:m', 'h:m:s t Z', 'H:m:s Z'];
 
 /**
  * pre defined formats of a given date
- * @param  {Date}            date            -  JavaScript Date to format
- * @param  {string}          [format]        -  format of the date
  * @param  {Array.<string>}  [dayNames]      -  Array of day Names in short and ["Sunday", "Monday", ..., "Mo", "Tu", ...]
  * @param  {Array.<string>}  [monthNames]    -  Array of month Names long and short ["January", "February", ..., "Jan", "Feb", ...]
  * @param  {Array.<string>}  [dayDiffNames]  -  Array of names for relative day, starting 7 days ago ["1 week ago", "6 days ago", ..., "Yesterday", "Today", "Tomorrow", ...]
- * @param  {bool} [utc] - indicates if the formatted date should be in utc or not
  * @return {any}   returns a number, string or object depending on the given Format
  */
 function initializeParser(dayNames, monthNames, dayDiffNames) {
+    // @ts-ignore
     _dateFormat.i18n = {
         dayNames,
         monthNames,
@@ -1339,6 +1430,7 @@ function initializeParser(dayNames, monthNames, dayDiffNames) {
     };
 }
 
+// @ts-ignore
 _dateFormat.parse = [
     {label: 'Year yy (2 digits)', value: 'yy'},
     {label: 'Year yyyy (4 digits)', value: 'yyyy'},
@@ -1370,6 +1462,7 @@ _dateFormat.parse = [
     {label: 'AM/PM t (1 digit)', value: 't'},
     {label: 'AM/PM tt (2 digits)', value: 'tt'}
 ];
+// @ts-ignore
 _dateFormat.format = [
     {label: 'Year yyyy (4 digits)', value: 'yyyy'},
     {label: 'Year yy (2 digits)', value: 'yy'},
@@ -1411,9 +1504,9 @@ _dateFormat.format = [
 
 /**
  * pre defined formats of a given date
- * @param  {Date}            date            -  JavaScript Date to format
+ * @param  {Date | number}            date            -  JavaScript Date to format
  * @param  {string}          [format]        -  format of the date
- * @param  {bool} [utc] - indicates if the formatted date should be in utc or not
+ * @param  {boolean} [utc] - indicates if the formatted date should be in utc or not
  * @param  {number} [timeZoneOffset] - timezone offset for conversation in minutes
  * @return {any}   returns a number, string or object depending on the given Format
  */
@@ -1422,15 +1515,23 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
     if (timeZoneOffset === 0) {
         utc = true;
     }
+    // @ts-ignore
     format = format || 0;
+    // @ts-ignore
     if (date.value) { date = date.value; }
+    /** @type {Date} */
+    let d;
     if (!(date instanceof Date)) {
-        date = Date(date);
-        if (!isValidDate(date)) {
+        // @ts-ignore
+        d = Date(date);
+        if (!isValidDate(d)) {
             throw new Error(`given Date is not a valid Date!!`);
         }
+    } else {
+        d = date;
     }
 
+    // @ts-ignore
     if (isNaN(format)) {
         return _dateFormat(date, String(format), utc, timeZoneOffset);
     }
@@ -1438,129 +1539,129 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
     switch (Number(format)) {
         case 0: // timeformat_UNIX - milliseconds since Jan 1, 1970 00:00
             if (timeZoneOffset) {
-                return convertDateTimeZone(date, timeZoneOffset).getTime();
+                return convertDateTimeZone(d, timeZoneOffset).getTime();
             }
-            return date.getTime();
+            return d.getTime();
         case 1: // timeformat_ECMA262 - date as string ECMA-262
         case 4:
-            return date.toUTCString();
+            return d.toUTCString();
         case 2: // timeformat_local      - 26.12.2018, 23:40:45  - timeformat_G - 6/15/2009 1:45:30 PM
         case 14:
             if (utc) {
-                return date.toUTCString();
+                return d.toUTCString();
             }
             if (timeZoneOffset) {
-                return convertDateTimeZone(date, timeZoneOffset).toLocaleString();
+                return convertDateTimeZone(d, timeZoneOffset).toLocaleString();
             }
-            return date.toLocaleString();
+            return d.toLocaleString();
         case 3: // timeformat_localTime  - 23:40:58              - timeformat_T - 1:45:30 PM
         case 13:
             if (utc) {
-                return date.toLocaleTimeString([], { timeZone: 'UTC' });
+                return d.toLocaleTimeString([], { timeZone: 'UTC' });
             }
             if (timeZoneOffset) {
-                return convertDateTimeZone(date, timeZoneOffset).toLocaleTimeString();
+                return convertDateTimeZone(d, timeZoneOffset).toLocaleTimeString();
             }
-            return date.toLocaleTimeString();
+            return d.toLocaleTimeString();
         case 12: // timeformat_localDate - 26.12.2018  - timeformat_d - 6/15/2009
         case 15:
             if (utc) {
-                return date.toLocaleDateString([], { timeZone: 'UTC' });
+                return d.toLocaleDateString([], { timeZone: 'UTC' });
             }
             if (timeZoneOffset) {
-                return convertDateTimeZone(date, timeZoneOffset).toLocaleDateString();
+                return convertDateTimeZone(d, timeZoneOffset).toLocaleDateString();
             }
-            return date.toLocaleDateString();
+            return d.toLocaleDateString();
         case 5: // timeparse_ISO8601
-            return date.toISOString();
+            return d.toISOString();
         case 6: // timeformat_ms
-            return date.getTime() - (new Date()).getTime();
+            return d.getTime() - (new Date()).getTime();
         case 7: // timeformat_sec
-            return Math.round((date.getTime() - (new Date()).getTime()) / TIME_1s);
+            return Math.round((d.getTime() - (new Date()).getTime()) / TIME_1s);
         case 8: // timeformat_min
-            return (Math.round((date.getTime() - (new Date()).getTime()) / TIME_1s) / 60);
+            return (Math.round((d.getTime() - (new Date()).getTime()) / TIME_1s) / 60);
         case 9: // timeformat_hour
-            return (Math.round((date.getTime() - (new Date()).getTime()) / TIME_1s) / 3600);
+            return (Math.round((d.getTime() - (new Date()).getTime()) / TIME_1s) / 3600);
         case 10: // timeformat_YYYYMMDDHHMMSS
             if (utc) {
-                return Number(date.getUTCFullYear() +
-                        pad2(date.getUTCMonth() + 1) +
-                        pad2(date.getUTCDate()) +
-                        pad2(date.getUTCHours()) +
-                        pad2(date.getUTCMinutes()) +
-                        pad2(date.getUTCSeconds()));
+                return Number(d.getUTCFullYear() +
+                        pad2(d.getUTCMonth() + 1) +
+                        pad2(d.getUTCDate()) +
+                        pad2(d.getUTCHours()) +
+                        pad2(d.getUTCMinutes()) +
+                        pad2(d.getUTCSeconds()));
             }
             if (timeZoneOffset) {
-                date = convertDateTimeZone(date, timeZoneOffset);
+                d = convertDateTimeZone(d, timeZoneOffset);
             }
-            return Number(date.getFullYear() +
-                    pad2(date.getMonth() + 1) +
-                    pad2(date.getDate()) +
-                    pad2(date.getHours()) +
-                    pad2(date.getMinutes()) +
-                    pad2(date.getSeconds()));
+            return Number(d.getFullYear() +
+                    pad2(d.getMonth() + 1) +
+                    pad2(d.getDate()) +
+                    pad2(d.getHours()) +
+                    pad2(d.getMinutes()) +
+                    pad2(d.getSeconds()));
         case 11: // timeformat_YYYYMMDD_HHMMSS
             if (utc) {
-                return Number(date.getUTCFullYear() +
-                        pad2(date.getUTCMonth() + 1) +
-                        pad2(date.getUTCDate()) + '.' +
-                        pad2(date.getUTCHours()) +
-                        pad2(date.getUTCMinutes()) +
-                        pad2(date.getUTCSeconds()));
+                return Number(d.getUTCFullYear() +
+                        pad2(d.getUTCMonth() + 1) +
+                        pad2(d.getUTCDate()) + '.' +
+                        pad2(d.getUTCHours()) +
+                        pad2(d.getUTCMinutes()) +
+                        pad2(d.getUTCSeconds()));
             }
             if (timeZoneOffset) {
-                date = convertDateTimeZone(date, timeZoneOffset);
+                d = convertDateTimeZone(d, timeZoneOffset);
             }
-            return Number(date.getFullYear() +
-                    pad2(date.getMonth() + 1) +
-                    pad2(date.getDate()) + '.' +
-                    pad2(date.getHours()) +
-                    pad2(date.getMinutes()) +
-                    pad2(date.getSeconds()));
+            return Number(d.getFullYear() +
+                    pad2(d.getMonth() + 1) +
+                    pad2(d.getDate()) + '.' +
+                    pad2(d.getHours()) +
+                    pad2(d.getMinutes()) +
+                    pad2(d.getSeconds()));
         case 16: // timeformat_weekday           - Montag, 22.12.
-            return _dateFormat(date, 'dddd, d.M.', utc, timeZoneOffset);
+            return _dateFormat(d, 'dddd, d.M.', utc, timeZoneOffset);
         case 17: // timeformat_weekday2          - heute 22.12., morgen 23.12., übermorgen 24.12., in 3 Tagen 25.12., Montag, 26.12.
-            return _dateFormat(date, 'xx, d.M.', utc, timeZoneOffset);
-        case 18: { // customISOstring(date, offset)
-            date = new Date(date); // copy instance
+            return _dateFormat(d, 'xx, d.M.', utc, timeZoneOffset);
+        case 18: { // customISOstring(d, offset)
+            d = new Date(d); // copy instance
             let offset = 0;
             if (!utc) {
                 if (!timeZoneOffset) {
-                    offset = date.getTimezoneOffset();
+                    offset = d.getTimezoneOffset();
                 } else {
                     offset = timeZoneOffset;
                 }
             }
             const h = Math.floor(Math.abs(offset) / 60);
             const m = Math.abs(offset) % 60;
-            date.setMinutes(date.getMinutes() - offset); // apply custom timezone
-            return date.getUTCFullYear() + '-' // return custom format
-                + pad2(date.getUTCMonth() + 1) + '-'
-                + pad2(date.getUTCDate()) + 'T'
-                + pad2(date.getUTCHours()) + ':'
-                + pad2(date.getUTCMinutes()) + ':'
-                + pad2(date.getUTCSeconds())
+            d.setMinutes(d.getMinutes() - offset); // apply custom timezone
+            return d.getUTCFullYear() + '-' // return custom format
+                + pad2(d.getUTCMonth() + 1) + '-'
+                + pad2(d.getUTCDate()) + 'T'
+                + pad2(d.getUTCHours()) + ':'
+                + pad2(d.getUTCMinutes()) + ':'
+                + pad2(d.getUTCSeconds())
                 + (offset === 0 ? 'Z' : (offset < 0 ? '+' : '-') + pad2(h) + ':' + pad2(m));
         }
         case 19: // workweek
-            return getWeekOfYear(date)[1];
+            return getWeekOfYear(d)[1];
         case 20: // workweek even
-            return !(getWeekOfYear(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
+            return !(getWeekOfYear(d)[1] % 2); // eslint-disable-line no-extra-boolean-cast
         case 21: // day of year
-            return getDayOfYear(date)[1]; // eslint-disable-line no-extra-boolean-cast
+            return getDayOfYear(d)[1]; // eslint-disable-line no-extra-boolean-cast
         case 22: // day of year even
-            return !(getDayOfYear(date)[1] % 2); // eslint-disable-line no-extra-boolean-cast
+            return !(getDayOfYear(d)[1] % 2); // eslint-disable-line no-extra-boolean-cast
     }
 
     const dNow = new Date();
-    const delay = (date.getTime() - dNow.getTime());
-    const weekOfYear = getWeekOfYear(date);
-    const dayOfYear = getDayOfYear(date);
+    const delay = (d.getTime() - dNow.getTime());
+    const weekOfYear = getWeekOfYear(d);
+    const dayOfYear = getDayOfYear(d);
     return {
-        date,
-        ts: date.getTime(),
-        timeUTCStr: date.toUTCString(),
-        timeISOStr: date.toISOString(),
+        d,
+        ts: d.getTime(),
+        timeUTCStr: d.toUTCString(),
+        timeISOStr: d.toISOString(),
         delay,
         delaySec: Math.round(delay / TIME_1s),
         lc: dNow.getTime(),
@@ -1647,7 +1748,7 @@ function getFormattedDateOut(date, format, utc, timeZoneOffset) {
 /**
  * check if string is integer
  * @param {any} val value to check
- * @return {bool} **true** if value is integer otherwise **false**
+ * @return {boolean} **true** if value is integer otherwise **false**
  */
 function _isInteger(val) {
     const digits = '1234567890';
@@ -1756,12 +1857,15 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset, dNow) {
                 x = 2;
                 y = 4;
             }
+            // @ts-ignore
             year = _getInt(val, i_val, x, y);
             if (year === null && typeof year !== 'undefined') {
                 return { value: null, error: 'invalid year of format "' + token + '"'};
             }
 
+            // @ts-ignore
             i_val += year.length;
+            // @ts-ignore
             if (year.length === 2) {
                 if (year > 70) {
                     year = 1900 + (year - 0);
@@ -1771,7 +1875,9 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset, dNow) {
             }
         } else if (token === 'MMM' || token === 'NNN' || token === 'MMMM') {
             month = 0;
+            // @ts-ignore
             for (let i = 0; i < _dateFormat.i18n.monthNames.length; i++) {
+                // @ts-ignore
                 const month_name = _dateFormat.i18n.monthNames[i];
                 if (val.substr(i_val, month_name.length).toLowerCase() === month_name.toLowerCase()) {
                     if (token === 'MMM' || ((token === 'NNN' || token === 'MMMM') && i > 11)) {
@@ -1790,7 +1896,9 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset, dNow) {
                 return { value: null, error: 'invalidmonth "' + month + '" of format "' + token + '"' };
             }
         } else if (token === 'EE' || token === 'E' || token === 'dddd' || token === 'ddd') {
+            // @ts-ignore
             for (let i = 0; i < _dateFormat.i18n.dayNames.length; i++) {
+                // @ts-ignore
                 const day_name = _dateFormat.i18n.dayNames[i];
                 if (val.substr(i_val, day_name.length).toLowerCase() === day_name.toLowerCase()) {
                     i_val += day_name.length;
@@ -1798,59 +1906,77 @@ function _getDateFromFormat(val, format, utc, timeZoneOffset, dNow) {
                 }
             }
         } else if (token === 'MM' || token === 'M') {
+            // @ts-ignore
             month = _getInt(val, i_val, token.length, 2);
             if (month === null || typeof month === 'undefined' || (month < 1) || (month > 12)) {
                 return { value: null, error: 'invalid month "' + month + '" of format "' + token + '"' };
             }
+            // @ts-ignore
             i_val += month.length;
         } else if (token === 'dd' || token === 'd') {
+            // @ts-ignore
             date = _getInt(val, i_val, token.length, 2);
             if (date === null || typeof date === 'undefined' || (date < 1) || (date > 31)) {
                 return { value: null, error: 'invalid date "' + date + '"' };
             }
+            // @ts-ignore
             i_val += date.length;
         } else if (token === 'hh' || token === 'h') {
+            // @ts-ignore
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || typeof hour === 'undefined' || (hour < 1) || (hour > 12)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
+            // @ts-ignore
             i_val += hour.length;
         } else if (token === 'HH' || token === 'H') {
+            // @ts-ignore
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || typeof hour === 'undefined' || (hour < 0) || (hour > 23)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
+            // @ts-ignore
             i_val += hour.length;
         } else if (token === 'kk' || token === 'k') {
+            // @ts-ignore
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || typeof hour === 'undefined' || (hour < 0) || (hour > 11)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
+            // @ts-ignore
             i_val += hour.length;
         } else if (token === 'KK' || token === 'K') {
+            // @ts-ignore
             hour = _getInt(val, i_val, token.length, 2);
             if (hour === null || typeof hour === 'undefined' || (hour < 1) || (hour > 24)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
+            // @ts-ignore
             i_val += hour.length;
             hour--;
         } else if (token === 'mm' || token === 'm') {
+            // @ts-ignore
             min = _getInt(val, i_val, token.length, 2);
             if (min === null || typeof min === 'undefined' || (min < 0) || (min > 59)) {
                 return { value: null, error: 'invalid hour "' + hour + '" of format "' + token + '"' };
             }
+            // @ts-ignore
             i_val += min.length;
         } else if (token === 'ss' || token === 's') {
+            // @ts-ignore
             sec = _getInt(val, i_val, token.length, 2);
             if (sec === null || typeof sec === 'undefined' || (sec < 0) || (sec > 59)) {
                 return { value: null, error: 'invalid sec "' + sec + '" of format "' + token + '"' };
             }
+            // @ts-ignore
             i_val += sec.length;
         } else if (token.toLowerCase() === 'lll' || token.toLowerCase() === 'll' || token.toLowerCase() === 'l') {
+            // @ts-ignore
             misec = _getInt(val, i_val, token.length, 3);
             if (misec === null || typeof misec === 'undefined' || (misec < 0) || (misec > 999)) {
                 return { value: null, error: 'invalid millisecond "' + misec + '" of format "' + token + '"' };
             }
+            // @ts-ignore
             i_val += misec.length;
             if ( token === 'L' && misec < 10) {
                 misec = misec * 100;
@@ -1972,10 +2098,13 @@ function _isTimestamp(str) {
  */
 function _parseDate(val, preferMonthFirst, utc, timeZoneOffset, dNow) {
     // console.debug('_parseDate val=' + val + ' - preferMonthFirst=' + preferMonthFirst); // eslint-disable-line
+    // @ts-ignore
     let res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.monthFirst : _dateFormat.parseDates.dateFirst, utc, timeZoneOffset, dNow);
     if (res !== null && typeof res !== 'undefined') { return res; }
+    // @ts-ignore
     res = _parseArray(val, (preferMonthFirst) ? _dateFormat.parseDates.dateFirst : _dateFormat.parseDates.monthFirst, utc, timeZoneOffset, dNow);
     if (res !== null && typeof res !== 'undefined') { return res; }
+    // @ts-ignore
     return _parseArray(val, _dateFormat.parseDates.general, utc, timeZoneOffset, dNow);
 }
 
@@ -2001,21 +2130,27 @@ function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset, dNow) {
         return result;
     }
 
+    // @ts-ignore
     let checkList = [_dateFormat.isoDateTime];
     if (preferMonthFirst) {
+        // @ts-ignore
         checkList = mix(_dateFormat.parseDates.monthFirst, _dateFormat.parseTimes, checkList);
+        // @ts-ignore
         checkList = mix(_dateFormat.parseDates.dateFirst, _dateFormat.parseTimes, checkList);
     } else {
+        // @ts-ignore
         checkList = mix(_dateFormat.parseDates.dateFirst, _dateFormat.parseTimes, checkList);
+        // @ts-ignore
         checkList = mix(_dateFormat.parseDates.monthFirst, _dateFormat.parseTimes, checkList);
     }
+    // @ts-ignore
     checkList = mix(_dateFormat.parseDates.general, _dateFormat.parseTimes, checkList);
     return _parseArray(val, checkList, utc, timeZoneOffset, dNow);
 }
 
 /**
  * parses a date string to given format definition
- * @param {string} val date string to parse
+ * @param {string} date date string to parse
  * @param {number|string} format Format definition, if it is a number a predefined format will be try
  * @param {Array.<string>} [dayNames] list of day names
  * @param {Array.<string>} [monthNames] list of month names
@@ -2028,14 +2163,17 @@ function _parseDateTime(val, preferMonthFirst, utc, timeZoneOffset, dNow) {
 function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, utc, timeZoneOffset, dNow) {
     // console.debug('parseDateFromFormat date=' + util.inspect(date, { colors: true, compact: 10, breakLength: Infinity }) + ' - format=' + util.inspect(format, { colors: true, compact: 10, breakLength: Infinity }) + '  [' + dayNames + '] - [' + monthNames + '] [' + dayDiffNames + ']'); // eslint-disable-line
     if (dayNames) {
+        // @ts-ignore
         _dateFormat.i18n.dayNames = dayNames;
     }
 
     if (monthNames) {
+        // @ts-ignore
         _dateFormat.i18n.monthNames = monthNames;
     }
 
     if (dayDiffNames) {
+        // @ts-ignore
         _dateFormat.i18n.dayDiffNames = dayDiffNames;
     }
 
@@ -2046,7 +2184,9 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
 
     let res = null;
 
+    // @ts-ignore
     if (isNaN(format)) { // timeparse_TextOther
+        // @ts-ignore
         res = _getDateFromFormat(date, format, utc, timeZoneOffset, dNow);
         if (res.error) {
             throw new Error('could not evaluate format of ' + date + ' (' + format + ') - ' + res.error);
@@ -2059,9 +2199,12 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
             if (res !== null && typeof res !== 'undefined') { return res; }
             res = _parseDate(val, preferMonthFirst, utc, timeZoneOffset, dNow);
             if (res !== null && typeof res !== 'undefined') { return res; }
+            // @ts-ignore
             res = _parseArray(val, _dateFormat.parseTimes, utc, timeZoneOffset, dNow);
             if (res !== null && typeof res !== 'undefined') { return res; }
+            // @ts-ignore
             res = Date.parse(val);
+            // @ts-ignore
             if (!isNaN(res)) {
                 return new Date(res);
             }
@@ -2092,13 +2235,13 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
                 break;
             case 4: {// timeformat_YYYYMMDDHHMMSS
                 date = String(date);
-                const year = date.substr(0, 4);
-                const month = date.substr(4, 2);
-                const day = date.substr(6, 2);
-                const hours = date.substr(8, 2);
-                const mins = date.substr(10, 2);
-                const secs = date.substr(12, 2);
-                const mss = date.substr(14);
+                const year = parseInt(date.substr(0, 4));
+                const month = parseInt(date.substr(4, 2));
+                const day = parseInt(date.substr(6, 2));
+                const hours = parseInt(date.substr(8, 2));
+                const mins = parseInt(date.substr(10, 2));
+                const secs = parseInt(date.substr(12, 2));
+                const mss = parseInt(date.substr(14));
                 if (utc) {
                     res = Date.UTC(year, month, day, hours, mins, secs, mss);
                 } else if (timeZoneOffset) {
@@ -2110,13 +2253,13 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
             }
             case 5: { // timeformat_YYYYMMDD_HHMMSS
                 date = String(date);
-                const year = date.substr(0, 4);
-                const month = date.substr(4, 2);
-                const day = date.substr(6, 2);
-                const hours = date.substr(9, 2);
-                const mins = date.substr(11, 2);
-                const secs = date.substr(13, 2);
-                const mss = date.substr(15);
+                const year = parseInt(date.substr(0, 4));
+                const month = parseInt(date.substr(4, 2));
+                const day = parseInt(date.substr(6, 2));
+                const hours = parseInt(date.substr(9, 2));
+                const mins = parseInt(date.substr(11, 2));
+                const secs = parseInt(date.substr(13, 2));
+                const mss = parseInt(date.substr(15));
                 if (utc) {
                     res = Date.UTC(year, month, day, hours, mins, secs, mss);
                 } else if (timeZoneOffset) {
@@ -2127,6 +2270,7 @@ function parseDateFromFormat(date, format, dayNames, monthNames, dayDiffNames, u
                 break;
             }
             default: {
+                // @ts-ignore
                 res = getDateOfText(date);
                 break;
             }

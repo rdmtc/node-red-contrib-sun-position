@@ -24,8 +24,42 @@
  * moon-position:
  *********************************************/
 'use strict';
+/** --- Type Defs ---
+   * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
+   * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
+   * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
+   * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+   */
 
-module.exports = function (RED) {
+/**
+  * @typedef {Object} IMoonPositionNodeInstance Extensions for the nodeInstance object type
+  * @property {IPositionConfigNode} positionConfig    -   tbd
+  *
+  * @property {string} topic output topic
+  * @property {Array} rules output topic
+  *
+  * @property {*} start type of start value
+  * @property {string} startType start value
+  * @property {*} startOffset start offset value
+  * @property {string} startOffsetType type of the start offset value
+  * @property {number} startOffsetMultiplier start offset multipier
+  *
+  * @property {*} end type of end value
+  * @property {string} endType end value
+  * @property {*} endOffset end offset value
+  * @property {string} endOffsetType type of the end offset value
+  * @property {number} endOffsetMultiplier end offset multipier
+  *
+  * @property {*} azimuthPos end offset multipier
+  */
+
+/**
+  * @typedef {IMoonPositionNodeInstance & runtimeNode} IMoonPositionNode Combine nodeInstance with additional, optional functions
+  */
+/******************************************************************************************/
+/** Export the function that defines the node
+  * @type {runtimeRED} */
+module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
     const path = require('path');
 
@@ -33,24 +67,28 @@ module.exports = function (RED) {
     const util = require('util');
 
     /**
-     * moonPositionNode
-     * @param {*} config - configuration
+     * standard Node-Red Node handler for the moonPositionNode
+     * @param {*} config the Node-Red Configuration property of the Node
      */
     function moonPositionNode(config) {
         RED.nodes.createNode(this, config);
-        // Retrieve the config node
-        this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        this.topic = config.topic || '';
-        this.rules = config.rules || [];
-        this.azimuthPos = {};
+        /** Copy 'this' object in case we need it in context of callbacks of other functions.
+         * @type {IMoonPositionNode}
+         */
+        // @ts-ignore
         const node = this;
-        if (!this.positionConfig) {
+        // Retrieve the config node
+        node.positionConfig = RED.nodes.getNode(config.positionConfig);
+        node.topic = config.topic || '';
+        node.rules = config.rules || [];
+        node.azimuthPos = {};
+        if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
         }
 
-        this.on('input', function (msg, send, done) {
+        node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
@@ -59,29 +97,29 @@ module.exports = function (RED) {
                 const errorStatus = '';
                 const dNow = hlp.getNowTimeStamp(this, msg);
 
-                if (!this.positionConfig) {
+                if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
                     node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
                     return null;
                 }
-                const ports = new Array(this.rules.length);
+                const ports = new Array(node.rules.length);
 
                 ports[0] = RED.util.cloneMessage(msg);
-                ports[0].payload = this.positionConfig.getMoonCalc(dNow, true, true, msg.latitude || msg.lat,  msg.longitude || msg.lon);
+                ports[0].payload = node.positionConfig.getMoonCalc(dNow, true, true, msg.latitude || msg.lat,  msg.longitude || msg.lon);
 
-                ports[0].topic = this.topic;
+                ports[0].topic = node.topic;
                 if (!ports[0].payload.azimuth) {
-                    // this.error('Azimuth could not calculated!');
-                    send(ports); // this.send(ports);
+                    // node.error('Azimuth could not calculated!');
+                    send(ports); // node.send(ports);
                     done('Azimuth could not calculated!', msg);
                     return null;
                 }
 
                 ports[0].payload.pos = [];
                 ports[0].payload.posChanged = false;
-                for (let i = 0; i < this.rules.length; i += 1) {
-                    const rule = this.rules[i];
+                for (let i = 0; i < node.rules.length; i += 1) {
+                    const rule = node.rules[i];
                     const low = getNumProp(node, msg, rule.valueLowType, rule.valueLow);
                     const high = getNumProp(node, msg, rule.valueHighType, rule.valueHigh);
                     const chk = hlp.checkLimits(ports[0].payload.azimuth, low, high);
@@ -100,7 +138,7 @@ module.exports = function (RED) {
                 node.azimuthPos = ports[0].payload.pos;
 
                 if (errorStatus) {
-                    this.status({
+                    node.status({
                         fill:   'red',
                         shape:  'dot',
                         text:   errorStatus
@@ -115,18 +153,18 @@ module.exports = function (RED) {
                         text = azimuth + '/' + altitude + ' - ' + node.positionConfig.toDateTimeString(ports[0].payload.lastUpdate);
                         fill = 'grey';
                     }
-                    this.status({
+                    node.status({
                         fill,
                         shape:  'dot',
                         text
                     });
                 }
-                send(ports); // this.send(ports);
+                send(ports); // node.send(ports);
                 done();
                 return null;
             } catch (err) {
                 node.log(err.message);
-                node.log(util.inspect(err, Object.getOwnPropertyNames(err)));
+                node.log(util.inspect(err));
                 node.status({
                     fill: 'red',
                     shape: 'ring',
