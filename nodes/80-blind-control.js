@@ -36,10 +36,8 @@
 /**
  * @typedef {Object} IBlindControlNodeInstance Extensions for the nodeInstance object type
  * @property {Object} nodeData get/set generic Data of the node
- * @property {Object} sunData    -   the sun data Object
  * @property {Object} windowSettings    -   the window settings Object
  * @property {number} smoothTime smoothTime
- * @property {boolean} levelReverse    -   indicator if the Level is in reverse order
  * @property {Array.<Object>} oversteers    -   tbd
  * @property {Object} oversteer    -   tbd
  * @property {Object} level    -   tbd
@@ -147,7 +145,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      * @param {ITimeObject} oNow the now Object
      */
     function checkOversteer(node, msg, tempData, sunPosition, oNow) {
-        // node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity })}`);
+        // node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);
         try {
             node.oversteer.isChecked = true;
             return node.oversteers.find(el => ((el.mode === 0 || el.mode === node.sunData.mode) && (!el.onlySunInWindow || sunPosition.InWindow) &&
@@ -172,7 +170,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.log(util.inspect(err));
         }
-        // node.debug('node.oversteers=' + util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity }));
+        // node.debug('node.oversteers=' + util.inspect(node.oversteers, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
         return undefined;
     }
     /******************************************************************************************/
@@ -184,7 +182,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      * @returns blind level as number or NaN if not defined
      */
     function getBlindPosFromTI(node, msg, type, value, def) {
-        // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} nodeData=${ util.inspect(node.nodeData, { colors: true, compact: 10, breakLength: Infinity }) }`);
+        // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} nodeData=${ util.inspect(node.nodeData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }) }`);
         def = def || NaN;
         if (type === 'none' || type === ''|| type === 'levelND') {
             return def;
@@ -344,7 +342,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = node.positionConfig.getSunCalc(oNow.now, false, false);
-        // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
+        // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
 
         const azimuthStart = node.positionConfig.getFloatProp(node, msg, node.windowSettings.azimuthStartType, node.windowSettings.azimuthStart, NaN, (result, _obj) => {
             if (result !== null && typeof result !== 'undefined') {
@@ -570,7 +568,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             if (rule.time && !rule.time.end) { continue; }
             const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
             if (res) {
-                // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
+                node.debug(`old 1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }) }`);
                 if (res.level.operator === ctrlLib.cRuleType.slatOversteer) {
                     ruleSlatOvs = res;
                 } else if (res.level.operator === ctrlLib.cRuleType.topicOversteer) {
@@ -596,7 +594,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (rule.time && !rule.time.start) { continue; } // - From: timeOp === ctrlLib.cRuleTime.from
                 const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
                 if (res) {
-                    // node.debug(`2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
+                    node.debug(`old 2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }) }`);
                     if (res.level.operator === ctrlLib.cRuleType.slatOversteer) {
                         ruleSlatOvs = res;
                     } else if (res.level.operator === ctrlLib.cRuleType.topicOversteer) {
@@ -625,23 +623,23 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         if (ruleSlatOvs !== rule.ruleSlatOvs && (ctrlLib.isNullOrUndefined(ruleSlatOvs) !== ctrlLib.isNullOrUndefined(rule.ruleSlatOvs))) {
             node.error('not equal result ruleSlatOvs!');
-            node.debug('ruleSlatOvs ' + util.inspect(ruleSlatOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule.ruleSlatOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleSlatOvs old ' + util.inspect(ruleSlatOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleSlatOvs new ' + util.inspect(rule.ruleSlatOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         }
         if (ruleTopicOvs !== rule.ruleTopicOvs && (ctrlLib.isNullOrUndefined(ruleTopicOvs) !== ctrlLib.isNullOrUndefined(rule.ruleTopicOvs))) {
             node.error('not equal result ruleTopicOvs!');
-            node.debug('ruleTopicOvs ' + util.inspect(ruleTopicOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule.ruleTopicOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleTopicOvs old ' + util.inspect(ruleTopicOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleTopicOvs new ' + util.inspect(rule.ruleTopicOvs, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         }
         if (ruleSelMin !== rule.ruleSelMin && (ctrlLib.isNullOrUndefined(ruleSelMin) !== ctrlLib.isNullOrUndefined(rule.ruleSelMin))) {
             node.error('not equal result ruleSelMin!');
-            node.debug('ruleSelMin ' + util.inspect(ruleSelMin, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule.ruleSelMin, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleSelMin old ' + util.inspect(ruleSelMin, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleSelMin new ' + util.inspect(rule.ruleSelMin, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         }
         if (ruleSelMax !== rule.ruleSelMax && (ctrlLib.isNullOrUndefined(ruleSelMax) !== ctrlLib.isNullOrUndefined(rule.ruleSelMax))) {
             node.error('not equal result ruleSelMax!');
-            node.debug('ruleSelMax ' + util.inspect(ruleSelMax, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
-            node.debug('rule ' + util.inspect(rule.ruleSelMax, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleSelMax old ' + util.inspect(ruleSelMax, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
+            node.debug('ruleSelMax new ' + util.inspect(rule.ruleSelMax, { colors: true, compact: 10, depth: 4, maxStringLength: 1000, breakLength: Infinity }));
         }
         const livingRuleData = {};
 
@@ -674,7 +672,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         livingRuleData.hasMinimum = false;
         if (ruleSelMin) {
             const lev = getBlindPosFromTI(node, msg, ruleSelMin.level.type, ruleSelMin.level.value, -1);
-            // node.debug('ruleSelMin ' + lev + ' -- ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
+            // node.debug('ruleSelMin ' + lev + ' -- ' + util.inspect(ruleSelMin, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
             if (lev > -1) {
                 livingRuleData.levelMinimum = lev;
                 livingRuleData.hasMinimum = true;
@@ -695,7 +693,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         livingRuleData.hasMaximum = false;
         if (ruleSelMax) {
             const lev = getBlindPosFromTI(node, msg, ruleSelMax.level.type, ruleSelMax.level.value, -1);
-            // node.debug('ruleSelMax ' + lev + ' -- ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }) );
+            // node.debug('ruleSelMax ' + lev + ' -- ' + util.inspect(ruleSelMax, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }) );
             if (lev > -1) {
                 livingRuleData.levelMaximum = lev;
                 livingRuleData.hasMaximum = true;
@@ -809,7 +807,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
-            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);
 
             if (ruleSel.level.operator === ctrlLib.cRuleType.off) {
                 livingRuleData.isOff = true;
@@ -844,7 +842,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 checkRuleForAT(node.rules.data[node.rules.firstFrom]);
             }
         }
-        // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);
         return livingRuleData;
     }
     /******************************************************************************************/

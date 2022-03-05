@@ -1,15 +1,20 @@
 {
 	"compilerOptions": {
-	  "checkJs": true,
-	  "module": "commonJS",
-	  "target": "es6",
-	  "lib": [
-		  "es2019"
-	  ],
-	  "moduleResolution": "node",
-	  "sourceMap": true,
-	  "alwaysStrict": true,
-	  "resolveJsonModule": true
+		"baseUrl": "./",
+	 	"checkJs": true,
+		"module": "commonJS",
+		"target": "es6",
+		"lib": [
+			"es2019"
+		],
+		"paths": {
+			"@types": ["nodes/types"],
+			"@nodes": ["nodes"]
+		},
+		"sourceMap": true,
+		"alwaysStrict": true,
+		"resolveJsonModule": true
 	},
+	"include": ["./nodes/types/typedefs.js"],
 	"exclude": ["node_modules", "**/node_modules/*", "temp", "**/temp/*", "backup", "**/backup/*", "examples", "**/examples/*"]
   }

@@ -22,7 +22,14 @@ this software without specific prior written permission.
 -->
 
 <script type="text/javascript">
-    (function() {
+    // @ts-cehck
+    /* eslint-env browser es6 */
+    // Isolate this code
+    (function () {
+        'use strict';
+        /** --- Type Defs ---
+         * @typedef {import("node-red").Red} Red
+         */
         const cNBC_MODE_OFF = 0;
         const cNBC_MODE_MAXIMIZE = 1;
         const cNBC_MODE_MINIMIZE = 3;
@@ -68,6 +75,7 @@ this software without specific prior written permission.
             return { min:Math.min(min, max), max:Math.max(min, max) };
         }
 
+        /** @type {Red} */
         RED.nodes.registerType('blind-control', {
             category: 'time and astro',
             color: '#FFCC66',
@@ -501,6 +509,7 @@ this software without specific prior written permission.
             },
             paletteLabel() { return this._('blind-control.label.blind-control-palette'); },
             oneditprepare() {
+                // @ts-check
                 /** resizes a rule container */
                 function resizeRuleContainer() {
                     try {
@@ -1194,7 +1203,7 @@ this software without specific prior written permission.
                                     } else {
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelND');
                                     }
-                                    if (data.slat.type !== 'none') {
+                                    if (data.slat && data.slat.type !== 'none') {
                                         result += '<div class="indent-slatPos-text"> <i class="fa fa-slack" aria-hidden="true"></i><span>';
                                         result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlat');
                                         result += ': </span> <var>';
@@ -1233,7 +1242,7 @@ this software without specific prior written permission.
                                     result += ': </span><var>';
                                     result += RED.nodes.getType('position-config').getRDGNodeValLbl(node, data.level.type, data.level.value, null, null, null, length);
                                     result += '</var></div>';
-                                } else if (data.level.operator === cNBC_RULE_OP.slatOversteer) {
+                                } else if (data.level.operator === cNBC_RULE_OP.slatOversteer && data.slat) {
                                     result += '<div class="indent-slatPos-text"> <i class="fa fa-slack" aria-hidden="true"></i><span>';
                                     result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleSlatOversteer');
                                     result += ': </span><var>';
@@ -3858,6 +3867,10 @@ this software without specific prior written permission.
                                 delete result.topic;
                                 delete result.resetOverwrite;
                                 delete result.importance;
+                            } else {
+                                if (result.slat.type === 'none') {
+                                    delete result.slat;
+                                }
                             }
 
                             $dialogConditionContainer.editableList('items').each(function(_i) {
@@ -4043,6 +4056,12 @@ this software without specific prior written permission.
                     function _dialogSaveData() {
                         const data = _dialogGetData();
                         data.description = getRuleDescription(node, selFields, data);
+                        if (data.level) delete data.level.operatorText;
+                        if (data.conditions) data.conditions.forEach(p => {
+                            delete p.operatorText;
+                            delete p.conditionText;
+                        });
+
                         $dialogDataRow.data('ruleData', JSON.stringify(data));
                         $('#rule-name-'+dialogDataIndex).text((data.name || 'rule ' + (dialogDataIndex + 1)) + ((data.importance > 0) ? ' ['+data.importance+']' : ''));
                         $('#rule-description-'+dialogDataIndex).html(data.description);
@@ -4147,6 +4166,7 @@ this software without specific prior written permission.
                     });
             },
             oneditsave() {
+                // @ts-check
                 const node = this;
                 node.rules = [];
                 $('#node-input-rule-container').editableList('items').each(function (_i) {

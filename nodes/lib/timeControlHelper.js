@@ -250,7 +250,7 @@ function checkOverrideReset(node, msg, oNow, isSignificant) {
     if (isSignificant) {
         hlp.getMsgBoolValue(msg, ['reset','resetOverwrite'], 'resetOverwrite',
             val => {
-                node.debug(`reset val="${util.inspect(val, { colors: true, compact: 10, breakLength: Infinity })  }"`);
+                node.debug(`reset val="${util.inspect(val, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })  }"`);
                 if (val) {
                     if (node.nodeData.overwrite && node.nodeData.overwrite.active) {
                         node.log(`Overwrite reset by incoming message`);
@@ -544,19 +544,19 @@ function compareRules(node, msg, rule, cmp, data) {
 function checkRules(node, msg, oNow, tempData) {
     // node.debug('checkRules --------------------');
     prepareRules(node, msg, tempData, oNow.now);
-    // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
+    // node.debug(`checkRules rules.count=${node.rules.count}, rules.last1stRun=${node.rules.last1stRun}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
     const result = {
         ruleindex : -1,
         ruleSel : null
     };
 
-    for (let i = 0; i <= node.rules.lastUntil; ++i) {
+    for (let i = 0; i <= node.rules.last1stRun; ++i) {
         const rule = node.rules.data[i];
-        node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+        // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
         if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.last) { continue; }
         const res = compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow); // now is less time
         if (res) {
-            node.debug('1. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+            // node.debug('new 1. ruleSel ' + util.inspect(res, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
             if (res.level.operator === cRuleType.slatOversteer) {
                 result.ruleSlatOvs = res;
             } else if (res.level.operator === cRuleType.topicOversteer) {
@@ -581,7 +581,7 @@ function checkRules(node, msg, oNow, tempData) {
             if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.first) { continue; }
             const res = compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow); // now is greater time
             if (res) {
-                node.debug('2. ruleSel ' + util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }));
+                // node.debug('new 2. ruleSel ' + util.inspect(res, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
                 if (res.level.operator === cRuleType.slatOversteer) {
                     result.ruleSlatOvs = res;
                 } else if (res.level.operator === cRuleType.topicOversteer) {
@@ -709,6 +709,7 @@ function initializeCtrl(REDLib, node, config) {
 
     // Prepare Rules
     node.rules.count = node.rules.data.length;
+    node.rules.last1stRun = node.rules.count -1;
     node.rules.lastUntil = node.rules.count -1;
     node.rules.firstFrom = node.rules.lastUntil;
     node.rules.firstTimeLimited = node.rules.count;
@@ -880,16 +881,10 @@ function initializeCtrl(REDLib, node, config) {
                     operatorText    : rule.levelOpText || RED._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')
                 };
             }
-            if (!rule.slat) {
-                rule.slat = {
-                    type            : 'str',
-                    value           : ''
-                };
-            }
             if ((rule.level.operator === 3) || (rule.level.operator === 4)) { // 3 -> ⭳✋ reset minimum; 4 -> ⭱️✋ reset maximum
-                rule.level.operator.type = 'levelND';
-                rule.level.operator.value = '';
-                rule.level.operator = rule.level.operator - 2;
+                rule.level.type = 'levelND';
+                rule.level.value = '';
+                rule.level.operator = cRuleType.absolute; // rule.level.operator - 2;
             }
             delete rule.levelType;
             delete rule.levelValue;
@@ -917,8 +912,12 @@ function initializeCtrl(REDLib, node, config) {
         if (rule.payload && !('next' in rule)) {
             rule.payload.next = true;
         }
-        rule.execUse = cNBC_RULE_EXEC.first;
-        if (rule.exec === cNBC_RULE_EXEC.last || (rule.time && rule.time.start && !rule.time.end)) {
+
+        rule.execUse = rule.exec;
+        if (rule.exec === cNBC_RULE_EXEC.first || (rule.time && !rule.time.start && rule.time.end)) {
+            rule.execUse = cNBC_RULE_EXEC.first;
+            node.rules.last1stRun = i;
+        } else if (rule.exec === cNBC_RULE_EXEC.last || (rule.time && rule.time.start && !rule.time.end)) {
             rule.execUse = cNBC_RULE_EXEC.last;
         }
 
@@ -926,6 +925,18 @@ function initializeCtrl(REDLib, node, config) {
         rule.name = rule.name || 'rule ' + rule.pos;
         rule.enabled = !(rule.enabled === false || rule.enabled === 'false');
         rule.resetOverwrite = hlp.isTrue(rule.resetOverwrite === true) ? true : false;
+
+        if (rule.level) {
+            if (!rule.slat) {
+                rule.slat = {
+                    type            : 'none',
+                    value           : ''
+                };
+            }
+            if (rule.level.type === 'levelND') {
+                rule.level.operator = cRuleType.absolute;
+            }
+        }
         if (rule.payload || (rule.level && (rule.level.operator === cRuleType.absolute))) {
             rule.importance = Number(rule.importance) || 0;
             node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
