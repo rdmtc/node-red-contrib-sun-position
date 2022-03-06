@@ -24,6 +24,7 @@
 /********************************************
  * clock-timer:
  *********************************************/
+'use strict';
 /** --- Type Defs ---
  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
@@ -33,7 +34,6 @@
  * @typedef {import("./lib/timeControlHelper.js").ITimeControlNodeInstance} ITimeControlNodeInstance
  */
 
-// IClockTimerNodeInstance
 /**
  * @typedef {Object} IClockTimerNodeInstance Extensions for the nodeInstance object type
  * @property {Object} nodeData get/set generic Data of the node
@@ -42,16 +42,7 @@
  * @property {Object} oversteer    -   tbd
  * @property {Object} rules    -   tbd
  * @property {Object} payload    -   tbd
- * @property {Object} previousData    -   tbd
  * @property {Array.<Object>} results    -   tbd
- *
- * @property {Object} autoTrigger autotrigger options
- * @property {NodeJS.Timeout} autoTriggerObj autotrigger options
- *
- * @property {Object} startDelayTimeOut    -   tbd
- * @property {NodeJS.Timeout} startDelayTimeOutObj    -   tbd
-
- * @property {function} setState function for settign the state of the node
  * ... obviously there are more ...
  */
 
@@ -72,8 +63,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * check if a manual overwrite should be set
-     * @param {*} node node data
-     * @param {*} msg message object
+     * @param {IClockTimerNode} node node data
+     * @param {Object} msg message object
      * @param {ITimeObject} oNow the *current* date Object
      * @returns {boolean} true if override is active, otherwise false
      */
@@ -180,7 +171,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * changes the rule settings
-     * @param {Object} node node data
+     * @param {IClockTimerNode} node node data
      * @param {number} [rulePos] the position of the rule which should be changed
      * @param {string} [ruleName] the name of the rule which should be changed
      * @param {Object} [ruleData] the properties of the rule which should be changed
@@ -198,7 +189,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * check all rules and determinate the active rule
-     * @param {Object} node node data
+     * @param {IClockTimerNode} node node data
      * @param {Object} msg the message object
      * @param {ITimeObject} oNow the *current* date Object
      * @param {Object} tempData the object storing the temporary caching data
@@ -206,115 +197,57 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      */
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
-        const livingRuleData = {};
         ctrlLib.prepareRules(node, msg, tempData, oNow.now);
-        // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
+        const rule = ctrlLib.getActiveRules(node, msg, oNow, tempData);
+        const livingRuleData = {};
 
-        let ruleSel = null;
-        let ruleindex = -1;
-        // node.debug('first loop count:' + node.rules.count + ' lastuntil:' + node.rules.lastUntil);
-        for (let i = 0; i <= node.rules.lastUntil; ++i) {
-            const rule = node.rules.data[i];
-            // node.debug('rule ' + rule.time.operator + ' - ' + (rule.time.operator !== ctrlLib.cRuleTime.from) + ' - ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
-            if (!rule.enabled) { continue; }
-            if (rule.time && rule.time.operator === ctrlLib.cRuleTime.from) { continue; }
-            // const res = fktCheck(rule, r => (r >= nowNr));
-            const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
-            if (res) {
-                // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
-                ruleSel = res;
-                ruleindex = i;
-                break;
-            }
-        }
-
-        if (!ruleSel || (ruleSel.time && ruleSel.time.operator === ctrlLib.cRuleTime.from) ) {
-            // node.debug('--------- starting second loop ' + node.rules.count);
-            for (let i = (node.rules.count - 1); i >= 0; --i) {
-                const rule = node.rules.data[i];
-                // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noUntil=${rule.time.operator !== cRuleUntil} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
-                if (!rule.enabled) { continue; }
-                if (rule.time && rule.time.operator === ctrlLib.cRuleTime.until) { continue; } // - From: timeOp === ctrlLib.cRuleTime.from
-                const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
-                if (res) {
-                    // node.debug(`2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
-                    ruleSel = res;
-                    break;
-                }
-            }
-        }
-
-        const checkRuleForAT = rule => {
-            if (!rule.time) {
-                return;
-            }
-            const num = ctrlLib.getRuleTimeData(node, msg, rule, oNow);
-            if (num > oNow.nowNr) {
-                node.debug('autoTrigger set to rule ' + rule.pos);
-                const diff = num - oNow.nowNr;
-                node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                node.autoTrigger.type = 2; // next rule
-            }
-        };
-        if (ruleSel) {
-            if (node.autoTrigger) {
-                if (ruleSel.time && ruleSel.timeData.ts > oNow.nowNr) {
-                    node.debug('autoTrigger set to rule ' + ruleSel.pos + ' (current)');
-                    const diff = ruleSel.timeData.ts - oNow.nowNr;
-                    node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                    node.autoTrigger.type = 1; // current rule end
-                } else {
-                    for (let i = (ruleindex+1); i < node.rules.count; ++i) {
-                        const rule = node.rules.data[i];
-                        if (!rule.time) {
-                            continue;
-                        }
-                        checkRuleForAT(rule);
-                    }
-                    // check first rule, maybe next day
-                    if ((node.autoTrigger.type !== 2) && (node.rules.firstTimeLimited < node.rules.count)) {
-                        checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
-                    }
-                }
-            }
-            // ruleSel.text = '';
-            // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
-            livingRuleData.id = ruleSel.pos;
-            livingRuleData.name = ruleSel.name;
-            livingRuleData.importance = ruleSel.importance;
-            livingRuleData.resetOverwrite = ruleSel.resetOverwrite;
+        if (rule.ruleSel) {
+            // rule.ruleSel.text = '';
+            // node.debug('rule.ruleSel ' + util.inspect(rule.ruleSel, {colors:true, compact:10, breakLength: Infinity }));
+            livingRuleData.id = rule.ruleSel.pos;
+            livingRuleData.name = rule.ruleSel.name;
+            livingRuleData.importance = rule.ruleSel.importance;
+            livingRuleData.resetOverwrite = rule.ruleSel.resetOverwrite;
             livingRuleData.code = 4;
-            livingRuleData.topic = ruleSel.topic;
+            livingRuleData.topic = rule.ruleSel.topic;
 
             livingRuleData.active = true;
-            livingRuleData.outputValue = ruleSel.outputValue;
-            livingRuleData.outputType = ruleSel.outputType;
+            // livingRuleData.outputValue = rule.ruleSel.outputValue;
+            // livingRuleData.outputType = rule.ruleSel.outputType;
 
-            livingRuleData.conditional = ruleSel.conditional;
-            livingRuleData.timeLimited = (!!ruleSel.time);
-            livingRuleData.payloadData = ruleSel.payload;
-            const data = { number: ruleSel.pos, name: ruleSel.name };
+            livingRuleData.conditional = rule.ruleSel.conditional;
+            livingRuleData.timeLimited = (!!rule.ruleSel.time);
+            livingRuleData.payloadData = rule.ruleSel.payload;
+            const data = { number: rule.ruleSel.pos, name: rule.ruleSel.name };
             let name = 'rule';
-            if (ruleSel.conditional) {
-                livingRuleData.conditon = ruleSel.conditon;
-                data.text = ruleSel.conditon.text;
-                data.textShort = ruleSel.conditon.textShort;
+            if (rule.ruleSel.conditional) {
+                livingRuleData.conditon = rule.ruleSel.conditonResult;
+                data.text = rule.ruleSel.conditonResult.text;
+                data.textShort = rule.ruleSel.conditonResult.textShort;
                 name = 'ruleCond';
             }
-            if (ruleSel.time && ruleSel.timeData) {
-                livingRuleData.time = ruleSel.timeData;
-                livingRuleData.time.timeLocal = node.positionConfig.toTimeString(ruleSel.timeData.value);
-                livingRuleData.time.timeLocalDate = node.positionConfig.toDateString(ruleSel.timeData.value);
-                livingRuleData.time.dateISO= ruleSel.timeData.value.toISOString();
-                livingRuleData.time.dateUTC= ruleSel.timeData.value.toUTCString();
-                data.timeOp = ruleSel.time.operatorText;
-                data.timeLocal = livingRuleData.time.timeLocal;
-                data.time = livingRuleData.time.dateISO;
-                name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
+            if (rule.ruleSel.time && rule.ruleSel.timeResult) {
+                livingRuleData.time = rule.ruleSel.timeResult;
+                if (livingRuleData.time.start) {
+                    livingRuleData.time.start.timeLocal = node.positionConfig.toTimeString(rule.ruleSel.timeResult.start.value);
+                    livingRuleData.time.start.timeLocalDate = node.positionConfig.toDateString(rule.ruleSel.timeResult.start.value);
+                    livingRuleData.time.start.dateISO= rule.ruleSel.timeResult.start.value.toISOString();
+                    livingRuleData.time.start.dateUTC= rule.ruleSel.timeResult.start.value.toUTCString();
+                }
+                if (livingRuleData.time.end) {
+                    livingRuleData.time.end.timeLocal = node.positionConfig.toTimeString(rule.ruleSel.timeResult.end.value);
+                    livingRuleData.time.end.timeLocalDate = node.positionConfig.toDateString(rule.ruleSel.timeResult.end.value);
+                    livingRuleData.time.end.dateISO= rule.ruleSel.timeResult.end.value.toISOString();
+                    livingRuleData.time.end.dateUTC= rule.ruleSel.timeResult.end.value.toUTCString();
+                }
+                // data.timeOp = rule.ruleSel.time.operatorText;
+                // data.timeLocal = livingRuleData.time.timeLocal;
+                // data.time = livingRuleData.time.dateISO;
+                name = (rule.ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
             livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
-            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);
             return livingRuleData;
         }
         livingRuleData.active = false;
@@ -335,16 +268,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.default');
         livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.default');
 
-        if (node.autoTrigger && node.rules && node.rules.count > 0) {
-            // check first rule, maybe next day
-            if (node.rules.firstTimeLimited < node.rules.count) {
-                checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
-            }
-            if (node.rules.firstTimeLimited !== node.rules.firstFrom) {
-                checkRuleForAT(node.rules.data[node.rules.firstFrom]);
-            }
-        }
-        // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);
         return livingRuleData;
     }
     /******************************************************************************************/
@@ -398,7 +322,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         if (config.autoTrigger) {
             node.autoTrigger = {
-                defaultTime : parseInt(config.autoTriggerTime) || 20 * 60000 // 20min
+                defaultTime : parseInt(config.autoTriggerTime) || 20 * 60000, // 20min
+                type: 0,
+                time: 0
             };
         }
 
@@ -439,38 +365,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         };
 
         /**
-         * set the state of the node
-         */
-        this.setState = pLoad => {
-            const code = node.reason.code;
-            let shape = 'ring';
-            let fill = 'yellow';
-
-            if (isNaN(code)) {
-                fill = 'red'; // block
-                shape = 'dot';
-            } else if (code <= 3) {
-                fill = 'blue'; // override
-            } else if (code === 4 || code === 15 || code === 16) {
-                fill = 'grey'; // rule
-            } else if (code === 1 || code === 8) {
-                fill = 'green'; // not in window or oversteerExceeded
-            }
-
-            node.reason.stateComplete = node.reason.state ;
-            if (pLoad === null || typeof pLoad !== 'object') {
-                node.reason.stateComplete = hlp.clipStrLength(''+pLoad,20) + ' - ' + node.reason.stateComplete;
-            } else if (typeof pLoad === 'object') {
-                node.reason.stateComplete = hlp.clipStrLength(JSON.stringify(pLoad),20) + ' - ' + node.reason.stateComplete;
-            }
-            node.status({
-                fill,
-                shape,
-                text: node.reason.stateComplete
-            });
-        };
-
-        /**
          * handles the input of a message object to the node
          */
         node.on('input', function (msg, send, done) {
@@ -498,7 +392,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             break;
                         /* advanced Settings */
                         case 'setAutoTriggerTime':
-                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime; // payload of 0 makes no sense, use then default
+                            node.autoTrigger = Object.assign(node.autoTrigger ,{ defaultTime : parseInt(msg.payload) || node.autoTrigger.defaultTime }); // payload of 0 makes no sense, use then default
                             break;
                         case 'setContextStore':
                             node.contextStore = msg.payload || node.contextStore;
@@ -610,7 +504,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.startDelay', {date:node.positionConfig.toTimeString(node.startDelayTimeOut)});
                     node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.startDelay', {dateISO:node.startDelayTimeOut.toISOString()});
                 }
-                node.setState(node.payload.current);
+
                 let topic = node.payload.topic || msg.topic;
                 const replaceAttrs = {
                     name: timeCtrl.name,
@@ -672,13 +566,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 node.context().set('lastData', previousData, node.contextStore);
                 if (node.autoTrigger) {
                     node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
-                    if (node.autoTriggerObj) {
-                        clearTimeout(node.autoTriggerObj);
-                        delete node.autoTriggerObj;
+                    if (node.autoTrigger.timer) {
+                        clearTimeout(node.autoTrigger.timer);
+                        delete node.autoTrigger.timer;
                     }
-                    node.autoTriggerObj = setTimeout(() => {
-                        clearTimeout(node.autoTriggerObj);
-                        delete node.autoTriggerObj;
+                    node.autoTrigger.timer = setTimeout(() => {
+                        clearTimeout(node.autoTrigger.timer);
+                        delete node.autoTrigger.timer;
                         node.emit('input', {
                             topic: 'autoTrigger/triggerOnly',
                             payload: 'triggerOnly',
@@ -686,6 +580,35 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         });
                     }, node.autoTrigger.time);
                 }
+
+                // #region set the state of the node
+                let shape = 'ring';
+                let fill = 'yellow';
+
+                if (isNaN(node.reason.code)) {
+                    fill = 'red'; // block
+                    shape = 'dot';
+                } else if (node.reason.code <= 3) {
+                    fill = 'blue'; // override
+                } else if (node.reason.code === 4 || node.reason.code === 15 || node.reason.code === 16) {
+                    fill = 'grey'; // rule
+                } else if (node.reason.code === 1 || node.reason.code === 8) {
+                    fill = 'green'; // not in window or oversteerExceeded
+                }
+
+                if (node.payload.current === null || typeof node.payload.current !== 'object') {
+                    node.reason.stateComplete = hlp.clipStrLength(''+node.payload.current,20) + ' - ' + node.reason.stateComplete;
+                } else if (typeof node.payload.current === 'object') {
+                    node.reason.stateComplete = hlp.clipStrLength(JSON.stringify(node.payload.current),20) + ' - ' + node.reason.stateComplete;
+                }
+
+                node.reason.stateComplete = node.reason.state ;
+                node.status({
+                    fill,
+                    shape,
+                    text: node.reason.stateComplete
+                });
+                // #endregion set the state of the node
                 done();
                 return null;
             } catch (err) {
@@ -701,9 +624,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         });
 
         node.on('close', () => {
-            if (node.autoTriggerObj) {
-                clearTimeout(node.autoTriggerObj);
-                delete node.autoTriggerObj;
+            if (node.autoTrigger && node.autoTrigger.timer) {
+                clearTimeout(node.autoTrigger.timer);
+                delete node.autoTrigger.timer;
             }
             if (node.startDelayTimeOutObj) {
                 clearTimeout(node.startDelayTimeOutObj);

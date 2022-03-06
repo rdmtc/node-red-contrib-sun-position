@@ -116,6 +116,7 @@
  * @property {Function} removeListener Event handling
  * @property {function} error Error log output, also logs to the Editor's debug panel
  * @property {function} warn Warning log output, also logs to the Editor's debug panel
+ * @property {function} info information log output
  * @property {function} log log output
  * @property {function} debug debugging log output
  * @property {function} status set the node status

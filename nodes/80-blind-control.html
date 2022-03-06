@@ -25,7 +25,7 @@ this software without specific prior written permission.
     // @ts-cehck
     /* eslint-env browser es6 */
     // Isolate this code
-    (function () {
+    (function() {
         'use strict';
         /** --- Type Defs ---
          * @typedef {import("node-red").Red} Red
@@ -683,7 +683,6 @@ this software without specific prior written permission.
                         label: node._('node-red-contrib-sun-position/position-config:common.types.ctrlObj'),
                         hasValue: false
                     };
-
                     types.UndefinedTimeFrom = Object.assign({}, types.Undefined, {
                         label: node._('node-red-contrib-sun-position/position-config:common.types.undefinedTimeFrom')
                     });
@@ -692,6 +691,7 @@ this software without specific prior written permission.
                     });
 
                     const selFields = getSelectFields();
+
                     /**
                      * save rules
                      * @param {*} node - the node representation
@@ -1555,18 +1555,22 @@ this software without specific prior written permission.
                             const $div = $('<div/>', {
                                 class: 'rdgtimer-rule-mainblock'
                             }).appendTo($row0);
-                            let exec = cNBC_RULE_EXEC.first;
-                            if (data.exec === cNBC_RULE_EXEC.last || (data.time && data.time.start && !data.time.end)) {
-                                exec = cNBC_RULE_EXEC.last;
+
+                            $('<span />', {
+                                id: 'rule-name-'+containerIndex,
+                                class: 'rdgtimer-rule-name-span'
+                            }).append(data.name || 'rule ' + (containerIndex + 1)).appendTo( $div );
+                            let exec = data.exec;
+                            if (data.time) {
+                                exec = cNBC_RULE_EXEC.first;
+                                if (data.exec === cNBC_RULE_EXEC.last || (data.time.start && !data.time.end)) {
+                                    exec = cNBC_RULE_EXEC.last;
+                                }
                             }
                             $('<span />', {
                                 id: 'rule-exec-'+containerIndex,
                                 class: 'rdgtimer-rule-exec-span'
                             }).append(node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleExecShort.'+exec)).appendTo( $div );
-                            $('<span />', {
-                                id: 'rule-name-'+containerIndex,
-                                class: 'rdgtimer-rule-name-span'
-                            }).append(data.name || 'rule ' + (containerIndex + 1)).appendTo( $div );
                             $('<div />', {
                                 id: 'rule-description-'+containerIndex,
                                 class: 'rdgtimer-rule-description-span'
@@ -3208,6 +3212,7 @@ this software without specific prior written permission.
                             'bin',
                             'env',
                             'jsonata',
+                            types.randomNumber,
                             types.randmNumCachedDay,
                             types.randmNumCachedWeek
                         ]
@@ -3249,8 +3254,8 @@ this software without specific prior written permission.
                             return;
                         }
                         if (opType === types.TimeEntered.value ||
-                           opType === types.TimeSun.value ||
-                           opType === types.TimeMoon.value) {
+                            opType === types.TimeSun.value ||
+                            opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeStartReg').show();
                         } else {
                             $('#dialog-row-offset-timeStartReg').hide();
@@ -4046,7 +4051,6 @@ this software without specific prior written permission.
                             console.log('Rule Data:', result); // eslint-disable-line
                         } else {
                             delete result.validation; // if valid, not needed
-                            // delete result.validationError;
                         }
                         return result;
                     }
@@ -4972,7 +4976,7 @@ this software without specific prior written permission.
         margin-right: 16px; /*28px;*/
     }
     .rdgtimer-rule-name-span {
-        width: 30%; /* width: 120px; */
+        width: 25%; /* width: 120px; */
         float: left;
     }
     .rdgtimer-rule-exec-span {

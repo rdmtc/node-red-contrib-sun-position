@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * This code is licensed under the Apache License Version 2.0.
  *
@@ -96,8 +97,8 @@
 /**
  * get a float value from a type input in Node-Red
  * @typedef {function} FktGetFloatProp
- * @param {*} _srcNode - source node information
- * @param {*} msg - message object
+ * @param {runtimeNode} _srcNode - source node information
+ * @param {Object} msg - message object
  * @param {string} type - type name of the type input
  * @param {*} value - value of the type input
  * @param {*} [def] - default value if can not get float value
@@ -110,8 +111,8 @@
 /**
  * get an formated date prepared for output
  * @typedef {function} FktFormatOutDate
- * @param {*} _srcNode - source node for logging
- * @param {*} msg - the message object
+ * @param {runtimeNode} _srcNode - source node for logging
+ * @param {Object} msg - the message object
  * @param {Date} dateValue - the source date object which should be formated
  * @param {ITimePropertyType} data - additional formating and control data
  * @param {Date} [dNow] base Date to use for Date time functions
@@ -120,8 +121,8 @@
 /**
  * get the time Data prepared for output
  * @typedef {function} FktGetOutDataProp
- * @param {*} _srcNode - source node for logging
- * @param {*} msg - the message object
+ * @param {runtimeNode} _srcNode - source node for logging
+ * @param {Object} msg - the message object
  * @param {ITimePropertyType} data - a Data object
  * @param {Date} [dNow] base Date to use for Date time functions
  * @param {boolean} [noError] - true if no error shoudl be given in GUI
@@ -131,8 +132,8 @@
 /**
  * Creates a out object, based on input data
  * @typedef {function} FktSetMessageProp
- * @param {*} _srcNode The base node
- * @param {*} msg The Message Object to set the Data
+ * @param {runtimeNode} _srcNode The base node
+ * @param {Object} msg The Message Object to set the Data
  * @param {*} type type of the property to set
  * @param {*} value value of the property to set
  * @param {*} data Data object to set to the property
@@ -141,8 +142,8 @@
 /**
  * get the time Data from a typed input
  * @typedef {function} FktGetTimeProp
- * @param {*} _srcNode - source node for logging
- * @param {*} msg - the message object
+ * @param {runtimeNode} _srcNode - source node for logging
+ * @param {Object} msg - the message object
  * @param {ITimePropertyType} data - a Data object
  * @param {*} [dNow] base Date to use for Date time functions
  * @returns {ITimePropertyResult} value of the type input
@@ -151,7 +152,7 @@
 /**
  * get a prepared JSONATA Expression
  * @typedef {function} FktGetJSONataExpression
- * @param {*} _srcNode - source node information
+ * @param {runtimeNode} _srcNode - source node information
  * @param {string} value - get an expression for a value
  * @returns {function} JSONataExpression
  */
@@ -159,8 +160,8 @@
 /**
  * get a property value from a type input in Node-Red
  * @typedef {function} FktGetPropValue
- * @param {*} _srcNode - source node information
- * @param {*} msg - message object
+ * @param {runtimeNode} _srcNode - source node information
+ * @param {Object} msg - message object
  * @param {IValuePropertyType} data - data object with more information
  * @param {boolean} [noError] - true if no error shoudl be given in GUI
  * @param {Date} [dNow] base Date to use for Date time functions
@@ -170,8 +171,8 @@
 /**
  * compared two property's
  * @typedef {function} FktComparePropValue
- * @param {*} _srcNode - source node information
- * @param {*} msg - message object
+ * @param {runtimeNode} _srcNode - source node information
+ * @param {Object} msg - message object
  * @property {IValuePropertyType} operandA - first operand
  * @property {string} compare - compare between the both operands
  * @property {IValuePropertyType} operandB - second operand
@@ -271,7 +272,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     const dayMs = 86400000; // 1000 * 60 * 60 * 24;
 
     /** generic configuration Node
-     * @extends runtimeNode
+     * @class
+     * @augments IPositionConfigNode
     */
     class positionConfigurationNode {
         /**
@@ -356,7 +358,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         /**
          * register a node as child
-         * @param {*} srcnode node to register as child node
+         * @param {runtimeNode} srcnode node to register as child node
          */
         register(srcnode) {
             // @ts-ignore
@@ -365,11 +367,12 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         /**
          * remove a previous registered node as child
-         * @param {*} srcnode node to remove
+         * @param {runtimeNode} srcnode node to remove
          * @param {function} done function which should be executed after deregister
          * @returns {*} result of the function
          */
         deregister(srcnode, done) {
+            // @ts-ignore
             delete srcnode.users[srcnode.id];
             return done();
         }
@@ -814,7 +817,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         /*******************************************************************************************************/
         /**
          * get the random number cache for a node
-         * @param {*} _srcNode - source node information
+         * @param {runtimeNode} _srcNode - source node information
          * @param {Date} dNow base Date to use for Date time functions
          * @param {string} store used context store
          * @returns {*} random number cache
@@ -836,7 +839,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         /**
          * get a random number for a node cached per day
-         * @param {*} _srcNode - source node information
+         * @param {runtimeNode} _srcNode - source node information
          * @param {number} limit1 - lower limit for random number
          * @param {number} limit2 - upper limit for random number
          * @param {Date} [dNow] base Date to use for Date time functions
@@ -851,6 +854,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             const low = Math.min(limit1, isNaN(limit2) ? 0 : limit2);
             const high = Math.max(limit1, isNaN(limit2) ? 0 : limit2);
             const name = 'min_'+low+'_max_'+high;
+            // @ts-ignore
             const store = _srcNode.contextStore || this.contextStore;
             const cache = this._getNodeNumberCache(_srcNode, dNow, store);
             if (isNaN(cache.day[name])) {
@@ -861,7 +865,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         /**
          * get a random number for a node cached per day
-         * @param {*} _srcNode - source node information
+         * @param {runtimeNode} _srcNode - source node information
          * @param {number} limit1 - lower limit for random number
          * @param {number} limit2 - upper limit for random number
          * @param {Date} [dNow] base Date to use for Date time functions
@@ -876,6 +880,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             const low = Math.min(limit1, isNaN(limit2) ? 0 : limit2);
             const high = Math.max(limit1, isNaN(limit2) ? 0 : limit2);
             const name = 'min_'+low+'_max_'+high;
+            // @ts-ignore
             const store = _srcNode.contextStore || this.contextStore;
             const cache = this._getNodeNumberCache(_srcNode, dNow, store);
             if (isNaN(cache.week[name])) {
@@ -886,8 +891,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         /**
          * get a float value from a type input in Node-Red
-         * @param {*} _srcNode - source node information
-         * @param {*} msg - message object
+         * @param {runtimeNode} _srcNode - source node information
+         * @param {Object} msg - message object
          * @param {string} type - type name of the type input
          * @param {*} value - value of the type input
          * @param {*} [def] - default value if can not get float value
@@ -929,8 +934,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         /*******************************************************************************************************/
         /**
           * get an formated date prepared for output
-          * @param {*} _srcNode - source node for logging
-          * @param {*} msg - the message object
+          * @param {runtimeNode} _srcNode - source node for logging
+          * @param {Object} msg - the message object
           * @param {Date} dateValue - the source date object which should be formated
           * @param {ITimePropertyType} data - additional formating and control data
           * @param {Date} [dNow] base Date to use for Date time functions
@@ -943,8 +948,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         /**
          * get the time Data prepared for output
-         * @param {*} _srcNode - source node for logging
-         * @param {*} msg - the message object
+         * @param {runtimeNode} _srcNode - source node for logging
+         * @param {Object} msg - the message object
          * @param {ITimePropertyType} data - a Data object
          * @param {Date} [dNow] base Date to use for Date time functions
          * @param {boolean} [noError] - true if no error shoudl be given in GUI
@@ -1005,8 +1010,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         /*******************************************************************************************************/
         /**
          * Creates a out object, based on input data
-         * @param {*} _srcNode The base node
-         * @param {*} msg The Message Object to set the Data
+         * @param {runtimeNode} _srcNode The base node
+         * @param {Object} msg The Message Object to set the Data
          * @param {*} type type of the property to set
          * @param {*} value value of the property to set
          * @param {*} data Data object to set to the property
@@ -1035,8 +1040,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         /*******************************************************************************************************/
         /**
          * get the time Data from a typed input
-         * @param {*} _srcNode - source node for logging
-         * @param {*} msg - the message object
+         * @param {runtimeNode} _srcNode - source node for logging
+         * @param {Object} msg - the message object
          * @param {ITimePropertyType} data - a Data object
          * @param {*} [dNow] base Date to use for Date time functions
          * @returns {ITimePropertyResult} value of the type input
@@ -1165,7 +1170,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         /*******************************************************************************************************/
         /**
         * get a prepared JSONATA Expression
-        * @param {*} _srcNode - source node information
+        * @param {runtimeNode} _srcNode - source node information
         * @param {string} value - get an expression for a value
         * @returns {function} JSONataExpression
         */
@@ -1314,8 +1319,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         /**
          * get a property value from a type input in Node-Red
-         * @param {*} _srcNode - source node information
-         * @param {*} msg - message object
+         * @param {runtimeNode} _srcNode - source node information
+         * @param {Object} msg - message object
          * @param {IValuePropertyType} data - data object with more information
          * @param {boolean} [noError] - true if no error shoudl be given in GUI
          * @param {Date} [dNow] base Date to use for Date time functions
@@ -1364,6 +1369,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             } else if (data.type === 'numPct') {
                 return parseFloat(data.value) / 100;
             } else if (data.type === 'nodeId') {
+                // @ts-ignore
                 return _srcNode.addId || _srcNode.id;
             } else if (data.type === 'nodeName') {
                 return _srcNode.name || _srcNode._path || _srcNode.id; // if empty fallback to node ID
@@ -1484,8 +1490,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         /*******************************************************************************************************/
         /**
          * compared two property's
-         * @param {*} _srcNode - source node information
-         * @param {*} msg - message object
+         * @param {runtimeNode} _srcNode - source node information
+         * @param {Object} msg - message object
          * @property {IValuePropertyType} operandA - first operand
          * @property {string} compare - compare between the both operands
          * @property {IValuePropertyType} operandB - second operand

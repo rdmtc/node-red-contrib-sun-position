@@ -47,6 +47,9 @@
  * @property {boolean} [onlyEvenDays]           - if true only even days will be used
  * @property {boolean} [onlyOddWeeks]           - if true only odd weeks will be used
  * @property {boolean} [onlyEvenWeeks]          - if true only even weeks will be used
+ * @property {Date} [dateStart]                 - Date for start range
+ * @property {Date} [dateEnd]                   - Date for end range
+ * dateStart
  */
 
 
