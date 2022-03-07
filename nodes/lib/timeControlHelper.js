@@ -78,6 +78,18 @@
  */
 
 /**
+ * @typedef {Object} IRuleTimeDefSingle object for a rule time definition
+ *
+ * @property {string} value                 - time value
+ * @property {string} type                  - type of the time
+ * @property {string|number} offset         - time offset value
+ * @property {string} offsetType            - time offset type
+ * @property {number} multiplier            - time offset value
+ * @property {boolean} next                 - time offset value
+ * @property {Date} [now]                   - start time definition
+ */
+
+/**
  * @typedef {Object} IRuleTimeDef object for a rule time definition
  *
  * @property {string} value                 - time value
@@ -86,7 +98,10 @@
  * @property {string} offsetType            - time offset type
  * @property {number} multiplier            - time offset value
  * @property {boolean} next                 - time offset value
- */
+ * @property {Date} [now]                   - start time definition
+ * @property {IRuleTimeDefSingle} [min]     - minimum limitation to the time
+ * @property {IRuleTimeDefSingle} [max]     - maximum limitation to the time
+  */
 
 /**
  * @typedef {Object} IRuleTimesDefInt object for a rule time definition
@@ -108,6 +123,7 @@
  * @property {string} [timeLocalDate]   - time representation
  * @property {string} [dateISO]         - time representation
  * @property {string} [dateUTC]         - time representation
+ * @property {('default'|'min'|'max')} [source]    - source of the data if it comes from minimum or maximum limitation
  */
 
 /**
@@ -117,9 +133,9 @@
 /**
  * @typedef {Object} IRuleTimeDataDef object for a rule time definition
  *
- * @property {number} now                      - start time definition
  * @property {ITimePropResult} [start]      - start time definition
  * @property {ITimePropResult} [end]        - end time definition
+ * @property {number} [now]                 - start time definition
  */
 
 /**
@@ -485,37 +501,29 @@ function prepareRules(node, msg, tempData, dNow) {
  * @param {ITimeControlNode} node node data
  * @param {Object} msg the message object
  * @param {IRuleData} rule the rule data
- * @param {string} timep rule type
+ * @param {('start'|'end')} timep rule type
  * @param {Date} dNow base timestamp
  * @param {number} def default value
  */
 function getRuleTimeData(node, msg, rule, timep, dNow, def) {
-    if (!rule.time[timep] || rule.timeResult[timep]) {
-        Object.assign(rule.timeResult, {
-            [timep]: {
-                ts: def
-            }
-        });
+    if (!rule.timeResult) { rule.timeResult = {}; }
+    if (!rule.time || !rule.time[timep]) {
+        Object.assign(rule.timeResult, { [timep]: { ts: def } });
         return;
     }
     rule.time[timep].now = dNow;
-
-    rule.timeResult[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep]);
+    Object.assign(rule, { timeResult: { [timep]: node.positionConfig.getTimeProp(node, msg, rule.time[timep]) } });
 
     if (rule.timeResult[timep].error) {
         hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeResult[timep].error }), undefined, rule.timeResult[timep].error);
+        Object.assign(rule.timeResult, { [timep]: { ts: def } });
         // node.debug('rule data complete');
         // node.debug(util.inspect(rule, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
-        Object.assign(rule.timeResult, {
-            [timep]: {
-                ts: def
-            }
-        });
         return;
     } else if (!rule.timeResult[timep].value) {
         throw new Error('Error can not calc time!');
     }
-    rule.timeResult[timep].source = 'Default';
+    rule.timeResult[timep].source = 'default';
     rule.timeResult[timep].ts = rule.timeResult[timep].value.getTime();
     // node.debug(`time=${rule.timeResult[timep].value} -> ${new Date(rule.timeResult[timep].value)}`);
     if (rule.time[timep].min) {
@@ -524,7 +532,7 @@ function getRuleTimeData(node, msg, rule, timep, dNow, def) {
         if (!rule.timeResultMin) rule.timeResultMin = { start:{}, end:{} };
         rule.timeResultMin[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].min);
         rule.timeResultMin[timep].ts = rule.timeResultMin[timep].value.getTime();
-        rule.timeResultMin[timep].source = 'Min';
+        rule.timeResultMin[timep].source = 'min';
         if (rule.timeResultMin[timep].error) {
             hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeResultMin[timep].error }), undefined, rule.timeResultMin[timep].error);
         } else if (!rule.timeResultMin[timep].value) {
@@ -541,7 +549,7 @@ function getRuleTimeData(node, msg, rule, timep, dNow, def) {
         if (!rule.timeResultMax) rule.timeResultMax = { start:{}, end:{} };
         rule.timeResultMax[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].max);
         rule.timeResultMax[timep].ts = rule.timeResultMax[timep].value.getTime();
-        rule.timeResultMax[timep].source = 'Max';
+        rule.timeResultMax[timep].source = 'max';
         if (rule.timeResultMax[timep].error) {
             hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeResultMax[timep].error }), undefined, rule.timeResultMin[timep].error);
         } else if (!rule.timeResultMax[timep].value) {
@@ -727,7 +735,7 @@ function getActiveRules(node, msg, oNow, tempData) {
             node.autoTrigger.time = Math.min(node.autoTrigger.time, diff, d.getTime());
             node.autoTrigger.type = type; // current rule end
         };
-        if (result.ruleSel && result.ruleSel.time && result.timeResult.end && result.ruleSel.timeResult.end.ts > oNow.nowNr) {
+        if (result.ruleSel && result.ruleSel.time && result.timeResult && result.timeResult.end && result.ruleSel.timeResult.end.ts > oNow.nowNr) {
             node.debug('autoTrigger set to current rule ' + result.ruleSel.pos + ' end');
             setAutoTrigger(result.ruleSel.timeResult.end.ts, 1);
         } else {
