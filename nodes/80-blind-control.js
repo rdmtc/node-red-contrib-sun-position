@@ -25,6 +25,7 @@
  * blind-control:
  *********************************************/
 'use strict';
+/// <reference path="./types/typedefs.js" />
 /** --- Type Defs ---
  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* eslint-disable no-template-curly-in-string */
 /* eslint-disable require-jsdoc */
 /* eslint-disable prefer-arrow-callback */

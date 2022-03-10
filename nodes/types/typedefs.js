@@ -23,6 +23,12 @@
  */
 
 /** editorRED
+ * @typedef {Object} RED The Node-RED core object available to a custom node's .html file
+ *
+ */
+
+
+/** editorRED
  * @typedef {Object} editorRED The Node-RED core object available to a custom node's .html file
  *
  */

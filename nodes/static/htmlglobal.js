@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*
  * This code is licensed under the Apache License Version 2.0.
  *
@@ -21,6 +22,24 @@
  */
 
 /************************************************************************/
+/// <reference path="../../node_modules/@types/jquery/index.d.ts" />
+
+/** editorRED
+ * @typedef {Object} editorRED The Node-RED core object available to a custom node's .html file
+ * @property {function} registerType Register a new type of node to Node-myRED.
+ * @property {function} createNode Create a node instance (called from within registerType function).
+ * @property {function} getNode Get a reference to another node instance in the current flows. Can then access its properties.
+ * @property {function} eachNode: [Function: eachNode],
+ * @property {function} addCredentials: [Function: add],
+ * @property {function} getCredentials: [Function: get],
+ * @property {function} deleteCredentials: [Function: delete],
+ * @property {Object} validators
+ */
+
+/** @type {editorRED} */
+// @ts-ignore
+const myRED = RED;
+
 /**
  * get selection firlds
  * @returns {Object} Object for selection fields
@@ -260,7 +279,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.numPercent'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeNumberPercent.svg',
             hasValue: true,
-            validate: RED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
+            validate:  myRED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
         },
         nodeId: {
             value: 'nodeId',
@@ -351,7 +370,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
             // eslint-disable-next-line no-useless-escape
-            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            validate: myRED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         randmNumCachedDay: {
             value: 'randmNumCachedDay',
@@ -359,7 +378,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
             // eslint-disable-next-line no-useless-escape
-            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            validate: myRED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         randmNumCachedWeek: {
             value: 'randmNumCachedWeek',
@@ -367,7 +386,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
             // eslint-disable-next-line no-useless-escape
-            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            validate: myRED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         TimeSun: {
             value: 'pdsTime',
@@ -478,7 +497,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
-                return (RED.validators.number()(v) && (n >= -360) && (n <= 720));
+                return (myRED.validators.number()(v) && (n >= -360) && (n <= 720));
             }
         },
         numAzimuthRad: {
@@ -488,7 +507,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
-                return (RED.validators.number()(v) && (n > -6.3) && (n < 12.6));
+                return (myRED.validators.number()(v) && (n > -6.3) && (n < 12.6));
             }
         },
         numAltitude: {
@@ -498,7 +517,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
-                return (RED.validators.number()(v) && (n >= -90) && (n <= 90));
+                return (myRED.validators.number()(v) && (n >= -90) && (n <= 90));
             }
         },
         numAltitudeRad: {
@@ -508,7 +527,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
-                return (RED.validators.number()(v) && (n > -1.56) && (n < 1.56));
+                return (myRED.validators.number()(v) && (n > -1.56) && (n < 1.56));
             }
         },
         SunAzimuth: {
@@ -542,70 +561,70 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuth','Time by Azimuth'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuth.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByAzimuthRad: {
             value: 'pdsTimeByAzimuthRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuthRad','Time by Azimuth Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuthRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByElevationObj: {
             value: 'pdsTimeByElevation',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObj','next Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByElevationObjRad: {
             value: 'pdsTimeByElevationRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObjRad','next Time by Elevation Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByElevationNext: {
             value: 'pdsTimeByElevationNext',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNext','next Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByElevationNextRad: {
             value: 'pdsTimeByElevationNextRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNextRad','next Time by Elevation Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByElevationRise: {
             value: 'pdsTimeByElevationRise',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRise','next rise Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRise.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByElevationRiseRad: {
             value: 'pdsTimeByElevationRiseRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRiseRad','next rise Time by Elevation Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRiseRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByElevationSet: {
             value: 'pdsTimeByElevationSet',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSet','next set Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSet.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         SunTimeByElevationSetRad: {
             value: 'pdsTimeByElevationSetRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSetRad','next set Time by Elevation Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSetRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            validate: myRED.validators.number()
         },
         isDST: {
             value: 'pdbIsDST',
@@ -807,7 +826,9 @@ function getAutocompleteFormats() {
  * getcurrent cursor position
  * @returns {number|undefined} current cursor position
  */
+// @ts-ignore
 $.fn.getCursorPosition = function () {
+    // @ts-ignore
     const input = this.get(0);
     if (!input) {
         return undefined;
@@ -815,13 +836,18 @@ $.fn.getCursorPosition = function () {
 
     if ('selectionStart' in input) {
         // Standard-compliant browsers
+        // @ts-ignore
         return input.selectionStart;
     }
+    // @ts-ignore
     if (document.selection) {
         // IE
         input.focus();
+        // @ts-ignore
         const sel = document.selection.createRange();
+        // @ts-ignore
         const selLen = document.selection.createRange().text.length;
+        // @ts-ignore
         sel.moveStart('character', -input.value.length);
         return sel.text.length - selLen;
     }

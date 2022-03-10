@@ -22,14 +22,14 @@ this software without specific prior written permission.
 -->
 
 <script type="text/javascript">
-    // @ts-cehck
     /* eslint-env browser es6 */
     // Isolate this code
     (function() {
         'use strict';
-        /** --- Type Defs ---
-         * @typedef {import("node-red").Red} Red
-         */
+        /// <reference path="./types/typedefs.js" />
+        /// <reference path="./static/htmlglobal.js" />
+
+
         const cNBC_MODE_OFF = 0;
         const cNBC_MODE_MAXIMIZE = 1;
         const cNBC_MODE_MINIMIZE = 3;
@@ -75,7 +75,8 @@ this software without specific prior written permission.
             return { min:Math.min(min, max), max:Math.max(min, max) };
         }
 
-        /** @type {Red} */
+        /** @type {RED} */
+        // @ts-ignore
         RED.nodes.registerType('blind-control', {
             category: 'time and astro',
             color: '#FFCC66',
@@ -4928,6 +4929,8 @@ this software without specific prior written permission.
     }
     .dialog-element-clickable {
         user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
         cursor: pointer;
         touch-action: manipulation;
         display: inline-block;
