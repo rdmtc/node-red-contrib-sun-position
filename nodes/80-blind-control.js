@@ -393,7 +393,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         if (node.oversteer.active) {
             const res = checkOversteer(node, msg, tempData, sunPosition, oNow);
             if (res) {
-                node.level.current = getBlindPosFromTI(node, undefined, res.blindPos.type, res.blindPos.value, node.nodeData.levelTop);
+                node.level.current = getBlindPosFromTI(node, msg, res.blindPos.type, res.blindPos.value, node.nodeData.levelTop);
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.slat = node.positionConfig.getPropValue(node, msg, res.slatPos, false, oNow.now);
                 node.level.topic = node.oversteer.topic;

@@ -758,7 +758,10 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.LevelFix.value,
                         defaultValue: getDefLevel(node.blindPosDefaultType, node.blindPosDefault, 'open (max)'),
-                        types: [types.LevelFix, types.LevelEntered, 'env']
+                        types: [
+                            types.LevelFix,
+                            types.LevelEntered,
+                            'env']
                     });
 
                     setupTInput(node, {
@@ -1829,7 +1832,14 @@ this software without specific prior written permission.
                                 .appendTo($row3)
                                 .typedInput({
                                     default: types.LevelFix,
-                                    types: [types.LevelFix, types.LevelEntered, 'env']
+                                    types:[
+                                        types.LevelFix,
+                                        types.LevelEntered,
+                                        'msg',
+                                        'flow',
+                                        'global',
+                                        'env',
+                                        'jsonata']
                                 });
                             setTInputValue($oversteerBlindPos, data.blindPos.value, data.blindPos.type);
                             // row4 - BlindSlat
