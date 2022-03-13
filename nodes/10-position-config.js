@@ -31,34 +31,22 @@
  * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
  * @typedef {import("./lib/dateTimeHelper").ITimeObject} ITimeObject
  * @typedef {import("./lib/dateTimeHelper").ILimitationsObj} ILimitationsObj
- * @typedef {import("./lib/suncalc.js").ISunTimeSingle} ISunTimeSingle
+ * @typedef {import("suncalc3").ISunTimeDef} ISunTimeDef
+ * @typedef {import("suncalc3").ISunTimeSingle} ISunTimeSingle
  */
 
 // IPositionConfigNodeInstance
 /**
  * @typedef {Object} IPositionConfigNodeInstance Extensions for the nodeInstance object type
- * @property {Object} positionConfig    -   tbd
- * @property {string} addId internal used additional id
- * @property {Object} nodeData get/set generic Data of the node
- * @property {Object} sunData    -   the sun data Object
- * @property {Object} windowSettings    -   the window settings Object
- * @property {number} smoothTime smoothTime
- * @property {Object} reason    -   tbd
- * @property {boolean} levelReverse    -   indicator if the Level is in reverse order
- * @property {string} contextStore    -   used context store
- * @property {Array.<Object>} oversteers    -   tbd
- * @property {Object} oversteer    -   tbd
- * @property {Object} rules    -   tbd
- * @property {Object} level    -   tbd
- * @property {Object} previousData    -   tbd
- * @property {Array.<Object>} results    -   tbd
+ * @property {boolean} valid
+ * @property {number} latitude
+ * @property {number} longitude
+ * @property {('deg'|'rad')} angleType
+ * @property {number} tzOffset
+ * @property {number} tzDST
+ * @property {string} contextStore
+ * @property {object} cache
  *
- * @property {Object} autoTrigger autotrigger options
- * @property {NodeJS.Timeout} autoTriggerObj autotrigger options
- *
- * @property {Object} startDelayTimeOut    -   tbd
- * @property {NodeJS.Timeout} startDelayTimeOutObj    -   tbd
-
  * @property {function} setState function for settign the state of the node
  * @property {function} register register a node as child
  * @property {function} deregister remove a previous registered node as child
@@ -101,8 +89,8 @@
  * @param {Object} msg - message object
  * @param {string} type - type name of the type input
  * @param {*} value - value of the type input
- * @param {*} [def] - default value if can not get float value
- * @param {*} [callback] - callback function for getting getPropValue
+ * @param {number} [def] - default value if can not get float value
+ * @param {IValuePropertyTypeCallback} [callback] - callback function for getting getPropValue
  * @param {boolean} [noError] - true if no error should be given in GUI
  * @param {Date} [dNow] base Date to use for Date time functions
  * @returns {number} float property
@@ -136,7 +124,7 @@
  * @param {Object} msg The Message Object to set the Data
  * @param {*} type type of the property to set
  * @param {*} value value of the property to set
- * @param {*} data Data object to set to the property
+ * @param {*} msgPropertyData Data object to set to the property
  */
 
 /**
@@ -145,7 +133,7 @@
  * @param {runtimeNode} _srcNode - source node for logging
  * @param {Object} msg - the message object
  * @param {ITimePropertyType} data - a Data object
- * @param {*} [dNow] base Date to use for Date time functions
+ * @param {Date} [dNow] base Date to use for Date time functions
  * @returns {ITimePropertyResult} value of the type input
  */
 
@@ -227,7 +215,7 @@
  * @typedef {Object} IOffsetData
  * @property {string} [offset] - value of the offset
  * @property {string} [offsetType] - type name of the offset
- * @property {function} [offsetCallback] - callback function for getting getPropValue
+ * @property {IValuePropertyTypeCallback} [offsetCallback] - callback function for getting getPropValue
  * @property {boolean} [noOffsetError] - true if no error should be given in GUI
  * @property {number} [multiplier] - multiplier to the time
  */
@@ -238,8 +226,9 @@
  * @property {string} [days]        - valid days
  * @property {string} [months]      - valid monthss
  * @property {Date} [now]           - base date, current time as default
- * @property {number} [latitude]    - base date, current time as default
- * @property {number} [longitude]   - base date, current time as default
+ * @property {number} [latitude]    - latitude
+ * @property {number} [longitude]   - longitude
+ * @property {number} [height]      - height definition
  * @property {*} [expr] - optional prepared Jsonata expression
  *
  * @typedef {ITimePropertyTypeInt & ILimitationsObj & ITypedValue & IOffsetData} ITimePropertyType
@@ -253,9 +242,17 @@
  */
 
 /**
+ * This callback is displayed as a global member.
+ * @callback IValuePropertyTypeCallback
+ * @param {*} result - the result of the property value from a type input in Node-Red
+ * @param {IValuePropertyType} data - the given data to the function
+ * @returns {*} value of the type input
+ */
+
+/**
  * @typedef {Object} IValuePropertyTypeInt
  * @property {*} [expr] - optional prepared Jsonata expression
- * @property {function} [callback] - function which should be called after value was recived
+ * @property {IValuePropertyTypeCallback} [callback] - function which should be called after value was recived
  *
  * @typedef {ITypedValue & IValuePropertyTypeInt} IValuePropertyType
  */
@@ -267,7 +264,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
     const hlp = require('./lib/dateTimeHelper.js');
     const util = require('util');
-    const sunCalc = require('./lib/suncalc.js');
+    // const sunCalc = require('./lib/suncalc.js');
+    const sunCalc = require('suncalc3');
 
     const dayMs = 86400000; // 1000 * 60 * 60 * 24;
 
@@ -290,6 +288,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 this.latitude = parseFloat(Object.prototype.hasOwnProperty.call(this.credentials, 'posLatitude') ? this.credentials.posLatitude : config.latitude);
                 // @ts-ignore
                 this.longitude = parseFloat(Object.prototype.hasOwnProperty.call(this.credentials, 'posLongitude') ? this.credentials.posLongitude : config.longitude);
+                // @ts-ignore
+                this.height = parseFloat(this.credentials.height);
                 this.checkNode(
                     error => {
                         // @ts-ignore
@@ -413,14 +413,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * @param {ILimitationsObj} [limit] additional limitations for the calculation
          * @param {number} [latitude] latitude
          * @param {number} [longitude] longitude
+         * @param {number} [height] height definition
          * @return {ITimeResult} result object of sunTime
          */
-        _getSunTimeByName(dNow, value, offset, multiplier, limit, latitude, longitude) {
+        _getSunTimeByName(dNow, value, offset, multiplier, limit, latitude, longitude, height) {
             // this.debug('_getSunTimeByName dNow=' + dNow + ' limit=' + util.inspect(limit, { colors: true, compact: 10, breakLength: Infinity }));
             let result;
             const dayId = hlp.getDayId(dNow); // this._getUTCDayId(dNow);
+            const mheight = (height || this.height);
             if (latitude && longitude) {
-                result = Object.assign({},sunCalc.getSunTimes(dNow.getTime(), latitude, longitude)[value]);
+                result = Object.assign({}, sunCalc.getSunTimes(dNow.getTime(), latitude, longitude, mheight, true)[value]);
             } else {
                 latitude = this.latitude;
                 longitude = this.longitude;
@@ -442,7 +444,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     };
                     this.cache.sunTimesAdd1 = {
                         dayId,
-                        times : sunCalc.getSunTimes(dNow.getTime(), latitude, longitude)
+                        times : sunCalc.getSunTimes(dNow.getTime(), latitude, longitude, mheight, true)
                     };
                     result = Object.assign({},this.cache.sunTimesAdd1.times[value]); // needed for a object copy
                 }
@@ -457,7 +459,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 const dateBase = new Date(dNow);
                 while (result.value.getTime() <= dNow.getTime()) {
                     dateBase.setUTCDate(dateBase.getUTCDate() + 1);
-                    result = Object.assign(result, sunCalc.getSunTimes(dateBase.getTime(), latitude, longitude)[value]);
+                    result = Object.assign(result, sunCalc.getSunTimes(dateBase.getTime(), latitude, longitude, mheight, true)[value]);
                     result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
                 }
             }
@@ -470,7 +472,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
             if (r.hasChanged) {
                 this.checkNode(error => { throw new Error(error); });
-                result = Object.assign(result, sunCalc.getSunTimes(result.value.valueOf(), latitude, longitude)[value]);
+                result = Object.assign(result, sunCalc.getSunTimes(result.value.valueOf(), latitude, longitude, mheight, true)[value]);
                 result.value = hlp.addOffset(new Date(result.value), offset, multiplier);
             }
 
@@ -482,7 +484,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * gets sun time by Elevation
          * @param {Date} dNow current time
          * @param {number} elevationAngle name of the sun time
-         * @param {ITimePropertyType} [tprop] additional limitations for the calculation
+         * @param {boolean} degree type of the angle
+         * @param {ITimePropertyType} tprop additional limitations for the calculation
          * @param {string} [prop=both] property (set, rise or both) to return
          * @return {ISunTimeSingle} result object of sunTime
          */
@@ -498,9 +501,20 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             // this.debug('_getSunTimeByElevation dNow=' + dNow + ' tprop=' + util.inspect(tprop, { colors: true, compact: 10, breakLength: Infinity }));
             const latitude = (tprop.latitude || this.latitude);
             const longitude = (tprop.longitude || this.longitude);
-            const result = Object.assign({},sunCalc.getSunTime(dNow.valueOf(), latitude, longitude, elevationAngle, degree));
+            const height = (tprop.height || this.height);
+            const result = Object.assign({},sunCalc.getSunTime(dNow.valueOf(), latitude, longitude, elevationAngle, height, degree));
 
-            const offsetX = this.getFloatProp(this, null, tprop.offsetType, tprop.offset, 0, tprop.offsetCallback, tprop.noOffsetError, dNow);
+            const offsetX = this.getFloatProp(
+                /** @type {IPositionConfigNode} */
+                // @ts-ignore
+                this,
+                null,
+                tprop.offsetType,
+                tprop.offset,
+                0,
+                tprop.offsetCallback,
+                tprop.noOffsetError,
+                dNow);
             const calc = (result, recalc) => {
                 result.value = hlp.addOffset(new Date(result.value), offsetX, tprop.multiplier);
                 if (tprop.next && result.value.getTime() <= dNow.getTime()) {
@@ -525,14 +539,14 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
             };
             if (prop==='rise') {
-                calc(result.rise, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).rise);
+                calc(result.rise, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, height, degree).rise);
                 return result;
             } else if (prop==='set') {
-                calc(result.set, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).set);
+                calc(result.set, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, height, degree).set);
                 return result;
             }
-            calc(result.rise, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).rise);
-            calc(result.set, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, degree).set);
+            calc(result.rise, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, height, degree).rise);
+            calc(result.set, dt => sunCalc.getSunTime(dt, latitude, longitude, elevationAngle, height, degree).set);
             return result;
         }
 
@@ -559,7 +573,17 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             longitude = (longitude || tprop.longitude || this.longitude);
             let result = sunCalc.getSunTimeByAzimuth(dNow, latitude, longitude, azimuthAngle, degree);
 
-            const offsetX = this.getFloatProp(this, null, tprop.offsetType, tprop.offset, 0, tprop.offsetCallback, tprop.noOffsetError, dNow);
+            const offsetX = this.getFloatProp(
+                /** @type {IPositionConfigNode} */
+                // @ts-ignore
+                this,
+                null,
+                tprop.offsetType,
+                tprop.offset,
+                0,
+                tprop.offsetCallback,
+                tprop.noOffsetError,
+                dNow);
             result = hlp.addOffset(result, offsetX, tprop.multiplier);
             if (tprop.next && result.getTime() <= dNow.getTime()) {
                 const datebase = new Date(dNow);
@@ -612,7 +636,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 };
                 this.cache.sunTimesAdd1 = {
                     dayId,
-                    times: sunCalc.getSunTimes(dNow.valueOf(), this.latitude, this.longitude)
+                    times: sunCalc.getSunTimes(dNow.valueOf(), this.latitude, this.longitude, this.height, false)
                 };
                 result = this.cache.sunTimesAdd1.times;
             }
@@ -678,7 +702,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             } else if (dayId === this.cache.sunTimesAdd2.dayId) {
                 result = this.cache.sunTimesAdd2.times;
             } else {
-                result = sunCalc.getSunTimes(dNow.valueOf() + dayMs, this.latitude, this.longitude); // needed for a object copy
+                result = sunCalc.getSunTimes(dNow.valueOf() + dayMs, this.latitude, this.longitude, this.height, false); // needed for a object copy
             }
             const sortable2 = [];
             for (const key in result) {
@@ -815,11 +839,17 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         /*******************************************************************************************************/
         /**
+         * @typedef {Object} ICacheData
+         * @property {Object} day - the cached data for day
+         * @property {Object} week - the cached data forweek
+         */
+
+        /**
          * get the random number cache for a node
          * @param {runtimeNode} _srcNode - source node information
          * @param {Date} dNow base Date to use for Date time functions
          * @param {string} store used context store
-         * @returns {*} random number cache
+         * @returns {ICacheData} random number cache
         */
         _getNodeNumberCache(_srcNode, dNow, store) {
             const cache = _srcNode.context().get('randomNumberCache', store) || {};
@@ -894,8 +924,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * @param {Object} msg - message object
          * @param {string} type - type name of the type input
          * @param {*} value - value of the type input
-         * @param {*} [def] - default value if can not get float value
-         * @param {*} [callback] - callback function for getting getPropValue
+         * @param {number} [def] - default value if can not get float value
+         * @param {IValuePropertyTypeCallback} [callback] - callback function for getting getPropValue
          * @param {boolean} [noError] - true if no error should be given in GUI
          * @param {Date} [dNow] base Date to use for Date time functions
          * @returns {number} float property
@@ -971,7 +1001,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             } else if ((data.type === 'pdsTime') || (data.type === 'pdmTime')) {
                 if (data.type === 'pdsTime') { // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError, dNow);
-                    result = this._getSunTimeByName(dNow, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude);
+                    result = this._getSunTimeByName(dNow, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude, data.height);
                 } else if (data.type === 'pdmTime') { // moon
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError, dNow);
                     result = this._getMoonTimeByName(dNow, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude);
@@ -1013,27 +1043,27 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * @param {Object} msg The Message Object to set the Data
          * @param {*} type type of the property to set
          * @param {*} value value of the property to set
-         * @param {*} data Data object to set to the property
+         * @param {*} msgPropertyData Data object to set to the property
          */
-        setMessageProp(_srcNode, msg, type, value, data) {
+        setMessageProp(_srcNode, msg, type, value, msgPropertyData) {
             // _srcNode.debug(`setMessageProp type=${type} value=${value} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })} data=${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             if (type === 'msgInput') {
                 return;
             } else if (type === 'msgPayload') {
-                msg.payload = data;
+                msg.payload = msgPropertyData;
             } else if (type === 'msgTopic') {
-                msg.topic = data;
+                msg.topic = msgPropertyData;
             } else if (type === 'msgTs') {
-                msg.ts = data;
+                msg.ts = msgPropertyData;
             } else if (type === 'msgLc') {
-                msg.lc = data;
+                msg.lc = msgPropertyData;
             } else if (type === 'msgValue') {
-                msg.value = data;
+                msg.value = msgPropertyData;
             } else if (type === 'msg') {
-                RED.util.setMessageProperty(msg, value, data, true);
+                RED.util.setMessageProperty(msg, value, msgPropertyData, true);
             } else if ((type === 'flow' || type === 'global')) {
                 const contextKey = RED.util.parseContextStore(value.trim());
-                _srcNode.context()[type].set(contextKey.key, data, contextKey.store);
+                _srcNode.context()[type].set(contextKey.key, msgPropertyData, contextKey.store);
             }
         }
         /*******************************************************************************************************/
@@ -1042,7 +1072,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * @param {runtimeNode} _srcNode - source node for logging
          * @param {Object} msg - the message object
          * @param {ITimePropertyType} data - a Data object
-         * @param {*} [dNow] base Date to use for Date time functions
+         * @param {Date} [dNow] base Date to use for Date time functions
          * @returns {ITimePropertyResult} value of the type input
          */
         getTimeProp(_srcNode, msg, data, dNow) {
@@ -1096,7 +1126,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 } else if (data.type === 'pdsTime') {
                     // sun
                     const offsetX = this.getFloatProp(_srcNode, msg, data.offsetType, data.offset, 0, data.offsetCallback, data.noOffsetError, dNow);
-                    Object.assign(result, this._getSunTimeByName(dNow, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude));
+                    Object.assign(result, this._getSunTimeByName(dNow, data.value, offsetX, data.multiplier, data, data.latitude, data.longitude, data.height));
                     if (this.tzOffset) {
                         result.value = hlp.convertDateTimeZone(result.value, this.tzOffset);
                     }
@@ -1245,7 +1275,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             expr.registerFunction('parseDateTimeObject', (text, utc, timeZoneOffset, preferMonthFirst) => {
                 return hlp.getDateOfText(text, preferMonthFirst, utc, timeZoneOffset);
             }, '<xb?n?b?:o>');
-            expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow, latitude, longitude, next, days, month, onlyOddDays, onlyEvenDays, onlyOddWeeks, onlyEvenWeeks) => {
+            expr.registerFunction('getSunTimeByName', (value, offset, multiplier, dNow, latitude, longitude, next, days, month, onlyOddDays, onlyEvenDays, onlyOddWeeks, onlyEvenWeeks, height) => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow); // if dNow is given as Number in milliseconds, try to convert
                     if (hlp.isValidDate(dto)) {
@@ -1263,8 +1293,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     onlyOddWeeks,
                     onlyEvenWeeks
                 };
-                return this._getSunTimeByName(dNow, value, offset, multiplier, limit, latitude, longitude).value;
-            }, '<sn?n?(osn)?n?n?b?a?a?b?b?b?b?:(ol)>');
+                return this._getSunTimeByName(dNow, value, offset, multiplier, limit, latitude, longitude, height).value;
+            }, '<sn?n?(osn)?n?n?b?a?a?b?b?b?b?n?:(ol)>');
             expr.registerFunction('getSunTimePrevNext', dNow => {
                 if (!hlp.isValidDate(dNow)) {
                     const dto = new Date(dNow); // if dNow is given as Number in milliseconds, try to convert
@@ -1285,7 +1315,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         dNow = new Date();
                     }
                 }
-                return this._getSunTimeByElevation(dNow, parseFloat(elevation), {});
+                return this._getSunTimeByElevation(dNow, parseFloat(elevation), true, {
+                    type: 'str',
+                    value: ''
+                });
             }, '<sn?n?>');
             expr.registerFunction('getMoonTimeByName', (value, offset, multiplier, dNow) => {
                 if (!hlp.isValidDate(dNow)) {
@@ -1578,7 +1611,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
         }
         /**************************************************************************************************************/
-        getSunCalc(date, calcTimes, sunInSky, specLatitude,  specLongitude) {
+        getSunCalc(date, calcTimes, sunInSky, specLatitude, specLongitude, specHeight) {
             // this.debug(`getSunCalc for date="${date}" calcTimes="${calcTimes}" sunInSky="${sunInSky}"`);
             if (!hlp.isValidDate(date)) {
                 const dto = new Date(date);
@@ -1589,7 +1622,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
             }
 
-            const cacheEnabled = isNaN(specLatitude) && isNaN(specLongitude);
+            const cacheEnabled = isNaN(specLatitude) && isNaN(specLongitude) && isNaN(specHeight);
             if (cacheEnabled && (Math.abs(date.getTime() - this.cache.lastSunCalc.ts) < 3000)) {
                 // @ts-ignore
                 this.log('getSunCalc, time difference since last output to low, do no calculation');
@@ -1597,6 +1630,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             specLatitude = specLatitude || this.latitude;
             specLongitude = specLongitude || this.longitude;
+            specHeight = specHeight || this.height;
 
             const sunPos = sunCalc.getPosition(date.valueOf(), specLatitude, specLongitude);
             const result = {
@@ -1635,7 +1669,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 result.times = this.cache.sunTimesAdd2.times;
             } else {
                 // this.debug('getSunTimes calc extra time');
-                result.times = sunCalc.getSunTimes(date.valueOf(), specLatitude, specLongitude); // needed for a object copy
+                result.times = sunCalc.getSunTimes(date.valueOf(), specLatitude, specLongitude, specHeight, true); // needed for a object copy
             }
             if (!result.positionAtSolarNoon && sunInSky && result.times.solarNoon.valid) {
                 result.positionAtSolarNoon = sunCalc.getPosition(result.times.solarNoon.value.valueOf(), specLatitude, specLongitude);
@@ -1798,12 +1832,12 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 this.cache.sunTimesToday.sunPosAtSolarNoon = this.cache.sunTimesTomorrow.sunPosAtSolarNoon;
                 this.cache.sunTimesToday.dayId = this.cache.sunTimesTomorrow.dayId;
             } else {
-                this.cache.sunTimesToday.times = sunCalc.getSunTimes(todayValue, this.latitude, this.longitude);
+                this.cache.sunTimesToday.times = sunCalc.getSunTimes(todayValue, this.latitude, this.longitude, this.height, true);
                 this.cache.sunTimesToday.sunPosAtSolarNoon = sunCalc.getPosition(this.cache.sunTimesToday.times.solarNoon.value.valueOf(), this.latitude, this.longitude);
                 this.cache.sunTimesToday.dayId = dayId;
             }
             this.cache.sunTimesTomorrow = {};
-            this.cache.sunTimesTomorrow.times = sunCalc.getSunTimes(todayValue + dayMs, this.latitude, this.longitude);
+            this.cache.sunTimesTomorrow.times = sunCalc.getSunTimes(todayValue + dayMs, this.latitude, this.longitude, this.height, true);
             this.cache.sunTimesTomorrow.sunPosAtSolarNoon = sunCalc.getPosition(this.cache.sunTimesTomorrow.times.solarNoon.value.valueOf(), this.latitude, this.longitude);
             this.cache.sunTimesTomorrow.dayId = (dayId + 1);
 

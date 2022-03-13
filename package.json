@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "2.2.0",
+  "version": "2.2.0-betha",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -110,6 +110,7 @@
     }
   },
   "dependencies": {
+    "suncalc3": "^2.0.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
     "cronosjs": "^1.7.1"
