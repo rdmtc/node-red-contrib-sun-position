@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * This code is licensed under the Apache License Version 2.0.
  *
@@ -20,6 +21,10 @@
  *
  */
 
+'use strict';
+/** --- Type Defs ---
+ * @typedef {import('./../types/typedefs.js').runtimeRED} runtimeRED
+ */
 /************************************************************************/
 /**
  * get selection firlds
@@ -260,7 +265,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.numPercent'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeNumberPercent.svg',
             hasValue: true,
-            validate: RED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
         },
         nodeId: {
             value: 'nodeId',
@@ -350,21 +356,27 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.randomNumber','randomNumber'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
-            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            // eslint-disable-next-line no-useless-escape
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         randmNumCachedDay: {
             value: 'randmNumCachedDay',
             label: node._('node-red-contrib-sun-position/position-config:common.types.randmNumCachedDay','randmNumCachedDay'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
-            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            // eslint-disable-next-line no-useless-escape
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         randmNumCachedWeek: {
             value: 'randmNumCachedWeek',
             label: node._('node-red-contrib-sun-position/position-config:common.types.randmNumCachedWeek','randmNumCachedWeek'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
-            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            // eslint-disable-next-line no-useless-escape
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         TimeSun: {
             value: 'pdsTime',
@@ -475,7 +487,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
-                return (RED.validators.number()(v) && (n >= -360) && (n <= 720));
+                // @ts-ignore
+                return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n >= -360) && (n <= 720));
             }
         },
         numAzimuthRad: {
@@ -485,7 +498,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
-                return (RED.validators.number()(v) && (n > -6.3) && (n < 12.6));
+                // @ts-ignore
+                return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n > -6.3) && (n < 12.6));
             }
         },
         numAltitude: {
@@ -495,7 +509,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
-                return (RED.validators.number()(v) && (n >= -90) && (n <= 90));
+                // @ts-ignore
+                return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n >= -90) && (n <= 90));
             }
         },
         numAltitudeRad: {
@@ -505,7 +520,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             validate(v) {
                 const n = parseFloat(v);
-                return (RED.validators.number()(v) && (n > -1.56) && (n < 1.56));
+                // @ts-ignore
+                return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n > -1.56) && (n < 1.56));
             }
         },
         SunAzimuth: {
@@ -539,70 +555,80 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuth','Time by Azimuth'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuth.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByAzimuthRad: {
             value: 'pdsTimeByAzimuthRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuthRad','Time by Azimuth Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuthRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByElevationObj: {
             value: 'pdsTimeByElevation',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObj','next Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByElevationObjRad: {
             value: 'pdsTimeByElevationRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObjRad','next Time by Elevation Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByElevationNext: {
             value: 'pdsTimeByElevationNext',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNext','next Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByElevationNextRad: {
             value: 'pdsTimeByElevationNextRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNextRad','next Time by Elevation Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByElevationRise: {
             value: 'pdsTimeByElevationRise',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRise','next rise Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRise.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByElevationRiseRad: {
             value: 'pdsTimeByElevationRiseRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRiseRad','next rise Time by Elevation Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRiseRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByElevationSet: {
             value: 'pdsTimeByElevationSet',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSet','next set Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSet.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         SunTimeByElevationSetRad: {
             value: 'pdsTimeByElevationSetRad',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSetRad','next set Time by Elevation Rad'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSetRad.svg',
             hasValue: true,
-            validate: RED.validators.number()
+            // @ts-ignore
+            validate: /** @type {runtimeRED} */ RED.validators.number()
         },
         isDST: {
             value: 'pdbIsDST',
@@ -805,6 +831,7 @@ function getAutocompleteFormats() {
  * @returns {number|undefined} current cursor position
  */
 $.fn.getCursorPosition = function () {
+    // @ts-ignore
     const input = this.get(0);
     if (!input) {
         return undefined;
@@ -814,10 +841,13 @@ $.fn.getCursorPosition = function () {
         // Standard-compliant browsers
         return input.selectionStart;
     }
+    // @ts-ignore
     if (document.selection) {
         // IE
         input.focus();
+        // @ts-ignore
         const sel = document.selection.createRange();
+        // @ts-ignore
         const selLen = document.selection.createRange().text.length;
         sel.moveStart('character', -input.value.length);
         return sel.text.length - selLen;
@@ -835,6 +865,7 @@ function initializeValue(data, id, newVal) { // eslint-disable-line no-unused-va
     if (data[id] === null || typeof data[id] === 'undefined') {
         // let idHtml = "#node-input-" + id;
         // data[id] = newVal;
+        // @ts-ignore
         $('#node-input-' + id).val(newVal);
         // console.log('not initialized value !! "' + id + '" = "' + newVal + '" - ' + data[id]); // eslint-disable-line
     }
@@ -842,13 +873,14 @@ function initializeValue(data, id, newVal) { // eslint-disable-line no-unused-va
 
 /**
  * initializes an inputbos with autocomplete
- * @param {jQuery} inputBox - jsQuery selector of the input box
+ * @param {object} inputBox - jsQuery selector of the input box
  * @param {string} dataListID - id of the datalist from getAutocompleteFormats()
  */
 function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-vars
     const dataList = getAutocompleteFormats()[dataListID];
     // don't navigate away from the field on tab when selecting an item
     inputBox.on('keydown', function (event) {
+        // @ts-ignore
         if (event.keyCode === $.ui.keyCode.TAB && $(this).autocomplete('instance') && $(this).autocomplete('instance').menu.active) {
             event.preventDefault();
         }
@@ -885,9 +917,9 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
 /**
  * append options to a select field
  * @param {*} node - node representation for access to i18N function (node._())
- * @param {jQuery} parent - jQuery selector of the parent element (<select> - field)
+ * @param {object} parent - jQuery selector of the parent element (<select> - field)
  * @param {string} elementName - name of the element from getSelectFields()
- * @param {Function} filter - function for filter the elements
+ * @param {Function} [filter] - function for filter the elements
  */
 function appendOptions(node, parent, elementName, filter) { // eslint-disable-line no-unused-vars
     // console.log('[IN appendOptions] elementName='+ elementName + ' limit='+limit);
@@ -902,14 +934,17 @@ function appendOptions(node, parent, elementName, filter) { // eslint-disable-li
     const groupLength = groups.length;
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
+        // @ts-ignore
         const group = $('<optgroup/>', {label: node._('node-red-contrib-sun-position/position-config:' + groups[gIndex].i18n)}).appendTo(parent);
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
                 if (filter) {
                     if (filter(elements[eIndex])) {
+                        // @ts-ignore
                         group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:' + elements[eIndex].i18n)).attr('addText', elements[eIndex].add));
                     }
                 } else {
+                    // @ts-ignore
                     group.append($('<option></option>').val(elements[eIndex].id).text(node._('node-red-contrib-sun-position/position-config:' + elements[eIndex].i18n)).attr('addText', elements[eIndex].add));
                 }
             }
@@ -918,9 +953,16 @@ function appendOptions(node, parent, elementName, filter) { // eslint-disable-li
 }
 
 /**
+* @typedef {Object} typesArr
+* @property {string} value - the value property
+* @property {string} type - the type property
+*/
+
+/**
 * @typedef {Object} tiData
 * @property {string} valueProp - the name of the value property
 * @property {string} typeProp - the name of the type property
+* @property {Array.<string|typesArr>} [types] - list of allowed types
 * @property {string} [defaultValue] - value for the default value
 * @property {string} [defaultType] - value for the default type
 * @property {string} [tooltip] - a tootlip for the input field
@@ -933,10 +975,12 @@ function appendOptions(node, parent, elementName, filter) { // eslint-disable-li
  * setup a typedInput for node-red
  * @param {*} node - node representation for access to i18N function (node._())
  * @param {tiData} data - data of the typed input
- * @returns {jQuery} jQuery selector of the typeInput field - ideal for chaining
+ * @returns {object} jQuery selector of the typeInput field - ideal for chaining
  */
 function setupTInput(node, data) { // eslint-disable-line no-unused-vars
+    // @ts-ignore
     const $inputField = $('#node-input-' + data.valueProp);
+    // @ts-ignore
     const $typeField = $('#node-input-' + data.typeProp);
     let type='';
     if (typeof node[data.typeProp] === 'undefined' || node[data.typeProp] === null) {
@@ -949,6 +993,7 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
         type = node[data.typeProp];
         $typeField.val(type);
     }
+    // @ts-ignore
     if (Array.isArray(data.types) && !data.types.find(el => (el === type || el.value === type))) {
         console.error(`unknown typeInput type: ${data.typeProp} = '${type}', using default '${data.defaultType}' allowed types=`,data.types); // eslint-disable-line no-console
         type = data.defaultType;
@@ -1010,12 +1055,16 @@ function setTInputValue($field, value, type) { // eslint-disable-line no-unused-
  */
 function initCheckboxesBlock(element, val) { // eslint-disable-line no-unused-vars
     if (val === '*' || typeof val === 'undefined' || val === null) {
+        // @ts-ignore
         $(element + ' input[type=checkbox]').prop('checked', true);
     } else if (val === '' || val === 'none') {
+        // @ts-ignore
         $(element + ' input[type=checkbox]').removeAttr('checked');
     } else {
+        // @ts-ignore
         $(element + ' input[type=checkbox]').removeAttr('checked');
         val.split(',').forEach(v => {
+            // @ts-ignore
             $(element + ' [value=' + v + ']').prop('checked', true);
         });
     }
@@ -1025,8 +1074,8 @@ function initCheckboxesBlock(element, val) { // eslint-disable-line no-unused-va
 /**
  * initializes a combobox (combination of input and select box)
  * @param {*} node - node representation for access to i18N function (node._())
- * @param {jQuery} $inputSelect - jQuery selector of the select element
- * @param {jQuery} $inputBox - jQuery selector of the input element
+ * @param {object} $inputSelect - jQuery selector of the select element
+ * @param {object} $inputBox - jQuery selector of the input element
  * @param {string} dataListID - id of the datalist from getAutocompleteFormats()
  * @param {string} optionElementName - name of the element from getSelectFields()
  * @param {string} value - value of the input/select field
@@ -1069,19 +1118,21 @@ function initCombobox(node, $inputSelect, $inputBox, dataListID, optionElementNa
 
 /**
  * add a label to a html element
- * @param {jQuery} parent - element (row) to append the label
+ * @param {object} parent - element (row) to append the label
  * @param {string} forEl - name of the element to what the label is
  * @param {string} [symb] - class name of the symbol e.g. 'fa fa-clock'
  * @param {string} [text] - text of the label
  * @param {string} [width] - width of the label
- * @returns {jQuery} jQuery selector of the new label
+ * @returns {object} jQuery selector of the new label
  */
 function addLabel(parent, forEl, symb, text, width) { // eslint-disable-line no-unused-vars
+    // @ts-ignore
     const lbl = $('<label class="' + forEl + '-lbl" style="width:auto;"/>').attr('for', forEl).appendTo(parent);
     if (symb) {
         lbl.append('<i class= "' + symb + '" >');
     }
     if (text) {
+        // @ts-ignore
         const span = $('<span class="' + forEl + '-span" style="float: right; margin-left: 5px; margin-right: 2px;">' + text + '</span>');
         lbl.append(span);
         // lbl.attr('style', 'margin-left: 5px; width:' + 20 + span.width() + 'px;');
@@ -1097,15 +1148,15 @@ function addLabel(parent, forEl, symb, text, width) { // eslint-disable-line no-
 /**
 * @typedef {Object} multiselectTypes
 * @property {string} label - the name of the type property
-* @property {regex} selection - regular expression selector
+* @property {RegExp} selection - regular expression selector
 */
 
 /**
  * return the label who matches the regex selector for types
  * @param {string} val - value to test
- * @param {number} [length] - optional output if nothing is found
- * @param {multiselectTypes[]} types - array of types
- * @returns {string} the selected label or the given length or 'NA'
+ * @param {number} length - optional output if nothing is found
+ * @param {Array.<multiselectTypes>} types - array of types
+ * @returns {number|string} the selected label or the given length or 'NA'
  */
 function getMultiselectText(val, length, types) { // eslint-disable-line no-unused-vars
     for (let index = 0; index < types.length; index++) {
@@ -1122,8 +1173,8 @@ function getMultiselectText(val, length, types) { // eslint-disable-line no-unus
 /**
  * set the checkboxes in a multiselect combo box to a value
  * @param {string} value - value of the array
- * @param {jQuery} field - parent jquery selector element
- * @param {multiselectTypes[]} types - array of types
+ * @param {object} field - parent jquery selector element
+ * @param {Array.<multiselectTypes>} types - array of types
  */
 function setMultiselect(value, field, types) { // eslint-disable-line no-unused-vars
     if (value === '*' || typeof value === 'undefined') {
@@ -1142,32 +1193,39 @@ function setMultiselect(value, field, types) { // eslint-disable-line no-unused-
 /**
  * adds a multiselect combo box to the form
  * @param {*} node - Node Red Source Node
- * @param {jQuery} parent - parent jQuery selector to add multiselect
+ * @param {object} parent - parent jQuery selector to add multiselect
  * @param {string} elementName - Name of the element in the node, e.g. 'operatorTypes'
  * @param {string} i18N - i18N element name, e.g. 'time-comp.operatorTypes'
  * @param {string} id - element id, e.g. 'node-input-rule-operatorType-1'
- * @returns {jQuery} jQuery selector of the multiselect
+ * @returns {object} jQuery selector of the multiselect
  */
 function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-line no-unused-vars
     const types = getSelectFields()[elementName + 'Short'];
     const getSelection = function getCBText(parent) {
         const value = parent.find('.option-checkboxes input[type=checkbox]:checked');
+        // @ts-ignore
         const elements = value.map((_, el) => { return $(el).val(); }).get();
         parent.find('.multiselect-option').text(getMultiselectText(elements.join(','), elements.length, types));
     };
+    // @ts-ignore
     const multiselect = $('<div/>', {class: 'multiselect', id}).appendTo(parent);
+    // @ts-ignore
     const selectbox = $('<div/>', {
         class: 'selectBox',
+        // @ts-ignore
         html: $('<select/>', {
             id: id+'multiselect-select',
             class: 'multiselect-select',
+            // @ts-ignore
             html: $('<option></option>', {
                 id: 'multiselect-option',
                 class: 'multiselect-option'
             }).text('x')
         })
     }).appendTo(multiselect);
+    // @ts-ignore
     $('<div/>', {class: 'overSelect'}).appendTo(selectbox);
+    // @ts-ignore
     const list = $('<div/>', {
         id: id +'option-checkboxes',
         class: 'option-checkboxes'
@@ -1178,14 +1236,17 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
     const elements = getSelectFields()[elementName];
     const elementsLength = elements.length;
     for (let gIndex = 0; gIndex < groupLength; gIndex++) {
+        // @ts-ignore
         list.append($('<label></label>', {
             class: 'header',
             html: node._(i18N + 'Groups.' + gIndex)
         }));
         for (let eIndex = 0; eIndex < elementsLength; eIndex++) {
             if (groups[gIndex].id === elements[eIndex].group) {
+                // @ts-ignore
                 list.append($('<label></label>', {
                     for: id + '-' + elements[eIndex].id,
+                    // @ts-ignore
                     html: [$('<input>', {
                         class: id + '-checkbox',
                         type: 'checkbox',
@@ -1215,16 +1276,22 @@ function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-li
 
 /**
 * @typedef {Object} backendData
-* @property {string} config - the config object
+* @property {string} nodeId - the id of the node
 * @property {('getTimeData'|'getOutDataData')} kind - kind of request
+* @property {string} config - the config object
 * @property {string} type - type input type
 * @property {string} value - type input value
 * @property {string} [offsetType] - type input type for offset
 * @property {string} [offset] - type input value for offset
+* @property {boolean} [noOffsetError] - if no offset error should be triggered
 * @property {number} [multiplier] - multiplier to value
 * @property {boolean} [next] - identifier if the next should be output
 * @property {string} [days] - allowed days identifier
-* @property {string} [months] - allowed months identifier
+* @property {string} [months] - allowed days identifier
+* @property {boolean} [onlyOddDays] - additional limitation
+* @property {boolean} [onlyEvenDays] - additional limitation
+* @property {boolean} [onlyOddWeeks] - additional limitation
+* @property {boolean} [onlyEvenWeeks] - additional limitation
 * @property {string} [format] - output format
 */
 
@@ -1260,12 +1327,14 @@ function getBackendData(result, data) { // eslint-disable-line no-unused-vars
             res.value = 'msg.lc';
         } else if (data.type === 'msgValue') {
             res.value = 'msg.value';
-        } else if (data.timeDays === '') {
+        } else if (data.days === '') {
             res.value = 'No valid days given! Please check settings!';
-        } else if (data.timeMonths === '') {
+        } else if (data.months === '') {
             res.value = 'No valid month given! Please check settings!';
         } else {
+            // @ts-ignore
             const url = 'sun-position/data?' + jQuery.param( data );
+            // @ts-ignore
             $.getJSON(url, result);
             return;
         }
@@ -1287,10 +1356,11 @@ function isTrue(val) {  // eslint-disable-line no-unused-vars
 
 /**
  * checks if a value is a valid Date object
- * @param {*} d - a value to check
+ * @param {any} d - a value to check
  * @returns {boolean} returns __true__ if it is a valid Date, otherwhise __false__
  */
 function isValidDate(d) {
+    // @ts-ignore
     return d instanceof Date && !isNaN(d);
     // d !== 'Invalid Date' && !isNaN(d)
 }
@@ -1321,11 +1391,12 @@ function bdDateToTime(d, add) { // eslint-disable-line no-unused-vars
 
 /**
  * get the value for the day checkbox array
- * @param {jQuery} value - the checkbox array
+ * @param {object} value - the checkbox array
  * * @param {number} max - the maximum count of elements
  * @returns {string} the value of the checkboxes
  */
 function getCheckboxesStr(value, max) { // eslint-disable-line no-unused-vars
+    // @ts-ignore
     const days = value.map((_, el) => { return $(el).val(); }).get();
     if (days.length === 0) { return ''; }
     if (days.length === max) { return '*'; }

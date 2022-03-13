@@ -625,7 +625,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             result[time.setName] = {
                 value: new Date(v1),
                 ts: v1,
-                name: time[2],
+                name: time.setName,
                 elevation: sa,
                 julian: Jset,
                 valid,
@@ -634,7 +634,7 @@ const util = require('util'); // eslint-disable-line no-unused-vars
             result[time.riseName] = {
                 value: new Date(v2),
                 ts: v2,
-                name: time[1],
+                name: time.riseName,
                 elevation: sa, // (180 + (sa * -1)),
                 julian: Jrise,
                 valid,

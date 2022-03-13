@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * This code is licensed under the Apache License Version 2.0.
  *
@@ -36,14 +37,11 @@
 /**
  * @typedef {Object} IBlindControlNodeInstance Extensions for the nodeInstance object type
  * @property {Object} nodeData get/set generic Data of the node
- * @property {Object} sunData    -   the sun data Object
  * @property {Object} windowSettings    -   the window settings Object
  * @property {number} smoothTime smoothTime
- * @property {boolean} levelReverse    -   indicator if the Level is in reverse order
  * @property {Array.<Object>} oversteers    -   tbd
  * @property {Object} oversteer    -   tbd
  * @property {Object} level    -   tbd
- * @property {Object} previousData    -   tbd
  * @property {Array.<Object>} results    -   tbd
  * ... obviously there are more ...
  */
@@ -83,16 +81,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * get the absolute level from percentage level
-     * @param {*} node the node settings
-     * @param {*} levelPercent the level in percentage (0-1)
+     * @param {IBlindControlNode} node the node settings
+     * @param {number} levelPercent the level in percentage (0-1)
      */
     function posPrcToAbs_(node, levelPercent) {
         return posRound_(node, ((node.nodeData.levelTop - node.nodeData.levelBottom) * levelPercent) + node.nodeData.levelBottom);
     }
     /**
      * get the percentage level from absolute level  (0-1)
-     * @param {*} node the node settings
-     * @param {*} levelAbsolute the level absolute
+     * @param {IBlindControlNode} node the node settings
+     * @param {number} levelAbsolute the level absolute
      * @return {number} get the level percentage
      */
     function posAbsToPrc_(node, levelAbsolute) {
@@ -100,8 +98,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     }
     /**
      * get the absolute inverse level
-     * @param {*} node the node settings
-     * @param {*} level the level absolute
+     * @param {IBlindControlNode} node the node settings
+     * @param {number} level the level absolute
      * @return {number} get the inverse level
      */
     function getInversePos_(node, level) {
@@ -109,19 +107,20 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     }
     /**
      * get the absolute inverse level
-     * @param {*} node the node settings
+     * @param {IBlindControlNode} node the node settings
+     * @param {Object} prevData the nodes previous data
      * @return {number} get the current level
      */
-    function getRealLevel_(node) {
+    function getRealLevel_(node, prevData) {
         if (node.levelReverse) {
-            return isNaN(node.level.currentInverse) ? node.previousData.levelInverse: node.level.currentInverse;
+            return isNaN(node.level.currentInverse) ? prevData.levelInverse: node.level.currentInverse;
         }
-        return isNaN(node.level.current) ? node.previousData.level : node.level.current;
+        return isNaN(node.level.current) ? prevData.level : node.level.current;
     }
 
     /**
      * round a level to the next increment
-     * @param {*} node node data
+     * @param {IBlindControlNode} node node data
      * @param {number} pos level
      * @return {number} rounded level number
      */
@@ -152,13 +151,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * check the oversteering data
-     * @param {*} node node data
-     * @param {*} msg the message object
+     * @param {IBlindControlNode} node node data
+     * @param {Object} msg the message object
      * @param {Object} tempData the temporary data holder object
      * @param {ITimeObject} oNow the now Object
      */
     function checkOversteer(node, msg, tempData, sunPosition, oNow) {
-        // node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity })}`);
+        // node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);
         try {
             node.oversteer.isChecked = true;
             return node.oversteers.find(el => ((el.mode === 0 || el.mode === node.sunData.mode) && (!el.onlySunInWindow || sunPosition.InWindow) &&
@@ -183,19 +182,19 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.log(util.inspect(err));
         }
-        // node.debug('node.oversteers=' + util.inspect(node.oversteers, { colors: true, compact: 10, breakLength: Infinity }));
+        // node.debug('node.oversteers=' + util.inspect(node.oversteers, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
         return undefined;
     }
     /******************************************************************************************/
     /**
      * get the blind level from a typed input
-     * @param {*} node node data
-     * @param {*} type type field
-     * @param {*} value value field
+     * @param {IBlindControlNode} node node data
+     * @param {string} type type field
+     * @param {string} value value field
      * @returns blind level as number or NaN if not defined
      */
     function getBlindPosFromTI(node, msg, type, value, def) {
-        // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} nodeData=${ util.inspect(node.nodeData, { colors: true, compact: 10, breakLength: Infinity }) }`);
+        // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} nodeData=${ util.inspect(node.nodeData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }) }`);
         def = def || NaN;
         if (type === 'none' || type === ''|| type === 'levelND') {
             return def;
@@ -235,12 +234,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * check if a manual overwrite should be set
-     * @param {*} node node data
-     * @param {*} msg message object
+     * @param {IBlindControlNode} node node data
+     * @param {Object} msg message object
      * @param {ITimeObject} oNow Now Date object
+     * @param {Object} prevData the nodes previous data
      * @returns {boolean} true if override is active, otherwise false
      */
-    function checkPosOverwrite(node, msg, oNow) {
+    function checkPosOverwrite(node, msg, oNow, prevData) {
         // node.debug(`checkPosOverwrite act=${node.nodeData.overwrite.active} `);
         let isSignificant = false;
         const exactImportance = hlp.getMsgBoolValue(msg, ['exactImportance', 'exactSignificance', 'exactPriority', 'exactPrivilege'], ['exactImporta', 'exactSignifican', 'exactPrivilege', 'exactPrio']);
@@ -288,11 +288,11 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     newPos = posRound_(node, newPos);
                 }
                 node.debug(`overwrite newPos=${newPos}`);
-                if (hlp.getMsgBoolValue(msg, 'resetOnSameAsLastValue') && (node.previousData.level === newPos)) {
+                if (hlp.getMsgBoolValue(msg, 'resetOnSameAsLastValue') && (prevData.level === newPos)) {
                     node.debug(`resetOnSameAsLastValue active, reset overwrite and exit newPos=${newPos}`);
                     ctrlLib.posOverwriteReset(node);
                     return ctrlLib.setOverwriteReason(node);
-                } else if (hlp.getMsgBoolValue(msg, 'ignoreSameValue') && (node.previousData.level === newPos)) {
+                } else if (hlp.getMsgBoolValue(msg, 'ignoreSameValue') && (prevData.level === newPos)) {
                     node.debug(`overwrite exit true (ignoreSameValue), newPos=${newPos}`);
                     return ctrlLib.setOverwriteReason(node);
                 }
@@ -345,17 +345,18 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * calculates for the blind the new level
-     * @param {*} node the node data
-     * @param {*} msg the message object
+     * @param {IBlindControlNode} node the node data
+     * @param {Object} msg the message object
      * @param {ITimeObject} oNow the now Object
      * @param {Object} tempData the temporary data holder object
+     * @param {Object} prevData the nodes previous data
      * @returns the sun position object
      */
-    function calcBlindSunPosition(node, msg, oNow, tempData) {
+    function calcBlindSunPosition(node, msg, oNow, tempData, prevData) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = node.positionConfig.getSunCalc(oNow.now, false, false);
-        // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 10, breakLength: Infinity }));
+        // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
 
         const azimuthStart = node.positionConfig.getFloatProp(node, msg, node.windowSettings.azimuthStartType, node.windowSettings.azimuthStart, NaN, (result, _obj) => {
             if (result !== null && typeof result !== 'undefined') {
@@ -396,7 +397,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.slat = node.positionConfig.getPropValue(node, msg, res.slatPos, false, oNow.now);
                 node.level.topic = node.oversteer.topic;
-                node.previousData.last.sunLevel = node.level.current;
+                prevData.last.sunLevel = node.level.current;
                 node.reason.code = 10;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.oversteer', { pos: res.pos+1 });
                 node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.oversteer', { pos: res.pos+1 });
@@ -414,7 +415,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.topic = node.sunData.topic;
                 node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
-                node.previousData.last.sunLevel = node.level.current;
+                prevData.last.sunLevel = node.level.current;
                 node.reason.code = 13;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWinMin');
                 node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunNotInWinMin');
@@ -423,7 +424,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.topic = node.sunData.topic;
                 node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
-                node.previousData.last.sunLevel = node.level.current;
+                prevData.last.sunLevel = node.level.current;
                 node.reason.code = 13;
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWinMax');
                 node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunNotInWinMax');
@@ -440,7 +441,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             node.level.currentInverse = getInversePos_(node, node.level.current);
             node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
             node.level.topic = node.sunData.topic;
-            node.previousData.last.sunLevel = node.level.current;
+            prevData.last.sunLevel = node.level.current;
             node.reason.code = 12;
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunInWinMax');
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunInWinMax');
@@ -450,7 +451,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             node.level.currentInverse = getInversePos_(node, node.level.current);
             node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
             node.level.topic = node.sunData.topic;
-            node.previousData.last.sunLevel = node.level.current;
+            prevData.last.sunLevel = node.level.current;
             node.reason.code = 12;
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunInWinMin');
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunInWinMin');
@@ -489,25 +490,25 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
         node.level.topic = node.sunData.topic;
 
-        const delta = Math.abs(node.previousData.level - node.level.current);
+        const delta = Math.abs(prevData.level - node.level.current);
 
         if ((node.smoothTime > 0) && (node.sunData.changeAgain > oNow.nowNr)) {
             node.debug(`no change smooth - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain}`);
             node.reason.code = 11;
-            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.smooth', { pos: getRealLevel_(node).toString()});
-            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.smooth', { pos: getRealLevel_(node).toString()});
-            node.level.current = node.previousData.level;
-            node.level.currentInverse = node.previousData.levelInverse;
-            node.level.slat = node.previousData.slat;
-            node.level.topic = node.previousData.topic;
+            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.smooth', { pos: getRealLevel_(node, prevData).toString()});
+            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.smooth', { pos: getRealLevel_(node, prevData).toString()});
+            node.level.current = prevData.level;
+            node.level.currentInverse = prevData.levelInverse;
+            node.level.slat = prevData.slat;
+            node.level.topic = prevData.topic;
         } else if ((node.sunData.minDelta > 0) && (delta < node.sunData.minDelta) && (node.level.current > node.nodeData.levelBottom) && (node.level.current < node.nodeData.levelTop)) {
             node.reason.code = 14;
-            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunMinDelta', { pos: getRealLevel_(node).toString()});
-            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunMinDelta', { pos: getRealLevel_(node).toString() });
-            node.level.current = node.previousData.level;
-            node.level.currentInverse = node.previousData.levelInverse;
-            node.level.slat = node.previousData.slat;
-            node.level.topic = node.previousData.topic;
+            node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunMinDelta', { pos: getRealLevel_(node, prevData).toString()});
+            node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunMinDelta', { pos: getRealLevel_(node, prevData).toString() });
+            node.level.current = prevData.level;
+            node.level.currentInverse = prevData.levelInverse;
+            node.level.slat = prevData.slat;
+            node.level.topic = prevData.topic;
         } else {
             node.reason.code = 9;
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunCtrl');
@@ -532,14 +533,14 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             node.level.current = node.nodeData.levelMax;
             node.level.currentInverse = getInversePos_(node, node.level.current); // node.nodeData.levelMin;
         }
-        node.previousData.last.sunLevel = node.level.current;
+        prevData.last.sunLevel = node.level.current;
         // node.debug(`calcBlindSunPosition end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description}`);
         return sunPosition;
     }
     /******************************************************************************************/
     /**
      * changes the rule settings
-     * @param {Object} node node data
+     * @param {IBlindControlNode} node node data
      * @param {number} [rulePos] the position of the rule which should be changed
      * @param {string} [ruleName] the name of the rule which should be changed
      * @param {Object} [ruleData] the properties of the rule which should be changed
@@ -557,7 +558,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * check all rules and determinate the active rule
-     * @param {Object} node node data
+     * @param {IBlindControlNode} node node data
      * @param {Object} msg the message object
      * @param {ITimeObject} oNow the *current* date Object
      * @param {Object} tempData the object storing the temporary caching data
@@ -854,7 +855,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         if (config.autoTrigger) {
             node.autoTrigger = {
-                defaultTime : parseInt(config.autoTriggerTime) || 3600000 // 1h
+                defaultTime : parseInt(config.autoTriggerTime) || 3600000, // 1h
+                time : NaN,
+                type : 0 // default time
             };
         }
 
@@ -876,6 +879,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         node.sunData = {
             /** Defines if the sun control is active or not */
             active: false,
+            // @ts-ignore
             mode: Number(hlp.chkValueFilled(config.sunControlMode, 0)),
             topic: config.sunTopic,
             /** define how long could be the sun on the floor **/
@@ -889,6 +893,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             },
             changeAgain: 0
         };
+        // @ts-ignore
         if (node.sunData.mode === 2) { node.sunData.mode = cSummerMode; } // backwards compatibility
         node.sunData.modeMax = node.sunData.mode;
         node.windowSettings = {
@@ -1078,59 +1083,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             isChecked: false
         };
 
+        // @ts-ignore
         node.rules = {
             data: config.rules || []
         };
         node.level = {
             current: NaN, // unknown
             currentInverse: NaN
-        };
-        node.previousData = node.context().get('lastData', node.contextStore) || {
-            level: NaN, // unknown
-            reasonCode: -1,
-            usedRule: NaN,
-            last : {}
-        };
-
-        /**
-         * set the state of the node
-         */
-        this.setState = blindCtrl => {
-            let code = node.reason.code;
-            let shape = 'ring';
-            let fill = 'yellow';
-            if (code === 10 && node.previousData) { // smooth;
-                code = node.previousData.reasonCode;
-            }
-
-            if (blindCtrl.level === node.nodeData.levelTop) {
-                shape = 'dot';
-            }
-            if (isNaN(code)) {
-                fill = 'red'; // block
-                shape = 'dot';
-            } else if (code <= 3) {
-                fill = 'blue'; // override
-            } else if (code === 4 || code === 15 || code === 16) {
-                fill = 'grey'; // rule
-            } else if (code === 1 || code === 8) {
-                fill = 'green'; // not in window or oversteerExceeded
-            }
-            let modeSign = '';
-            if (node.sunData.mode === cWinterMode) {
-                modeSign = '❆ ';
-            } else if (node.sunData.mode === cSummerMode) {
-                modeSign = '☀ ';
-            } else if (node.sunData.mode === cMinimizeMode) {
-                modeSign = '🕶 ';
-            }
-
-            node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : blindCtrl.level.toString() + ' - ' + modeSign + node.reason.state;
-            node.status({
-                fill,
-                shape,
-                text: node.reason.stateComplete
-            });
         };
 
         /**
@@ -1253,19 +1212,25 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
                 // initialize
                 const tempData = node.context().get('cacheData',node.contextStore) || {};
+                const previousData = node.context().get('lastData', node.contextStore) || {
+                    level: NaN, // unknown
+                    reasonCode: -1,
+                    usedRule: NaN,
+                    last : {}
+                };
                 if (!isNaN(node.level.current)) {
-                    node.previousData.level = node.level.current;
-                    node.previousData.levelInverse = node.level.currentInverse;
-                    node.previousData.slat = clonedeep(node.level.slat); // deep copy
-                    node.previousData.topic = node.level.topic;
-                    node.previousData.reasonCode = node.reason.code;
-                    node.previousData.reasonState = node.reason.state;
-                    node.previousData.reasonDescription = node.reason.description;
+                    previousData.level = node.level.current;
+                    previousData.levelInverse = node.level.currentInverse;
+                    previousData.slat = clonedeep(node.level.slat); // deep copy
+                    previousData.topic = node.level.topic;
+                    previousData.reasonCode = node.reason.code;
+                    previousData.reasonState = node.reason.state;
+                    previousData.reasonDescription = node.reason.description;
                     if (String(msg.topic).includes('forceOutput')) { // hlp.getMsgTopicContains(msg, 'forceOutput')) {
-                        node.previousData.forceNext = true;
+                        previousData.forceNext = true;
                     }
                 } else {
-                    node.previousData.forceNext = true;
+                    previousData.forceNext = true;
                 }
                 node.oversteer.isChecked = false;
                 node.reason.code = NaN;
@@ -1291,7 +1256,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     reason : node.reason,
                     blind: node.nodeData,
                     autoTrigger : node.autoTrigger,
-                    lastEvaluated: node.previousData.last,
+                    lastEvaluated: previousData.last,
                     name: node.name || node.id,
                     id: node.addId || node.id,
                     srcId: node.id,
@@ -1300,25 +1265,25 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
                 let ruleId = NaN;
                 // check for manual overwrite
-                let overwrite = checkPosOverwrite(node, msg, oNow);
+                let overwrite = checkPosOverwrite(node, msg, oNow, previousData);
                 if (!overwrite || node.rules.canResetOverwrite || (node.rules.maxImportance > 0 && node.rules.maxImportance > node.nodeData.overwrite.importance)) {
                     // calc times:
                     blindCtrl.rule = checkRules(node, msg, oNow, tempData);
-                    node.previousData.last.ruleId = blindCtrl.rule.id;
-                    node.previousData.last.ruleLevel = blindCtrl.rule.level;
-                    node.previousData.last.ruleTopic = blindCtrl.rule.topic;
+                    previousData.last.ruleId = blindCtrl.rule.id;
+                    previousData.last.ruleLevel = blindCtrl.rule.level;
+                    previousData.last.ruleTopic = blindCtrl.rule.topic;
                     if (blindCtrl.rule.isOff === true) {
-                        node.previousData.forceNext = true;
-                        node.context().set('lastData', node.previousData, node.contextStore);
+                        previousData.forceNext = true;
+                        node.context().set('lastData', previousData, node.contextStore);
                         node.context().set('cacheData', tempData, node.contextStore);
                         // rule set the controller off
                         done();
                         return null;
                     }
 
-                    // node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.nodeData.overwrite.importance=${node.nodeData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}, blindCtrl.rule.resetOverwrite=${blindCtrl.rule.resetOverwrite}, blindCtrl.rule.id=${blindCtrl.rule.id}, node.previousData.usedRule=${node.previousData.usedRule}`);
-                    if (overwrite && blindCtrl.rule.resetOverwrite && blindCtrl.rule.id !== node.previousData.usedRule) {
-                        node.debug(`Overwrite expired caused by rule rule=${blindCtrl.rule.id}, previousRule=${node.previousData.usedRule}`);
+                    // node.debug(`overwrite=${overwrite}, node.rules.maxImportance=${node.rules.maxImportance}, node.nodeData.overwrite.importance=${node.nodeData.overwrite.importance}, blindCtrl.rule.importance=${blindCtrl.rule.importance}, blindCtrl.rule.resetOverwrite=${blindCtrl.rule.resetOverwrite}, blindCtrl.rule.id=${blindCtrl.rule.id}, previousData.usedRule=${previousData.usedRule}`);
+                    if (overwrite && blindCtrl.rule.resetOverwrite && blindCtrl.rule.id !== previousData.usedRule) {
+                        node.debug(`Overwrite expired caused by rule rule=${blindCtrl.rule.id}, previousRule=${previousData.usedRule}`);
                         ctrlLib.posOverwriteReset(node);
                         overwrite = false;
                     }
@@ -1334,14 +1299,14 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         node.reason.description = blindCtrl.rule.description;
                         if (!blindCtrl.rule.active && (node.sunData.mode > 0)) {
                             // calc sun position:
-                            blindCtrl.sunPosition = calcBlindSunPosition(node, msg, oNow, tempData);
+                            blindCtrl.sunPosition = calcBlindSunPosition(node, msg, oNow, tempData, previousData);
                         }
                         if (blindCtrl.rule.hasMinimum && (node.level.current < blindCtrl.rule.levelMinimum)) {
                             node.debug(`${node.level.current} is below rule minimum ${blindCtrl.rule.levelMinimum}`);
                             node.reason.code = 15;
                             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.ruleMin', { org: node.reason.state, number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name });
                             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.ruleMin',
-                                { org: node.reason.description, level: getRealLevel_(node), number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name  });
+                                { org: node.reason.description, level: getRealLevel_(node, previousData), number: blindCtrl.rule.minimum.id, name: blindCtrl.rule.minimum.name  });
                             node.level.current = blindCtrl.rule.levelMinimum;
                             node.level.currentInverse = getInversePos_(node, node.level.current);
                         } else if (blindCtrl.rule.hasMaximum && (node.level.current > blindCtrl.rule.levelMaximum)) {
@@ -1349,7 +1314,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             node.reason.code = 26;
                             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.ruleMax', { org: node.reason.state, number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
                             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.ruleMax',
-                                { org: node.reason.description, level: getRealLevel_(node), number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
+                                { org: node.reason.description, level: getRealLevel_(node, previousData), number: blindCtrl.rule.maximum.id, name: blindCtrl.rule.maximum.name });
                             node.level.current = blindCtrl.rule.levelMaximum;
                             node.level.currentInverse = getInversePos_(node, node.level.current);
                         }
@@ -1363,8 +1328,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             node.level.current = node.nodeData.levelTop;
                             node.level.currentInverse = node.nodeData.levelBottom;
                         }
-                        node.previousData.last.level = node.level.current;
-                        node.previousData.last.topic = node.level.topic;
+                        previousData.last.level = node.level.current;
+                        previousData.last.topic = node.level.topic;
                     }
                     if (blindCtrl.rule.topicOversteer && (!overwrite || (blindCtrl.rule.topicOversteer.importance > node.nodeData.overwrite.importance))) {
                         node.level.topic = blindCtrl.rule.topicOversteer.topic;
@@ -1391,11 +1356,11 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
                 blindCtrl.slat = node.level.slat;
                 if (node.levelReverse) {
-                    blindCtrl.level = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
-                    blindCtrl.levelInverse = isNaN(node.level.current) ? node.previousData.level : node.level.current;
+                    blindCtrl.level = isNaN(node.level.currentInverse) ? previousData.levelInverse : node.level.currentInverse;
+                    blindCtrl.levelInverse = isNaN(node.level.current) ? previousData.level : node.level.current;
                 } else {
-                    blindCtrl.level = isNaN(node.level.current) ? node.previousData.level : node.level.current;
-                    blindCtrl.levelInverse = isNaN(node.level.currentInverse) ? node.previousData.levelInverse : node.level.currentInverse;
+                    blindCtrl.level = isNaN(node.level.current) ? previousData.level : node.level.current;
+                    blindCtrl.levelInverse = isNaN(node.level.currentInverse) ? previousData.levelInverse : node.level.currentInverse;
                 }
 
                 if (node.startDelayTimeOut) {
@@ -1403,7 +1368,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.startDelay', {date:node.positionConfig.toTimeString(node.startDelayTimeOut)});
                     node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.startDelay', {dateISO:node.startDelayTimeOut.toISOString()});
                 }
-                node.setState(blindCtrl);
 
                 let topic = node.level.topic || node.nodeData.topic || msg.topic;
                 const replaceAttrs = {
@@ -1423,15 +1387,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     payload: msg.payload
                 };
                 if (topic) {
-                    topic = hlp.topicReplace(topic, replaceAttrs);
+                    topic = hlp.textReplace(topic, replaceAttrs, RED, msg);
                 }
 
                 if ((!node.startDelayTimeOut) &&
                     (!isNaN(node.level.current)) &&
-                    (node.previousData.forceNext === true ||
-                    (node.level.current !== node.previousData.level) ||
-                    (!isEqual(node.level.slat, node.previousData.slat)) ||
-                    (node.level.topic !== node.previousData.topic))) {
+                    (previousData.forceNext === true ||
+                    (node.level.current !== previousData.level) ||
+                    (!isEqual(node.level.slat, previousData.slat)) ||
+                    (node.level.topic !== previousData.topic))) {
                     const msgOut = {};
                     for (let i = 0; i < node.results.length; i++) {
                         const prop = node.results[i];
@@ -1447,7 +1411,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         } else if (prop.type === 'ctrlObj') {
                             resultObj = blindCtrl;
                         } else if (prop.type === 'strPlaceholder') {
-                            resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
+                            resultObj = hlp.textReplace(''+prop.value, replaceAttrs, RED, msg);
                         } else {
                             resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.now);
                         }
@@ -1460,15 +1424,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         }
                     }
                     send([msgOut, { topic, payload: blindCtrl, reason: node.reason, mode: node.sunData.mode }]);
-                    delete node.previousData.forceNext;
+                    delete previousData.forceNext;
                 } else {
                     send([null, { topic, payload: blindCtrl, reason: node.reason, mode: node.sunData.mode }]);
                 }
                 if (isNaN(ruleId)) {
-                    node.previousData.usedRule = ruleId;
+                    previousData.usedRule = ruleId;
                 }
                 node.context().set('cacheData', tempData, node.contextStore);
-                node.context().set('lastData', node.previousData, node.contextStore);
+                node.context().set('lastData', previousData, node.contextStore);
                 if (node.autoTrigger) {
                     node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
                     if (node.autoTriggerObj) {
@@ -1485,6 +1449,44 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         });
                     }, node.autoTrigger.time);
                 }
+
+                // #region set the state of the node
+                let code = node.reason.code;
+                let shape = 'ring';
+                let fill = 'yellow';
+                if (code === 10 && previousData) { // smooth;
+                    code = previousData.reasonCode;
+                }
+
+                if (blindCtrl.level === node.nodeData.levelTop) {
+                    shape = 'dot';
+                }
+                if (isNaN(code)) {
+                    fill = 'red'; // block
+                    shape = 'dot';
+                } else if (code <= 3) {
+                    fill = 'blue'; // override
+                } else if (code === 4 || code === 15 || code === 16) {
+                    fill = 'grey'; // rule
+                } else if (code === 1 || code === 8) {
+                    fill = 'green'; // not in window or oversteerExceeded
+                }
+                let modeSign = '';
+                if (node.sunData.mode === cWinterMode) {
+                    modeSign = '❆ ';
+                } else if (node.sunData.mode === cSummerMode) {
+                    modeSign = '☀ ';
+                } else if (node.sunData.mode === cMinimizeMode) {
+                    modeSign = '🕶 ';
+                }
+
+                node.reason.stateComplete = (isNaN(blindCtrl.level)) ? node.reason.state : blindCtrl.level.toString() + ' - ' + modeSign + node.reason.state;
+                node.status({
+                    fill,
+                    shape,
+                    text: node.reason.stateComplete
+                });
+                // #endregion set the state of the node
                 done();
                 return null;
             } catch (err) {

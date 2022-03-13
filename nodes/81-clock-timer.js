@@ -24,6 +24,7 @@
 /********************************************
  * clock-timer:
  *********************************************/
+'use strict';
 /** --- Type Defs ---
  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
@@ -33,7 +34,6 @@
  * @typedef {import("./lib/timeControlHelper.js").ITimeControlNodeInstance} ITimeControlNodeInstance
  */
 
-// IClockTimerNodeInstance
 /**
  * @typedef {Object} IClockTimerNodeInstance Extensions for the nodeInstance object type
  * @property {Object} nodeData get/set generic Data of the node
@@ -42,16 +42,7 @@
  * @property {Object} oversteer    -   tbd
  * @property {Object} rules    -   tbd
  * @property {Object} payload    -   tbd
- * @property {Object} previousData    -   tbd
  * @property {Array.<Object>} results    -   tbd
- *
- * @property {Object} autoTrigger autotrigger options
- * @property {NodeJS.Timeout} autoTriggerObj autotrigger options
- *
- * @property {Object} startDelayTimeOut    -   tbd
- * @property {NodeJS.Timeout} startDelayTimeOutObj    -   tbd
-
- * @property {function} setState function for settign the state of the node
  * ... obviously there are more ...
  */
 
@@ -76,8 +67,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * check if a manual overwrite should be set
-     * @param {*} node node data
-     * @param {*} msg message object
+     * @param {IClockTimerNode} node node data
+     * @param {Object} msg message object
      * @param {ITimeObject} oNow the *current* date Object
      * @returns {boolean} true if override is active, otherwise false
      */
@@ -184,7 +175,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * changes the rule settings
-     * @param {Object} node node data
+     * @param {IClockTimerNode} node node data
      * @param {number} [rulePos] the position of the rule which should be changed
      * @param {string} [ruleName] the name of the rule which should be changed
      * @param {Object} [ruleData] the properties of the rule which should be changed
@@ -202,7 +193,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * check all rules and determinate the active rule
-     * @param {Object} node node data
+     * @param {IClockTimerNode} node node data
      * @param {Object} msg the message object
      * @param {ITimeObject} oNow the *current* date Object
      * @param {Object} tempData the object storing the temporary caching data
@@ -402,7 +393,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         if (config.autoTrigger) {
             node.autoTrigger = {
-                defaultTime : parseInt(config.autoTriggerTime) || 20 * 60000 // 20min
+                defaultTime : parseInt(config.autoTriggerTime) || 20 * 60000, // 20min
+                time : NaN,
+                type : 0 // default time
             };
         }
 
@@ -440,38 +433,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         node.payload = {
             current: undefined,
             topic: node.nodeData.topic
-        };
-
-        /**
-         * set the state of the node
-         */
-        this.setState = pLoad => {
-            const code = node.reason.code;
-            let shape = 'ring';
-            let fill = 'yellow';
-
-            if (isNaN(code)) {
-                fill = 'red'; // block
-                shape = 'dot';
-            } else if (code <= 3) {
-                fill = 'blue'; // override
-            } else if (code === 4 || code === 15 || code === 16) {
-                fill = 'grey'; // rule
-            } else if (code === 1 || code === 8) {
-                fill = 'green'; // not in window or oversteerExceeded
-            }
-
-            node.reason.stateComplete = node.reason.state ;
-            if (pLoad === null || typeof pLoad !== 'object') {
-                node.reason.stateComplete = hlp.clipStrLength(''+pLoad,20) + ' - ' + node.reason.stateComplete;
-            } else if (typeof pLoad === 'object') {
-                node.reason.stateComplete = hlp.clipStrLength(JSON.stringify(pLoad),20) + ' - ' + node.reason.stateComplete;
-            }
-            node.status({
-                fill,
-                shape,
-                text: node.reason.stateComplete
-            });
         };
 
         /**
@@ -615,7 +576,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.startDelay', {date:node.positionConfig.toTimeString(node.startDelayTimeOut)});
                     node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.startDelay', {dateISO:node.startDelayTimeOut.toISOString()});
                 }
-                node.setState(node.payload.current);
+
                 let topic = node.payload.topic || msg.topic;
                 const replaceAttrs = {
                     name: timeCtrl.name,
@@ -630,7 +591,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     payload: msg.payload
                 };
                 if (topic) {
-                    topic = hlp.topicReplace(topic, replaceAttrs);
+                    topic = hlp.textReplace(topic, replaceAttrs, RED, msg);
                 }
 
                 if ((!node.startDelayTimeOut) &&
@@ -650,7 +611,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         } else if (prop.type === 'ctrlObj') {
                             resultObj = timeCtrl;
                         } else if (prop.type === 'strPlaceholder') {
-                            resultObj = hlp.topicReplace(''+prop.value, replaceAttrs);
+                            resultObj = hlp.textReplace(''+prop.value, replaceAttrs, RED, msg);
                         } else {
                             resultObj = node.positionConfig.getPropValue(this, msg, prop, false, oNow.now);
                         }
@@ -691,6 +652,35 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         });
                     }, node.autoTrigger.time);
                 }
+
+                // #region set the state of the node
+                let shape = 'ring';
+                let fill = 'yellow';
+
+                if (isNaN(node.reason.code)) {
+                    fill = 'red'; // block
+                    shape = 'dot';
+                } else if (node.reason.code <= 3) {
+                    fill = 'blue'; // override
+                } else if (node.reason.code === 4 || node.reason.code === 15 || node.reason.code === 16) {
+                    fill = 'grey'; // rule
+                } else if (node.reason.code === 1 || node.reason.code === 8) {
+                    fill = 'green'; // not in window or oversteerExceeded
+                }
+
+                if (node.payload.current === null || typeof node.payload.current !== 'object') {
+                    node.reason.stateComplete = hlp.clipStrLength(''+node.payload.current,20) + ' - ' + node.reason.stateComplete;
+                } else if (typeof node.payload.current === 'object') {
+                    node.reason.stateComplete = hlp.clipStrLength(JSON.stringify(node.payload.current),20) + ' - ' + node.reason.stateComplete;
+                }
+
+                node.reason.stateComplete = node.reason.state ;
+                node.status({
+                    fill,
+                    shape,
+                    text: node.reason.stateComplete
+                });
+                // #endregion set the state of the node
                 done();
                 return null;
             } catch (err) {

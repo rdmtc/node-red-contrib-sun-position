@@ -55,6 +55,7 @@
   "scripts": {
     "test": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate && mocha \"test/**/*_spec.js\"",
     "testnode": "mocha \"test/**/*_spec.js\"",
+    "testnodes": "mocha \"test/**/*_spec.js\"",
     "lintfix": "eslint --fix \"./**/*.js\" \"./**/*.html\"",
     "lint": "eslint \"./**/*.js\" \"./**/*.html\"",
     "predev": "npm i -g",
@@ -114,11 +115,13 @@
     "cronosjs": "^1.7.1"
   },
   "devDependencies": {
-    "eslint": ">=8.10.0",
+    "eslint": ">=8.11.0",
     "eslint-plugin-html": ">=6.2.0",
-    "eslint-plugin-jsdoc": ">=37.9.5",
     "eslint-plugin-json": ">=3.1.0",
     "eslint-plugin-node": ">=11.1.0",
+    "@types/express": "^4.17.13",
+    "@types/jquery": "^3.5.14",
+    "@types/node-red": "^1.2.0",
     "jsonata": "^1.8.6",
     "mocha": "^8.4.0",
     "node-red": ">=2.0.0",
@@ -127,11 +130,6 @@
     "should": "^13.2.3",
     "should-sinon": "^0.0.6",
     "sinon": "^13.0.1"
-  },
-  "disabledSettings": {
-    "plugins-disabled": [
-      "jsdoc"
-    ]
   },
   "eslintConfig": {
     "env": {

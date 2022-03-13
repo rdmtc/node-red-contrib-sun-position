@@ -14,11 +14,12 @@ Install of a specific Version in Redmatic (on a Homematic):
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@2.0.0`
 
 This can be also used to go back to an older Version.
-### ?.?.?: enhancement
+### 2.2.0: enhancement
 
 - general
-  - first implementation of tests with `mocha` and some changes due to the test implementation
+  - first implementation of tests with `mocha` and some changes due to the test implementation (inject enhance and delay-until)
     - revised error handling and output messages if the configuration of nodes is not correct (missing config node, missing latitude/longitude).
+  - added type checking
 
 - inject enhance (time-inject)
   - added repletely inject with CRON expression
@@ -29,9 +30,13 @@ This can be also used to go back to an older Version.
 - within-time-switch
   - changed state output in case time span is over midnight, because the shown times could be not correct #416
   - added automatic test case
-    - basic inject
+    - basic test for configuration
+    - test for message passing is for later
 
-- new Node. delay-until which allows to delay messages until defined time
+- new Node `delay-until` which allows to delay messages until defined time
+
+- blind-control
+  - fix #421
 
 ### 2.1.1: bug fixes
 

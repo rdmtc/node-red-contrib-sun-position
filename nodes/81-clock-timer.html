@@ -22,7 +22,14 @@ this software without specific prior written permission.
 -->
 
 <script type="text/javascript">
+    // @ts-cehck
+    /* eslint-env browser es6 */
+    // Isolate this code
     (function() {
+        'use strict';
+        /** --- Type Defs ---
+         * @typedef {import("node-red").Red} Red
+         */
         const cNBC_RULE_TYPE_UNTIL = 0;
         const cNBC_RULE_TYPE_FROM = 1;
 
@@ -175,7 +182,7 @@ this software without specific prior written permission.
                 // this.results will not be an array for legacy inject nodes until they are re-deployed
                 //
                 let results = this.results;
-                if (!Array.isArray(results)) {
+                if (!results || !Array.isArray(results)) {
                     results = [
                         {
                             p: '',
@@ -216,7 +223,7 @@ this software without specific prior written permission.
                                 if (propType === 'object' && Array.isArray(parsedProp)) {
                                     propType = 'Array';
                                 }
-                            } catch(e) {
+                            } catch (ex) {
                                 propType = 'invalid';
                             }
                         }
@@ -240,6 +247,7 @@ this software without specific prior written permission.
             },
             paletteLabel() { return this._('clock-timer.label.clock-timer-palette'); },
             oneditprepare() {
+                // @ts-check
                 /** resizes a rule container */
                 function resizeRuleContainer() {
                     try {
@@ -250,7 +258,7 @@ this software without specific prior written permission.
                             // $('#node-input-rule-container').editableList('height', height + 40);
                             $('#node-input-rule-container').css('min-height', height + 'px');
                         } else {
-                            // $('#node-input-rule-container').editableList('height', 20);
+                            // $('#node-input-rule-container').editableList('height', 40);
                             $('#node-input-rule-container').css('min-height', '40px');
                         }
                     } catch (ex) {
@@ -922,7 +930,7 @@ this software without specific prior written permission.
                                 delete data.timeBValue;
                                 delete data.timeBOp;
                                 delete data.timeBOpText;
-                                data.isValid = false;
+                                delete data.isValid; // need retrigger of validation, because rule is outdated
                                 data.description = node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleIsOutdated');
                             }
                             if(data.timeType) {
@@ -1240,7 +1248,7 @@ this software without specific prior written permission.
                                     p: '',
                                     pt: types.MsgPayload.value,
                                     v: '',
-                                    vt: types.OutputLevel.value
+                                    vt: types.OutputPayload.value
                                 };
                             }
                             if (prop.p === 'payload' && (!prop.pt || prop.pt === 'msg')) {
@@ -1281,7 +1289,7 @@ this software without specific prior written permission.
                                 .css('width', 'calc(60% - 30px)')
                                 .appendTo($row1)
                                 .typedInput({
-                                    default: 'input',
+                                    default: types.OutputPayload.value,
                                     types: [
                                         types.OutputPayload,
                                         types.OutputTopic,
@@ -1314,9 +1322,10 @@ this software without specific prior written permission.
                                 // const plNType = $propertyName.typedInput('type');
                                 const plVType = $propertyValue.typedInput('type');
                                 const plVValue = $propertyValue.typedInput('value');
-                                if (plVValue === 'input') {
+                                if (plVValue === types.OutputPayload.value ||
+                                    plVValue === types.OutputTopic.value ||
+                                    plVValue === types.OutputCtrlObj.value) {
                                     $containerRow.attr('title', $('#node-input-input').attr('title'));
-
                                 } else {
                                     getBackendData(d => {
                                         $containerRow.attr('title', bdDateToTime(d));
@@ -2627,6 +2636,7 @@ this software without specific prior written permission.
                     });
             },
             oneditsave() {
+                // @ts-check
                 const node = this;
                 node.rules = [];
                 $('#node-input-rule-container').editableList('items').each(function (_i) {
@@ -3110,17 +3120,17 @@ this software without specific prior written permission.
     }
     .dialog-row label {
         display: inline-block;
-        width: 9rem;
-        /* width: 25%; */
+        /* width: 9rem; */
+        width: 25%;
         margin-bottom: 0px !important;
     }
     .dialog-row.block-indent1 label {
-        width: 11rem;
-        /*width: 23%; */
+        /* width: 11rem; */
+        width: 23%;
     }
     .dialog-row.block-indent2 label {
-        width: 13rem;
-        /* width: 22%;*/
+        /* width: 13rem; */
+        width: 22%;
     }
 
     .dialog-row .ipalone {
