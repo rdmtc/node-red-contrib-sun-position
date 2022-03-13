@@ -1,0 +1,83 @@
+[
+    {
+        "id": "a5f09193a7042daa",
+        "type": "rdg-delay-until",
+        "z": "5f922dadd3c06750",
+        "name": "",
+        "positionConfig": "",
+        "time": "10:00",
+        "timeType": "entered",
+        "offset": 0,
+        "offsetType": "none",
+        "offsetMultiplier": 60000,
+        "queuingBehavior": "all",
+        "flushMsgs": "",
+        "flushMsgsType": "none",
+        "flushMsgsValue": "true",
+        "flushMsgsValueType": "bool",
+        "dropMsgs": "",
+        "dropMsgsType": "none",
+        "dropMsgsValue": "true",
+        "dropMsgsValueType": "bool",
+        "enqueueMsg": "",
+        "enqueueMsgType": "none",
+        "enqueueMsgValue": "true",
+        "enqueueMsgValueType": "bool",
+        "ctrlPropChange": false,
+        "ctrlPropValue": "",
+        "ctrlPropValueType": "delete",
+        "tsCompare": "0",
+        "x": 710,
+        "y": 640,
+        "wires": [
+            [
+                "76deb05ef54bb8f9"
+            ]
+        ]
+    },
+    {
+        "id": "e926c223c334b655",
+        "type": "inject",
+        "z": "5f922dadd3c06750",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 540,
+        "y": 640,
+        "wires": [
+            [
+                "a5f09193a7042daa"
+            ]
+        ]
+    },
+    {
+        "id": "76deb05ef54bb8f9",
+        "type": "debug",
+        "z": "5f922dadd3c06750",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 910,
+        "y": 640,
+        "wires": []
+    }
+]

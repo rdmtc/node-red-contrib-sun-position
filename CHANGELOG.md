@@ -14,7 +14,7 @@ Install of a specific Version in Redmatic (on a Homematic):
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@2.0.0`
 
 This can be also used to go back to an older Version.
-### 2.2.0: enhancement
+### 2.2.0-beta: enhancement
 
 - general
   - first implementation of tests with `mocha` and some changes due to the test implementation (inject enhance and delay-until)

@@ -356,8 +356,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.randomNumber','randomNumber'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
-            // eslint-disable-next-line no-useless-escape
             // @ts-ignore
+            // eslint-disable-next-line no-useless-escape
             validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         randmNumCachedDay: {
@@ -365,8 +365,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.randmNumCachedDay','randmNumCachedDay'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
-            // eslint-disable-next-line no-useless-escape
             // @ts-ignore
+            // eslint-disable-next-line no-useless-escape
             validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         randmNumCachedWeek: {
@@ -374,8 +374,8 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             label: node._('node-red-contrib-sun-position/position-config:common.types.randmNumCachedWeek','randmNumCachedWeek'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeRandomNumber.svg',
             hasValue: true,
-            // eslint-disable-next-line no-useless-escape
             // @ts-ignore
+            // eslint-disable-next-line no-useless-escape
             validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         TimeSun: {
