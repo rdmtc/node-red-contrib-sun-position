@@ -548,8 +548,6 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevationRad.svg',
             hasValue: false
         },
-
-
         SunTimeByAzimuth: {
             value: 'pdsTimeByAzimuth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuth','Time by Azimuth'),

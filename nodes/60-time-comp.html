@@ -95,11 +95,11 @@ this software without specific prior written permission.
                             pt: 'msgPayload',
                             v: '',
                             vt: 'input',
-                            o: '',
+                            o: 1,
                             oT: 'none',
                             oM: 60000,
                             f: 0,
-                            next: true,
+                            next: false,
                             days: '*',
                             months: '*'
                         }
@@ -199,7 +199,11 @@ this software without specific prior written permission.
                         onChange(_type, _value) {
                             const $input = $('#node-input-input');
                             const opType = $input.typedInput('type');
-                            if (opType === types.DateSpecific.value ||
+                            if (opType === types.TimeEntered.value) {
+                                $('.time-row-inputNext').show();
+                                $('.time-row-inputFormat').hide();
+                                $('.time-row-inputOffset').show();
+                            } else if (opType === types.DateSpecific.value ||
                                 opType === types.TimeEntered.value ||
                                 opType === types.DateEntered.value ||
                                 opType === types.DayOfMonth.value) {
@@ -295,7 +299,7 @@ this software without specific prior written permission.
                         const $operand = rule.find('.node-input-rule-operand');
                         const $formatSel = rule.find('.node-input-rule-operandFormatSel');
                         const $formatIp = rule.find('.node-input-rule-operandFormatIp');
-                        // const $cbNext = rule.find('.node-input-rule-next');
+                        // const $cbrlNext = rule.find('.node-input-rule-next');
                         const $offset = rule.find('.node-input-rule-offset');
                         const $multiplier = rule.find('.node-input-rule-multiplier');
                         const $property = rule.find('.node-input-rule-property');
@@ -323,7 +327,7 @@ this software without specific prior written permission.
                             $formatSel.width(formatWidth);
                         }
                         // row3
-                        // $cbNext
+                        // $cbrlNext
                         // row4
                         const multiplierWidth = 125;
                         $multiplier.width(multiplierWidth);
@@ -399,7 +403,7 @@ this software without specific prior written permission.
                             // row3 - 1 - Next selection
                             const $divNext = $('<div/>').appendTo($row3);
                             addLabel($divNext, 'node-input-rule-next', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
-                            const $cbrNext = $('<input/>', {
+                            const $cbrlNext = $('<input/>', {
                                 class: 'node-input-rule-next',
                                 type: 'checkbox',
                                 style: 'display:inline-block; width:15px; vertical-align:baseline;'
@@ -407,9 +411,9 @@ this software without specific prior written permission.
                                 .css('width', 'calc(30% - 30px)')
                                 .appendTo($divNext);
                             if (data.next === true || data.next === 'true') {
-                                $cbrNext.prop('checked', true);
+                                $cbrlNext.prop('checked', true);
                             } else {
-                                $cbrNext.prop('checked', false);
+                                $cbrlNext.prop('checked', false);
                             }
                             // row4
                             addLabel($row4, 'node-input-rule-offset', 'fa fa-plus');
@@ -453,7 +457,12 @@ this software without specific prior written permission.
                                 } else {
                                     $operandDiv.show();
                                     operatorTypeField.show();
-                                    if (opType === types.TimeEntered.value || opType === types.DateEntered.value  || opType === types.DateSpecific.value) {
+                                    if (opType === types.TimeEntered.value) {
+                                        $row2.hide(); // format
+                                        $row3.show(); // next
+                                        $row4.show(); // offset
+                                        $row5.show(); // limit
+                                    } else if (opType === types.DateEntered.value  || opType === types.DateSpecific.value) {
                                         $row2.hide(); // format
                                         $row3.hide(); // next
                                         $row4.show(); // offset
@@ -484,7 +493,7 @@ this software without specific prior written permission.
                                     type:       opType,
                                     value:      $operand.typedInput('value'),
                                     format:     $formatIp.val(),
-                                    next:       $cbrNext.is(':checked'),
+                                    next:       $cbrlNext.is(':checked'),
                                     offsetType: $offset.typedInput('type'),
                                     offset:     $offset.typedInput('value'),
                                     multiplier: $multiplier.val(),
@@ -494,7 +503,7 @@ this software without specific prior written permission.
                             });
                             $operator.change(() => $operand.change());
                             $multiplier.change(() => $operand.change());
-                            $cbrNext.change(() => $operand.change());
+                            $cbrlNext.change(() => $operand.change());
                             $offset.change(() => $operand.change());
                             $formatSel.change(() => $operand.change());
                             $formatIp.change(() => $operand.change());
@@ -553,7 +562,7 @@ this software without specific prior written permission.
                                     oT   : types.Undefined.value,
                                     oM   : 60000,
                                     f    : 0,
-                                    next : true,
+                                    next : false,
                                     days : '*',
                                     months: '*'
                                 };
@@ -693,18 +702,18 @@ this software without specific prior written permission.
                             // row4 - Next, Day, Month selection
                             // row4 - 1 - Next selection
                             const $divNext = $('<div/>').appendTo($row4);
-                            addLabel($divNext, 'node-input-prop-result-Next', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
-                            const $cbNext = $('<input/>', {
-                                class: 'node-input-prop-result-Next',
+                            addLabel($divNext, 'node-input-prop-result-next', 'fa fa-clock-o', node._('node-red-contrib-sun-position/position-config:common.label.nextOccurrence'));
+                            const $cbOutNext = $('<input/>', {
+                                class: 'node-input-prop-result-next',
                                 type: 'checkbox',
                                 style: 'display:inline-block; width:15px; vertical-align:baseline;'
                             })
                                 .css('width', 'calc(30% - 30px)')
                                 .appendTo($divNext);
                             if (typeof prop.next === 'undefined' || prop.next === null || prop.next === true || prop.next === 'true') {
-                                $cbNext.prop('checked', true);
+                                $cbOutNext.prop('checked', true);
                             } else {
-                                $cbNext.prop('checked', false);
+                                $cbOutNext.prop('checked', false);
                             }
                             // row4 - 2 - Day selection
                             const $divMnDays = $('<div/>', {
@@ -891,7 +900,7 @@ this software without specific prior written permission.
                                         offsetType:     $offset.typedInput('type'),
                                         offset:         $offset.typedInput('value'),
                                         multiplier:     $multiplier.val(),
-                                        next:           $cbNext.is(':checked'),
+                                        next:           $cbOutNext.is(':checked'),
                                         days:           getCheckboxesStr($divDays.find('input[type=checkbox]:checked'), 7),
                                         months:         getCheckboxesStr($divMonths.find('input[type=checkbox]:checked'), 12),
                                         onlyOddDays:    $cbOnlyEvenDays.is(':checked'),
@@ -940,7 +949,7 @@ this software without specific prior written permission.
                                 vt      : node.result1ValueType ? node.result1ValueType : 'input',
                                 o       : node.result1Offset ? node.result1Offset : 1,
                                 oT      : (node.result1OffsetType === 0 || node.result1OffsetType === '') ? types.Undefined.value : (node.result1OffsetType ? node.result1OffsetType : 'num'),
-                                oM      : node.result1OffsetMultiplier ? node.result1OffsetMultiplier : 60000,
+                                oM      : parseFloat(node.result1OffsetMultiplier) ? parseFloat(node.result1OffsetMultiplier) : 60000,
                                 f       : node.result1Format ? node.result1Format : 0,
                                 next    : false,
                                 days    : '*',
@@ -1046,7 +1055,7 @@ this software without specific prior written permission.
                         fS: Number(prop.find('.node-input-prop-result-FormatSel').val()),
                         fT: prop.find('.node-input-prop-result-FormatSel option:selected').text(),
                         fI: prop.find('.node-input-prop-result-FormatIp').val(),
-                        next: prop.find('.node-input-prop-result-Next').is(':checked'),
+                        next: prop.find('.node-input-prop-result-next').is(':checked'),
                         days: getCheckboxesStr(prop.find('#node-input-prop-result-Days input[type=checkbox]:checked'), 7),
                         months: getCheckboxesStr(prop.find('#node-input-prop-result-Months input[type=checkbox]:checked'), 12),
                         onlyEvenDays: prop.find('.node-input-prop-result-onlyEvenDays').is(':checked'),
