@@ -90,6 +90,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             offset: config.inputOffset,
             multiplier: config.inputOffsetMultiplier
         };
+        if (node.input.type !== 'entered' && node.input.type !== 'pdsTime' && node.input.type !== 'pdmTime') {
+            node.input.next = false;
+        }
 
         if (!Array.isArray(config.results)) {
             config.results = [];
@@ -131,7 +134,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 format      : prop.f,
                 offsetType  : prop.oT,
                 offset      : prop.o,
-                multiplier  : prop.oM,
+                multiplier  : parseFloat(prop.oM) || 60000,
                 next        : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next)) ? true : false,
                 days        : prop.days,
                 months      : prop.months,
@@ -140,6 +143,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 onlyEvenWeeks: prop.onlyEvenWeeks,
                 onlyOddWeeks : prop.onlyOddWeeks
             };
+            if (propNew.type !== 'entered' && propNew.type !== 'pdsTime' && propNew.type !== 'pdmTime') {
+                propNew.next = false;
+            }
 
             if (node.positionConfig && propNew.type === 'jsonata') {
                 try {
@@ -153,7 +159,44 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         });
 
         node.rules = config.rules;
-        node.checkall = config.checkall;
+        const rulesLength = node.rules.length;
+        for (let i = 0; i < rulesLength; ++i) {
+            const rule = node.rules[i];
+            rule.operator = Number(rule.operator);
+            if (rule.operator === 99) {
+                rule.next = false;
+            } else {
+                if (rule.operandType !== 'entered' && rule.operandType !== 'pdsTime' && rule.operandType !== 'pdmTime') {
+                    rule.next = false;
+                }
+            }
+            rule.compare = null;
+            rule.result = false;
+            switch (rule.operator) {
+                case 1: // equal             { id: 1, group: "ms", label: "==", "text": "equal" },
+                    rule.compare = (op1, op2) => op1 === op2;
+                    break;
+                case 2: // unequal           { id: 2, group: "ms", label: "!=", "text": "unequal" },
+                    rule.compare = (op1, op2) => op1 !== op2;
+                    break;
+                case 3: // greater           { id: 3, group: "ms", label: ">", "text": "greater" },
+                    rule.compare = (op1, op2) => op1 > op2;
+                    break;
+                case 4: // greaterOrEqual    { id: 5, group: "ms", label: ">=", "text": "greater or equal" },
+                    rule.compare = (op1, op2) => op1 >= op2;
+                    break;
+                case 5: // lesser            { id: 6, group: "ms", label: "<", "text": "lesser" },
+                    rule.compare = (op1, op2) => op1 < op2;
+                    break;
+                case 6: // lesserOrEqual     { id: 7, group: "ms", label: "<=", "text": "lesser or equal" },
+                    rule.compare = (op1, op2) => op1 <= op2;
+                    break;
+                case 99: // otherwise
+                    rule.result = true;
+                    break;
+            }
+        }
+        node.checkall = config.checkall === true || config.checkall === 'true';
 
         node.on('input', (msg, send, done) => {
             // If this is pre-1.0, 'done' will be undefined
@@ -215,33 +258,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             rule.format = 0;
                         }
 
-                        let compare = null;
-                        let result = false;
-                        switch (Number(rule.operator)) {
-                            case 1: // equal             { id: 1, group: "ms", label: "==", "text": "equal" },
-                                compare = (op1, op2) => op1 === op2;
-                                break;
-                            case 2: // unequal           { id: 2, group: "ms", label: "!=", "text": "unequal" },
-                                compare = (op1, op2) => op1 !== op2;
-                                break;
-                            case 3: // greater           { id: 3, group: "ms", label: ">", "text": "greater" },
-                                compare = (op1, op2) => op1 > op2;
-                                break;
-                            case 4: // greaterOrEqual    { id: 5, group: "ms", label: ">=", "text": "greater or equal" },
-                                compare = (op1, op2) => op1 >= op2;
-                                break;
-                            case 5: // lesser            { id: 6, group: "ms", label: "<", "text": "lesser" },
-                                compare = (op1, op2) => op1 < op2;
-                                break;
-                            case 6: // lesserOrEqual     { id: 7, group: "ms", label: "<=", "text": "lesser or equal" },
-                                compare = (op1, op2) => op1 <= op2;
-                                break;
-                            case 99: // otherwise
-                                result = true;
-                                break;
-                        }
-
-                        if (compare) {
+                        rule.result = rule.operator === 99;
+                        if (rule.compare) {
                             let ruleoperand = null;
                             try {
                                 ruleoperand = node.positionConfig.getTimeProp(node, msg, {
@@ -269,28 +287,28 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
                                     case '11': // ms
-                                        result = compare(inputOperant.getMilliseconds(), ruleoperand.getMilliseconds());
+                                        rule.result = rule.compare(inputOperant.getMilliseconds(), ruleoperand.getMilliseconds());
                                         break;
                                     case '12': // only sec
-                                        result = compare(inputOperant.getSeconds(), ruleoperand.getSeconds());
+                                        rule.result = rule.compare(inputOperant.getSeconds(), ruleoperand.getSeconds());
                                         break;
                                     case '13': // only min
-                                        result = compare(inputOperant.getMinutes(), ruleoperand.getMinutes());
+                                        rule.result = rule.compare(inputOperant.getMinutes(), ruleoperand.getMinutes());
                                         break;
                                     case '14': // only hour
-                                        result = compare(inputOperant.getHours(), ruleoperand.getHours());
+                                        rule.result = rule.compare(inputOperant.getHours(), ruleoperand.getHours());
                                         break;
                                     case '15': // only day
-                                        result = compare(inputOperant.getDate(), ruleoperand.getDate());
+                                        rule.result = rule.compare(inputOperant.getDate(), ruleoperand.getDate());
                                         break;
                                     case '16': // only Month
-                                        result = compare(inputOperant.getMonth(), ruleoperand.getMonth());
+                                        rule.result = rule.compare(inputOperant.getMonth(), ruleoperand.getMonth());
                                         break;
                                     case '17': // only FullYear
-                                        result = compare(inputOperant.getFullYear(), ruleoperand.getFullYear());
+                                        rule.result = rule.compare(inputOperant.getFullYear(), ruleoperand.getFullYear());
                                         break;
                                     case '18': // only dayOfWeek
-                                        result = compare(inputOperant.getDay(), ruleoperand.getDay());
+                                        rule.result = rule.compare(inputOperant.getDay(), ruleoperand.getDay());
                                         break;
                                     default:
                                         if (rule.operatorType.indexOf('11') < 0) {
@@ -328,9 +346,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                                             ruleoperand.setFullYear(0);
                                         }
 
-                                        result = compare(inputOperant.getTime(), ruleoperand.getTime());
+                                        rule.result = rule.compare(inputOperant.getTime(), ruleoperand.getTime());
                                         if (rule.operatorType.indexOf('18') >= 0) {
-                                            result = result && compare(inputOperant.getDay(), ruleoperand.getDay());
+                                            rule.result = rule.result && rule.compare(inputOperant.getDay(), ruleoperand.getDay());
                                         }
                                         break;
                                 }
@@ -338,10 +356,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         }
                         // node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
 
-                        if (result) {
+                        if (rule.result) {
                             resObj.push(msg);
-                            node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
-                            if (node.checkall != 'true') { // eslint-disable-line eqeqeq
+                            node.debug(i + ' result=' + util.inspect(rule.result, { colors: true, compact: 10, breakLength: Infinity }));
+                            if (!node.checkall) { // eslint-disable-line eqeqeq
                                 node.debug(i + ' end cause checkall');
                                 break;
                             }
@@ -375,6 +393,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             return null;
         });
+        node.status({});
     }
 
     RED.nodes.registerType('time-comp', timeCompNode);

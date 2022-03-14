@@ -31,13 +31,48 @@
  * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
  * @typedef {import("./lib/dateTimeHelper").ITimeObject} ITimeObject
  * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
+ * @typedef {import("./10-position-config.js").ITypedValue} ITypedValue
  * @typedef {import("./lib/timeControlHelper.js").ITimeControlNodeInstance} ITimeControlNodeInstance
+ */
+
+
+/**
+ * @typedef {Object} IBlindNodeData Node data object
+ * @property {boolean} isDisabled           - is the node disabled
+ * @property {number} levelTop              - the blind top level
+ * @property {number} levelBottom           - the blind bottom level
+ * @property {number} levelTopOffset        - the blind top level offset
+ * @property {number} levelBottomOffset     - the blind bottom level
+ * @property {number} increment             - open/closing increment
+ * @property {ITypedValue} levelDefault     - defaulot level
+ * @property {ITypedValue} levelMin         - minimum level
+ * @property {ITypedValue} levelMax         - maximum levell
+ * @property {ITypedValue} slat             - default slat setting
+ * @property {string} topic                 - default topic
+ * @property {ITypedValue} addId            - additional id of the node
+ * @property {Object}   overwrite                   - open/closing increment
+ * @property {boolean}  overwrite.active            - overwrite active or not
+ * @property {number}   overwrite.importance        - importance of the overwrite
+ * @property {number}   overwrite.expireDuration    - expireDuration
+
+ */
+
+/**
+ * @typedef {Object} IBlindWindowSettings the window settings
+ * @property {*} top                        - the top of the window
+ * @property {string} topType               - type of the top of the window
+ * @property {*} bottom                     - the bottom of the window
+ * @property {string} bottomType            - type of the bottom of the window
+ * @property {*} azimuthStart               - the orientation angle to the geographical north
+ * @property {string} azimuthStartType      - type of the orientation angle to the geographical north
+ * @property {*} azimuthEnd                 - the offset for the angle clockwise offset
+ * @property {string} azimuthEndType        - type of the offset for the angle clockwise offset
  */
 
 /**
  * @typedef {Object} IBlindControlNodeInstance Extensions for the nodeInstance object type
- * @property {Object} nodeData get/set generic Data of the node
- * @property {Object} windowSettings    -   the window settings Object
+ * @property {IBlindNodeData} nodeData get/set generic Data of the node
+ * @property {IBlindWindowSettings} windowSettings    -   the window settings Object
  * @property {number} smoothTime smoothTime
  * @property {Array.<Object>} oversteers    -   tbd
  * @property {Object} oversteer    -   tbd
@@ -411,7 +446,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         // const summerMode = 2;
         if (!sunPosition.InWindow) {
             if (node.sunData.mode === cWinterMode) {
-                node.level.current = node.nodeData.levelMin;
+                node.level.current = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.topic = node.sunData.topic;
                 node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
@@ -420,7 +455,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunNotInWinMin');
                 node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunNotInWinMin');
             } else if (node.sunData.mode === cMinimizeMode) {
-                node.level.current = node.nodeData.levelMax;
+                node.level.current = getBlindPosFromTI(node, msg, node.nodeData.levelMax.type, node.nodeData.levelMax.value, node.nodeData.levelTop);
                 node.level.currentInverse = getInversePos_(node, node.level.current);
                 node.level.topic = node.sunData.topic;
                 node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
@@ -447,7 +482,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunInWinMax');
             return sunPosition;
         } else if (node.sunData.mode === cMinimizeMode) {
-            node.level.current = node.nodeData.levelMin;
+            node.level.current = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
             node.level.currentInverse = getInversePos_(node, node.level.current);
             node.level.slat = node.positionConfig.getPropValue(node, msg, node.sunData.slat, false, oNow.now);
             node.level.topic = node.sunData.topic;
@@ -516,22 +551,24 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             node.sunData.changeAgain = oNow.nowNr + node.smoothTime;
             // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} nowNr=` + oNow.nowNr);
         }
-        if (node.level.current < node.nodeData.levelMin)  {
+        const levelMin = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
+        const levelMax = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
+        if (node.level.current < levelMin)  {
             // min
-            node.debug(`${node.level.current} is below ${node.nodeData.levelMin} (min)`);
+            node.debug(`${node.level.current} is below ${levelMin} (min)`);
             node.reason.code = 5;
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunCtrlMin', {org: node.reason.state});
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunCtrlMin', {org: node.reason.description, level:node.level.current});
-            node.level.current = node.nodeData.levelMin;
-            node.level.currentInverse = getInversePos_(node, node.level.current); // node.nodeData.levelMax;
-        } else if (node.level.current > node.nodeData.levelMax) {
+            node.level.current = levelMin;
+            node.level.currentInverse = getInversePos_(node, node.level.current);
+        } else if (node.level.current > levelMax) {
             // max
-            node.debug(`${node.level.current} is above ${node.nodeData.levelMax} (max)`);
+            node.debug(`${node.level.current} is above ${levelMax} (max)`);
             node.reason.code = 6;
             node.reason.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.sunCtrlMax', {org: node.reason.state});
             node.reason.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.sunCtrlMax', {org: node.reason.description, level:node.level.current});
-            node.level.current = node.nodeData.levelMax;
-            node.level.currentInverse = getInversePos_(node, node.level.current); // node.nodeData.levelMin;
+            node.level.current = levelMax;
+            node.level.currentInverse = getInversePos_(node, node.level.current);
         }
         prevData.last.sunLevel = node.level.current;
         // node.debug(`calcBlindSunPosition end pos=${node.level.current} reason=${node.reason.code} description=${node.reason.description}`);
@@ -771,7 +808,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 livingRuleData.active = (livingRuleData.level > -1);
             } else {
                 livingRuleData.active = false;
-                livingRuleData.level = node.nodeData.levelDefault;
+                livingRuleData.level = getBlindPosFromTI(node, msg, node.nodeData.levelDefault.type, node.nodeData.levelDefault.value, node.nodeData.levelTop);
                 livingRuleData.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.now);
             }
             return livingRuleData;
@@ -780,7 +817,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         livingRuleData.id = cRuleDefault;
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
-        livingRuleData.level = node.nodeData.levelDefault;
+        livingRuleData.level = getBlindPosFromTI(node, msg, node.nodeData.levelDefault.type, node.nodeData.levelDefault.value, node.nodeData.levelTop);
         livingRuleData.slat = node.positionConfig.getPropValue(node, msg, node.nodeData.slat, false, oNow.now);
         livingRuleData.topic = node.nodeData.topic;
         livingRuleData.code = 1;
@@ -910,7 +947,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             azimuthEnd: config.windowAzimuthEnd,
             azimuthEndType: config.windowAzimuthEndType || 'num'
         };
-        node.nodeData = {
+
+        node.nodeData = /** @type {IBlindNodeData} */ {
             isDisabled: node.context().get('isDisabled', node.contextStore) || false,
             /** The Level of the window */
             levelTop: Number(hlp.chkValueFilled(config.blindOpenPos, 100)),
@@ -918,16 +956,27 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             levelTopOffset: Number(hlp.chkValueFilled(config.blindOpenPosOffset, 0)),
             levelBottomOffset: Number(hlp.chkValueFilled(config.blindClosedPosOffset, 0)),
             increment: Number(hlp.chkValueFilled(config.blindIncrement, 1)),
-            levelDefault: NaN,
-            levelMin: NaN,
-            levelMax: NaN,
+            levelDefault: {
+                type : config.blindPosDefaultType || 'none',
+                value : config.blindPosDefault || ''
+            },
+            levelMin: {
+                type : config.blindPosMinType || 'none',
+                value : config.blindPosMin || ''
+            },
+            levelMax: {
+                type : config.blindPosMaxType || 'none',
+                value : config.blindPosMax || ''
+            },
             slat : {
                 type : config.slatPosDefaultType || 'none',
                 value : config.slatPosDefault || ''
             },
             topic: config.topic,
-            addId: config.addId,
-            addIdType: config.addIdType||'none',
+            addId : {
+                type : config.addIdType||'none',
+                value :  config.addId
+            },
             /** The override settings */
             overwrite: node.context().get('overwrite', node.contextStore) || {
                 active: false,
@@ -955,9 +1004,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         delete node.nodeData.levelBottomOffset;
         delete node.nodeData.levelTopOffset;
 
-        node.nodeData.levelDefault = getBlindPosFromTI(node, undefined, config.blindPosDefaultType, config.blindPosDefault, node.nodeData.levelTop);
-        node.nodeData.levelMin = getBlindPosFromTI(node, undefined, config.blindPosMinType, config.blindPosMin, node.nodeData.levelBottom);
-        node.nodeData.levelMax = getBlindPosFromTI(node, undefined, config.blindPosMaxType, config.blindPosMax, node.nodeData.levelTop);
         if (!config.oversteers) {
             config.oversteers = [];
             if (config.sunMinAltitude) {
@@ -1241,10 +1287,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     node.autoTrigger.type = 0; // default time
                 }
 
-                if (node.nodeData.addIdType !== 'none') {
+                if (node.nodeData.addId.type !== 'none') {
                     node.addId = node.positionConfig.getPropValue(node, msg, {
-                        type: node.nodeData.addIdType,
-                        value: node.nodeData.addId,
+                        type: node.nodeData.addId.type,
+                        value: node.nodeData.addId.value,
                         callback: (result, _obj) => {
                             if (result !== null && typeof result !== 'undefined') {
                                 tempData[_obj.type + '.' + _obj.value] = result;
