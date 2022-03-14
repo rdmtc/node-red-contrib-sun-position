@@ -122,7 +122,7 @@
  * @typedef {function} FktSetMessageProp
  * @param {runtimeNode} _srcNode The base node
  * @param {Object} msg The Message Object to set the Data
- * @param {*} type type of the property to set
+ * @param {string} type type of the property to set
  * @param {*} value value of the property to set
  * @param {*} msgPropertyData Data object to set to the property
  */
@@ -264,7 +264,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
     const hlp = require('./lib/dateTimeHelper.js');
     const util = require('util');
-    // const sunCalc = require('./lib/suncalc.js');
     const sunCalc = require('suncalc3');
 
     const dayMs = 86400000; // 1000 * 60 * 60 * 24;

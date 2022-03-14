@@ -761,7 +761,9 @@ this software without specific prior written permission.
                         types: [
                             types.LevelFix,
                             types.LevelEntered,
-                            'env']
+                            'env',
+                            'flow',
+                            'global']
                     });
 
                     setupTInput(node, {
@@ -1644,7 +1646,13 @@ this software without specific prior written permission.
                         width: 'calc(100% - 120px)',
                         defaultType: types.LevelFix.value,
                         defaultValue: getDefLevel(node.blindPosMinType, node.blindPosMin, 'closed (min)'),
-                        types: [types.LevelFix, types.LevelEntered, 'env']
+                        types: [
+                            types.LevelFix,
+                            types.LevelEntered,
+                            'env',
+                            'flow',
+                            'global'
+                        ]
                     });
                     setupTInput(node, {
                         typeProp: 'blindPosMaxType',
@@ -1652,7 +1660,13 @@ this software without specific prior written permission.
                         width: 'calc(100% - 120px)',
                         defaultType: types.LevelFix.value,
                         defaultValue: getDefLevel(node.blindPosMaxType, node.blindPosMax, 'open (max)'),
-                        types: [types.LevelFix, types.LevelEntered, 'env']
+                        types: [
+                            types.LevelFix,
+                            types.LevelEntered,
+                            'env',
+                            'flow',
+                            'global'
+                        ]
                     });
                     setupTInput(node, {
                         typeProp: 'sunSlatType',
