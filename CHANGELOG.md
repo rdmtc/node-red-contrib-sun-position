@@ -40,6 +40,12 @@ This can be also used to go back to an older Version.
   - added for oversteer blind position the possibility to select msg property, flow or global context #423
     - This has some limitations. Changes would only have effect if the oversteer are evaluated.
 
+- time-comp
+  - better adjustable of next time, fixes #420
+  - preprocessing rules
+  - added automatic test case
+    - basic test for configuration
+
 ### 2.1.1: bug fixes
 
 - clock-timer
