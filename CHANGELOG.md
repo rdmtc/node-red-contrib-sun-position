@@ -2,18 +2,28 @@
 
 ## Installation
 
-Install of a specific Version in Node-Red:
+### Install of a specific Version in Node-Red:
  - change to the installation directory of Node-Red
  - enter the command `npm install node-red-contrib-sun-position@2.0.0`
 
-Install of a specific Version in Redmatic (on a Homematic):
+### Install of a specific Version in Redmatic (on a Homematic):
 - logon per ssh
 - enter the commands in the order:
   - `source /usr/local/addons/redmatic/home/.profile`
   - `cd /usr/local/addons/redmatic/var`
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@2.0.0`
 
+### Install of a specific Version in HomeAssistant:
+ - go to the Supervisor
+ - go to the Node-Red AddOn
+ - add unter the `Configuration` in the Node-Red options as `npm_packages`:
+```yaml
+npm_packages:
+  - node-red-contrib-sun-position@2.0.0
+```
+
 This can be also used to go back to an older Version.
+
 ### 2.2.0-beta: enhancement
 
 - general
