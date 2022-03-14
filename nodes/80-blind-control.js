@@ -32,7 +32,7 @@
  * @typedef {import("./lib/dateTimeHelper").ITimeObject} ITimeObject
  * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
  * @typedef {import("./10-position-config.js").ITypedValue} ITypedValue
- * @typedef {import("./lib/timeControlHelper.js").ITimeControlNodeInstance} ITimeControlNodeInstance
+ * @typedef {import("./lib/timeControlHelper.js").ITimeControlNode} ITimeControlNode
  */
 
 
@@ -41,8 +41,8 @@
  * @property {boolean} isDisabled           - is the node disabled
  * @property {number} levelTop              - the blind top level
  * @property {number} levelBottom           - the blind bottom level
- * @property {number} levelTopOffset        - the blind top level offset
- * @property {number} levelBottomOffset     - the blind bottom level
+ * @property {number} [levelTopOffset]      - the blind top level offset
+ * @property {number} [levelBottomOffset]   - the blind bottom level
  * @property {number} increment             - open/closing increment
  * @property {ITypedValue} levelDefault     - defaulot level
  * @property {ITypedValue} levelMin         - minimum level
@@ -82,7 +82,7 @@
  */
 
 /**
- * @typedef {ITimeControlNodeInstance & IBlindControlNodeInstance & runtimeNode} IBlindControlNode Combine nodeInstance with additional, optional functions
+ * @typedef {ITimeControlNode & IBlindControlNodeInstance} IBlindControlNode Combine nodeInstance with additional, optional functions
  */
 
 /******************************************************************************************/
@@ -855,6 +855,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
             return;
         }
+
         if (this.positionConfig.checkNode(
             error => {
                 node.error(error);
@@ -933,6 +934,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         // @ts-ignore
         if (node.sunData.mode === 2) { node.sunData.mode = cSummerMode; } // backwards compatibility
         node.sunData.modeMax = node.sunData.mode;
+
+        /** type {IBlindWindowSettings} */
         node.windowSettings = {
             /** The top of the window */
             top: config.windowTop,
@@ -948,9 +951,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             azimuthEndType: config.windowAzimuthEndType || 'num'
         };
 
-        node.nodeData = /** @type {IBlindNodeData} */ {
+        /** @type {IBlindNodeData} */
+        node.nodeData = {
             isDisabled: node.context().get('isDisabled', node.contextStore) || false,
-            /** The Level of the window */
             levelTop: Number(hlp.chkValueFilled(config.blindOpenPos, 100)),
             levelBottom: Number(hlp.chkValueFilled(config.blindClosedPos, 0)),
             levelTopOffset: Number(hlp.chkValueFilled(config.blindOpenPosOffset, 0)),
@@ -977,10 +980,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 type : config.addIdType||'none',
                 value :  config.addId
             },
-            /** The override settings */
             overwrite: node.context().get('overwrite', node.contextStore) || {
                 active: false,
-                importance: 0
+                importance: 0,
+                expireDuration : NaN
             }
         };
         node.nodeData.overwrite.expireDuration = parseFloat(hlp.chkValueFilled(config.overwriteExpire, NaN));
