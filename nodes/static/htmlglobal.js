@@ -828,6 +828,7 @@ function getAutocompleteFormats() {
  * getcurrent cursor position
  * @returns {number|undefined} current cursor position
  */
+// @ts-ignore
 $.fn.getCursorPosition = function () {
     // @ts-ignore
     const input = this.get(0);
@@ -837,6 +838,7 @@ $.fn.getCursorPosition = function () {
 
     if ('selectionStart' in input) {
         // Standard-compliant browsers
+        // @ts-ignore
         return input.selectionStart;
     }
     // @ts-ignore
@@ -847,6 +849,7 @@ $.fn.getCursorPosition = function () {
         const sel = document.selection.createRange();
         // @ts-ignore
         const selLen = document.selection.createRange().text.length;
+        // @ts-ignore
         sel.moveStart('character', -input.value.length);
         return sel.text.length - selLen;
     }
@@ -1008,18 +1011,22 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     }
     $inputField.typedInput({
         typeField: $typeField,
+        // @ts-ignore
         types: data.types
     });
     if (data.tooltip) {
+        // @ts-ignore
         $inputField.$attr('title', data.tooltip);
     }
     if (data.width) {
         $inputField.typedInput('width', data.width);
     }
     if (data.onChange) {
+        // @ts-ignore
         $inputField.on('change', data.onChange);
     }
     if (data.onFocus) {
+        // @ts-ignore
         $inputField.on('change focus focusin focusout', data.onFocus);
     }
     return $inputField;

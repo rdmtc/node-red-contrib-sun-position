@@ -68,6 +68,28 @@
  */
 
 /**
+ * This callback is displayed as a global member.
+ * @callback IValuePropertyTypeCallback
+ * @param {*} result - the result of the property value from a type input in Node-Red
+ * @param {IValuePropertyType} data - the given data to the function
+ * @returns {*} value of the type input
+ */
+
+/**
+ * @typedef {Object} ITypedValue
+ * @property {string} type - type of the value
+ * @property {*} value - value
+ */
+
+/**
+ * @typedef {Object} IValuePropertyType
+ * @property {string} type - type of the value
+ * @property {*} value - value
+ * @property {*} [expr] - optional prepared Jsonata expression
+ * @property {IValuePropertyTypeCallback} [callback] - function which should be called after value was recived
+ */
+
+/**
  * check this node for configuration errors
  * @typedef {function} FktCheckNode
  * @property {onErrorCallback} [onError] - if an error occurs this function will be called
@@ -206,12 +228,6 @@
  */
 
 /**
- * @typedef {Object} ITypedValue
- * @property {string} type - type of the value
- * @property {*} value - value
- */
-
-/**
  * @typedef {Object} IOffsetData
  * @property {string} [offset] - value of the offset
  * @property {string} [offsetType] - type name of the offset
@@ -241,21 +257,6 @@
  * @property {boolean} fix - indicator if the given time value is a fix date
  */
 
-/**
- * This callback is displayed as a global member.
- * @callback IValuePropertyTypeCallback
- * @param {*} result - the result of the property value from a type input in Node-Red
- * @param {IValuePropertyType} data - the given data to the function
- * @returns {*} value of the type input
- */
-
-/**
- * @typedef {Object} IValuePropertyTypeInt
- * @property {*} [expr] - optional prepared Jsonata expression
- * @property {IValuePropertyTypeCallback} [callback] - function which should be called after value was recived
- *
- * @typedef {ITypedValue & IValuePropertyTypeInt} IValuePropertyType
- */
 /*******************************************************************************************************/
 /** Export the function that defines the node
  * @type {runtimeRED} */
