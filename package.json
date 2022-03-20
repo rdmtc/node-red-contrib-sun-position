@@ -124,7 +124,7 @@
     "@types/jquery": "^3.5.14",
     "@types/node-red": "^1.2.0",
     "jsonata": "^1.8.6",
-    "mocha": "^8.4.0",
+    "mocha": "^9.2.2",
     "node-red": ">=2.0.0",
     "node-red-dev": "^0.1.5",
     "node-red-node-test-helper": "^0.2.7",
