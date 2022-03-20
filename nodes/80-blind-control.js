@@ -70,12 +70,35 @@
  */
 
 /**
+ * @typedef {Object} IOversteerSettings the window settings
+ * @property {boolean} isChecked            - the top of the window
+ * @property {boolean} active               - type of the top of the window
+ * @property {string} topic                 - the topic of the oversteer
+ */
+
+/**
+ * @typedef {Object} IOversteerData the window settings
+ * @property {number} pos                   - position
+ * @property {(0|1|3|16)} mode              - the top of the window
+ * @property {any} value                    - type of the top of the window
+ * @property {string} valueType             - type of the value operator 1
+ * @property {function} valueExpr           - value operator 1
+ * @property {string} operator              - compare operator
+ * @property {string} [operatorText]        - compare operator text
+ * @property {string} thresholdType         - type of the value operator 2
+ * @property {string} threshold             - value operator 2
+ * @property {ITypedValue} blindPos         - blind position
+ * @property {ITypedValue} slatPos          - slat position
+ * @property {boolean} onlySunInWindow      - slat position
+ */
+
+/**
  * @typedef {Object} IBlindControlNodeInstance Extensions for the nodeInstance object type
  * @property {IBlindNodeData} nodeData get/set generic Data of the node
  * @property {IBlindWindowSettings} windowSettings    -   the window settings Object
  * @property {number} smoothTime smoothTime
- * @property {Array.<Object>} oversteers    -   tbd
- * @property {Object} oversteer    -   tbd
+ * @property {Array.<IOversteerData>} oversteers    -   tbd
+ * @property {IOversteerSettings} oversteer    -   tbd
  * @property {Object} level    -   tbd
  * @property {Array.<Object>} results    -   tbd
  * ... obviously there are more ...
@@ -190,6 +213,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      * @param {Object} msg the message object
      * @param {Object} tempData the temporary data holder object
      * @param {ITimeObject} oNow the now Object
+     * @return {IOversteerData|undefined}
      */
     function checkOversteer(node, msg, tempData, sunPosition, oNow) {
         // node.debug(`checkOversteer ${util.inspect(node.oversteers, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);

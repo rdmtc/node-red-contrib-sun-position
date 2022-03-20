@@ -1830,10 +1830,11 @@ this software without specific prior written permission.
                             })
                                 .css('width', '60px')
                                 .appendTo($row2);
-                            $oversteerMode.append($('<option></option>').val(0).text(node._('blind-control.label.sunControlNoMatter')));
-                            $oversteerMode.append($('<option></option>').val(1).text(node._('blind-control.label.sunControlRestrictOnly')));
-                            $oversteerMode.append($('<option></option>').val(2).text(node._('blind-control.label.sunControlMaximizeOnly')));
-                            $oversteerMode.append($('<option></option>').val(2).text(node._('blind-control.label.sunControlMinimizeOnly')));
+                            $oversteerMode.append($('<option></option>').val(cNBC_MODE_OFF).text(node._('blind-control.label.sunControlNoMatter')));
+                            $oversteerMode.append($('<option></option>').val(cNBC_MODE_MAXIMIZE).text(node._('blind-control.label.sunControlMaximizeOnly')));
+                            $oversteerMode.append($('<option></option>').val(cNBC_MODE_MINIMIZE).text(node._('blind-control.label.sunControlMinimizeOnly')));
+                            $oversteerMode.append($('<option></option>').val(cNBC_MODE_SUN_CONTROL).text(node._('blind-control.label.sunControlRestrictOnly')));
+                            if (data.mode === 2) { data.mode = cNBC_MODE_MAXIMIZE; } // backwards compatibility
                             $oversteerMode.val(data.mode || 0);
                             // row3 - BlindPos
                             addLabel($row3, 'node-input-oversteer-blindPos', 'fa fa-angle-down', node._('blind-control.label.oversteerBlindPos'), '140px');
