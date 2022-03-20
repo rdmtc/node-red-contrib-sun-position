@@ -49,6 +49,8 @@ This can be also used to go back to an older Version.
   - fix #421
   - added for oversteer blind position the possibility to select msg property, flow or global context #423
     - This has some limitations. Changes would only have effect if the oversteer are evaluated.
+  - fix not working oversteer mode limitation #431
+  - show rule edit dialog no longer modal to allow usage of JSON and JSONATA editor #432
 
 - time-comp
   - better adjustable of next time, fixes #420
