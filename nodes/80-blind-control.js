@@ -30,11 +30,10 @@
  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
  * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
  * @typedef {import("./lib/dateTimeHelper").ITimeObject} ITimeObject
- * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
  * @typedef {import("./10-position-config.js").ITypedValue} ITypedValue
  * @typedef {import("./lib/timeControlHelper.js").ITimeControlNode} ITimeControlNode
+ * @typedef {import("./lib/timeControlHelper.js").IPositionConfigNode} IPositionConfigNode
  */
-
 
 /**
  * @typedef {Object} IBlindNodeData Node data object
@@ -1183,10 +1182,18 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
 
                 // allow to overwrite settings by incomming message
-                const newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
+                let newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
                 if (Number.isFinite(newMode) && newMode >= 0 && newMode <= node.sunData.modeMax) {
                     node.debug(`set mode from ${node.sunData.mode} to ${newMode}`);
-                    node.sunData.mode = newMode;
+                    if (newMode === 2) { newMode = cSummerMode; } // backwards compatibility
+                    if (newMode !== 0 &&
+                        newMode !== cSummerMode &&
+                        newMode !== cWinterMode &&
+                        newMode !== cMinimizeMode) {
+                        node.error('Mode "' + newMode + '" is not a valid value!');
+                    } else {
+                        node.sunData.mode = newMode;
+                    }
                     node.context().set('mode', newMode, node.contextStore);
                 }
 
