@@ -134,8 +134,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         topicOversteer : 8,
         off : 9
     };
-    const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
-    const cautoTriggerTimeSun = 5 * 60000; // 5 min
+    const cautoTriggerTimeBeforeSun = 10 * hlp.TIME_1min; // 10 min
+    const cautoTriggerTimeSun = 5 * hlp.TIME_1min; // 5 min
     const cWinterMode = 1;
     const cMinimizeMode = 3;
     const cSummerMode = 16;
@@ -951,7 +951,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
-            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
         }
 
@@ -992,7 +992,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         if (config.autoTrigger) {
             node.autoTrigger = {
-                defaultTime : parseInt(config.autoTriggerTime) || 3600000, // 1h
+                defaultTime : parseInt(config.autoTriggerTime) || hlp.TIME_24h, // 1h
                 time : NaN,
                 type : 0 // default time
             };

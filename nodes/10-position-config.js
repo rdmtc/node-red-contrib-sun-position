@@ -420,8 +420,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     const util = require('util');
     const sunCalc = require('suncalc3');
 
-    const dayMs = 86400000; // 1000 * 60 * 60 * 24;
-
     /** generic configuration Node
      * @class
      * @extends {runtimeNode}
@@ -964,7 +962,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             } else if (dayId === this.cache.sunTimesAdd2.dayId) {
                 result = this.cache.sunTimesAdd2.times;
             } else {
-                result = sunCalc.getSunTimes(dNow.valueOf() + dayMs, this.latitude, this.longitude, this.height, false); // needed for a object copy
+                result = sunCalc.getSunTimes(dNow.valueOf() + hlp.TIME_24h, this.latitude, this.longitude, this.height, false); // needed for a object copy
             }
             const sortable2 = [];
             for (const key in result) {
@@ -2199,7 +2197,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             // @ts-ignore
             this.cache.sunTimesTomorrow = {};
-            this.cache.sunTimesTomorrow.times = sunCalc.getSunTimes(todayValue + dayMs, this.latitude, this.longitude, this.height, true);
+            this.cache.sunTimesTomorrow.times = sunCalc.getSunTimes(todayValue + hlp.TIME_24h, this.latitude, this.longitude, this.height, true);
             this.cache.sunTimesTomorrow.sunPosAtSolarNoon = sunCalc.getPosition(this.cache.sunTimesTomorrow.times.solarNoon.value.valueOf(), this.latitude, this.longitude);
             this.cache.sunTimesTomorrow.dayId = (dayId + 1);
 
@@ -2239,10 +2237,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             } else {
                 this.cache.moonTimesToday.dayId = dayId;
                 this.cache.moonTimesToday.times = sunCalc.getMoonTimes(todayValue, this.latitude, this.longitude);
-                this.cache.moonTimesTomorrow.times = sunCalc.getMoonTimes(todayValue + dayMs, this.latitude, this.longitude);
+                this.cache.moonTimesTomorrow.times = sunCalc.getMoonTimes(todayValue + hlp.TIME_24h, this.latitude, this.longitude);
                 this.cache.moonTimesTomorrow.dayId = (dayId + 1);
             }
-            this.cache.moonTimes2Days.times = sunCalc.getMoonTimes(todayValue + dayMs + dayMs, this.latitude, this.longitude);
+            this.cache.moonTimes2Days.times = sunCalc.getMoonTimes(todayValue + hlp.TIME_24h + hlp.TIME_24h, this.latitude, this.longitude);
             this.cache.moonTimes2Days.dayId = (dayId + 2);
         }
 

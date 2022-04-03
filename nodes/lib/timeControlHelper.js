@@ -827,7 +827,7 @@ function initializeCtrl(REDLib, node, config) {
                     // @ts-ignore
                     offset          : (rule.offsetValue || 1),
                     // @ts-ignore
-                    multiplier      : (parseInt(rule.multiplier) || 60000),
+                    multiplier      : (parseInt(rule.multiplier) || hlp.TIME_1min),
                     // @ts-ignore
                     days            : (rule.timeDays || '*'),
                     // @ts-ignore
@@ -848,7 +848,7 @@ function initializeCtrl(REDLib, node, config) {
                             value           : (rule.timeMinValue || ''), // @ts-ignore
                             offsetType      : (rule.offsetMinType || 'none'), // @ts-ignore
                             offset          : (rule.offsetMinValue || 1), // @ts-ignore
-                            multiplier      : (parseInt(rule.multiplierMin) || 60000),
+                            multiplier      : (parseInt(rule.multiplierMin) || hlp.TIME_1min),
                             next            : false
                         };
                     }
@@ -863,7 +863,7 @@ function initializeCtrl(REDLib, node, config) {
                             value           : (rule.timeMaxValue || ''), // @ts-ignore
                             offsetType      : (rule.offsetMaxType || 'none'), // @ts-ignore
                             offset          : (rule.offsetMaxValue || 1), // @ts-ignore
-                            multiplier      : (parseInt(rule.multiplierMax) || 60000),
+                            multiplier      : (parseInt(rule.multiplierMax) || hlp.TIME_1min),
                             next            : false
                         };
                     }
@@ -941,7 +941,7 @@ function initializeCtrl(REDLib, node, config) {
                     // @ts-ignore
                     offset          : (rule.payloadOffsetValue || '1'),
                     // @ts-ignore
-                    multiplier      : (parseInt(rule.payloadOffsetMultiplier) || 60000),
+                    multiplier      : (parseInt(rule.payloadOffsetMultiplier) || hlp.TIME_1min),
                     // @ts-ignore
                     format          : (parseInt(rule.payloadFormat) || 99)
                 };

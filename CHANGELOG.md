@@ -37,7 +37,6 @@ This is still a beta
   - maybe
     - implement minimal tests for blind-controller
     - implement minimal tests for clock-timer
-    - implement minimal tests for time-span
 
 Changes:
 

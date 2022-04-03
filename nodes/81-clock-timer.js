@@ -362,7 +362,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         // node.outputs = Number(config.outputs || 1);
         if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
-            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
         }
         if (node.positionConfig.checkNode(

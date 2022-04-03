@@ -62,14 +62,24 @@
 
 const util = require('util');
 const TIME_WEEK = 604800000;
+const TIME_5d = 432000000;
+const TIME_4d = 345600000;
+const TIME_3d = 259200000;
+const TIME_36h = 129600000;
 const TIME_24h = 86400000;
+const TIME_12h = 43200000;
 const TIME_1h = 3600000;
 const TIME_1min = 60000;
 const TIME_1s = 1000;
 
 module.exports = {
     TIME_WEEK,
+    TIME_5d,
+    TIME_4d,
+    TIME_3d,
+    TIME_36h,
     TIME_24h,
+    TIME_12h,
     TIME_1h,
     TIME_1min,
     TIME_1s,

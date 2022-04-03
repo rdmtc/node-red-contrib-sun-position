@@ -318,12 +318,12 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             // let millisec = node.nextTime.value.valueOf() - node.timeData.now.valueOf();
             node.debug(`set timeout to ${node.nextTime.value.valueOf()} - ${node.timeData.now.valueOf()}`);
             // while (millisec < 1) {
-            //    millisec += 86400000; // 24h
+            //    millisec += hlp.TIME_24h; // 24h
             // }
-            if (millisec > 345600000) {
+            if (millisec > hlp.TIME_4d) {
                 // there is a limitation of nodejs that the maximum setTimeout time
                 // should not more then 2147483647 ms (24.8 days).
-                millisec = Math.min((millisec - 129600000), 2147483646);
+                millisec = Math.min((millisec - hlp.TIME_36h), 2147483646);
                 // node.debug('next inject is far far away, plan a inject time recalc in ' + millisec + ' ms');
                 node.delayTimer = setTimeout(() => {
                     delete node.delayTimer;

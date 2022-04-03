@@ -52,6 +52,7 @@
   * @type {runtimeRED} */
 module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
+
     const util = require('util');
     const hlp = require('./lib/dateTimeHelper.js');
 
@@ -66,6 +67,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          */
         // @ts-ignore
         const node = this;
+
         // Retrieve the config node
         node.positionConfig = RED.nodes.getNode(config.positionConfig);
         // node.debug('initialize time Node ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
@@ -106,7 +108,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     oT          : (config.result1OffsetType === 0 || config.result1OffsetType === '') ? 'none' : (config.result1OffsetType ? config.result1OffsetType : 'num'),
                     oM          : config.result1OffsetMultiplier ? config.result1OffsetMultiplier : 60000,
                     f           : config.result1Format ? config.result1Format : 0,
-                    next        : false,
+                    next        : true,
                     days        : '*',
                     months      : '*',
                     onlyEvenDays: false,
@@ -127,21 +129,21 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         node.results = [];
         config.results.forEach(prop => {
             const propNew = {
-                outType     : prop.pt,
-                outValue    : prop.p,
-                type        : prop.vt,
-                value       : prop.v,
-                format      : prop.f,
-                offsetType  : prop.oT,
-                offset      : prop.o,
-                multiplier  : parseFloat(prop.oM) || 60000,
-                next        : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next)) ? true : false,
-                days        : prop.days,
-                months      : prop.months,
-                onlyEvenDays: prop.onlyEvenDays,
-                onlyOddDays : prop.onlyOddDays,
-                onlyEvenWeeks: prop.onlyEvenWeeks,
-                onlyOddWeeks : prop.onlyOddWeeks
+                outType         : prop.pt,
+                outValue        : prop.p,
+                type            : prop.vt,
+                value           : prop.v,
+                format          : prop.f,
+                offsetType      : prop.oT,
+                offset          : prop.o,
+                multiplier      : parseFloat(prop.oM) || 60000,
+                next            : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next)) ? true : false,
+                days            : prop.days,
+                months          : prop.months,
+                onlyEvenDays    : prop.onlyEvenDays === 'true' || prop.onlyEvenDays === true,
+                onlyOddDays     : prop.onlyOddDays === 'true' || prop.onlyOddDays === true,
+                onlyEvenWeeks   : prop.onlyEvenWeeks === 'true' || prop.onlyEvenWeeks === true,
+                onlyOddWeeks    : prop.onlyOddWeeks === 'true' || prop.onlyOddWeeks === true
             };
             if (propNew.type !== 'entered' && propNew.type !== 'pdsTime' && propNew.type !== 'pdsTimeCustom' && propNew.type !== 'pdmTime') {
                 propNew.next = false;
@@ -149,7 +151,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
             if (node.positionConfig && propNew.type === 'jsonata') {
                 try {
-                    propNew.expr = node.positionConfig.getJSONataExpression(this, propNew.value);
+                    propNew.expr = node.positionConfig.getJSONataExpression(node, propNew.value);
                 } catch (err) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error: err.message }));
                     propNew.expr = null;
@@ -229,16 +231,17 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
                     let resultObj = null;
                     if (prop.type === 'input') {
-                        resultObj = node.positionConfig.formatOutDate(this, msg, inputData.value, prop);
+                        resultObj = node.positionConfig.formatOutDate(node, msg, inputData.value, prop);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(this, msg, prop, dNow);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, prop, dNow);
                     }
+
                     if (resultObj === null || (typeof resultObj === 'undefined')) {
                         node.error('Could not evaluate ' + prop.type + '.' + prop.value + '. - Maybe settings outdated (open and save again)!');
                     } else if (resultObj.error) {
                         node.error('error on getting result: "' + resultObj.error + '"');
                     } else {
-                        node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
+                        node.positionConfig.setMessageProp(node, msg, prop.outType, prop.outValue, resultObj);
                     }
                     // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
                 }
