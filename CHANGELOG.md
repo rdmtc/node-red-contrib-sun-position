@@ -24,12 +24,35 @@ npm_packages:
 
 This can be also used to go back to an older Version.
 
-### 2.2.0-beta: enhancement
+### 3.0.0-beta: enhancement
+
+Breaking changes: removed all "Radiant" angle selection from typed input. The standard selection (which was previous the decimal degree output) gives now an angle based on the type selection (degree or radiant) of the configuration node. Version number is changed to 3 to reflect these API changes.
+
+This is still a beta
+
+- TODO:
+  - implement start and end definition in blind-control and clock timer for rules.
+  - implement minimal tests for sun-position
+  - implement minimal tests for moon-position
+  - maybe
+    - implement minimal tests for blind-controller
+    - implement minimal tests for clock-timer
+    - implement minimal tests for time-span
+
+Changes:
 
 - general
   - first implementation of tests with `mocha` and some changes due to the test implementation (inject enhance and delay-until)
     - revised error handling and output messages if the configuration of nodes is not correct (missing config node, missing latitude/longitude).
   - added type checking
+  - allow of custom sun position set and rise angles in the configuration node
+  - allow of custom angles in the configuration node
+  - removed the following angle selections (replaced by existing ones without rad):
+    - time by azimuth (rad)
+    - time by elevation (set or rise in rad)
+    - next time by elevation (set or rise in rad)
+    - next rise time by elevation (rad)
+    - next set time by elevation (rad)
 
 - inject enhance (time-inject)
   - added repletely inject with CRON expression
@@ -51,6 +74,7 @@ This can be also used to go back to an older Version.
     - This has some limitations. Changes would only have effect if the oversteer are evaluated.
   - fix not working oversteer mode limitation #431
   - show rule edit dialog no longer modal to allow usage of JSON and JSONATA editor #432
+  - implemented optional alternative alternative azimuth input like node-red-contrib-blindcontroller #430
 
 - time-comp
   - better adjustable of next time, fixes #420

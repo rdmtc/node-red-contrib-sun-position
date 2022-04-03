@@ -53,6 +53,8 @@
             "dayofweek":"day of week",
             "timesun":"sun time",
             "timesunnow": "next sun time",
+            "timesuncustom":"sun time (custom)",
+            "timesuncustomnamed":"sun time __value__",
             "timemoon":"moon time",
             "randomNumber":"random number (continuously new)",
             "randmNumCachedDay":"random number (once a day)",
@@ -62,22 +64,14 @@
             "suninsky":"sun in the sky (percent)",
             "sunAzimuth":"Azimuth of sun",
             "sunElevation":"Elevation of sun",
-            "sunAzimuthRad":"Azimuth of sun (rad)",
-            "sunElevationRad":"Elevation of sun (rad)",
             "numAzimuth":"Azimuth angle",
             "numAltitude":"Elevation angle",
-            "numAzimuthRad":"Azimuth angle (rad)",
-            "numAltitudeRad":"Elevation angle (rad)",
+            "numAnglePreDef":"custom angle from config node",
             "SunTimeByAzimuth":"time by azimuth",
-            "SunTimeByAzimuthRad":"time by azimuth (rad)",
             "SunTimeByElevationObj":"time by elevation (set or rise)",
-            "SunTimeByElevationObjRad":"time by elevation (set or rise in rad)",
             "SunTimeByElevationNext":"next time by elevation (set or rise)",
-            "SunTimeByElevationNextRad":"next time by elevation (set or rise in rad)",
             "SunTimeByElevationRise":"next rise time by elevation",
-            "SunTimeByElevationRiseRad":"next rise time by elevation (rad)",
             "SunTimeByElevationSet":"next set time by elevation",
-            "SunTimeByElevationSetRad":"next set time by elevation (rad)",
             "suntime":"sun time",
             "suntimes":"sun times",
             "mooncalc":"moon calculation",
@@ -490,6 +484,7 @@
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
         "notEvaluablePropertyAdd":"Error \"__err__\", could not evaluate __type__.__value__",
         "notEvaluablePropertyUsedValue": "could not evaluate __type__.__value__, using \"__usedValue__\"!",
+        "notEvaluableCustomAngle":"Custom Angle with name \"__value__\" is not defined in the configuration node!",
         "invalidParameter":"Parameter \"__param__\" is invalid \"__type__\" (using __newValue__)",
         "invalid-expr": "Invalid JSONata expression: __error__",
         "getPropertyData": "error getting condition data: \"__message__\" skipping time",
@@ -501,7 +496,7 @@
             "position": "Position",
             "latitude": "Latitude",
             "longitude": "Longitude",
-            "height":"observer height",
+            "height":"(opt) observer height",
             "angleType": "angle type",
             "timeZoneOffset": "TZ Offset",
             "name": "Name",
@@ -513,14 +508,19 @@
             "timeZoneDST": "DST",
             "noDST": "No DST",
             "addDST1Hour": "DST add 1 Hour",
-            "addDST2Hour": "DST add 2 Hours"
+            "addDST2Hour": "DST add 2 Hours",
+            "sunPositions": "Custom Sun Positions",
+            "predefAngles":  "defined angles",
+            "angle":         "Angle",
+            "riseName":      "Rise Name",
+            "setName":       "Set Name",
+            "angleDec":      "Decimal degree"
         },
         "placeholder": {
             "positionConfig":"select or create generic configuration",
             "latitude": "51.025",
             "longitude": "-1.4",
             "height": "the observer height (in meters) relative to the horizon",
-            "angleType": "deg",
             "timeZoneOffset": "0",
             "name": "Name",
             "stateDateFormat": "Format of the state output of a date only. If empty default toLocale​Date​String will be used.",
@@ -528,12 +528,15 @@
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
-            "timeZoneOffset": "If for the timezone OS Standard is choosen the standard timezone including daylight saving switch is used. If is not chosen this setting, but a special time zone then no change of the daylightsaving is done! Formatchanges to time could taken time until it will get any effect."
+            "timeZoneOffset": "If for the timezone OS Standard is choosen the standard timezone including daylight saving switch is used. If is not chosen this setting, but a special time zone then no change of the daylightsaving is done! Formatchanges to time could taken time until it will get any effect.",
+            "sunPositions": "Here you can define your own elevation angles for sun positions.",
+            "predefAngles": "Here you can specify angle values in decimal degrees with a name, which can be used in different nodes. For example, an azimuth angle with the name N (for north) can be defined here. For the window position in the blind node, only the side of the window (N) is specified."
         },
         "errors": {
             "latitude-missing": "Latitude is missing or wrong!",
             "longitude-missing": "Longitude is missing or wrong!",
-            "coordinates-missing": "Coordinates Latitude and Longitude is missing in the configuration node!"
+            "coordinates-missing": "Coordinates Latitude and Longitude is missing in the configuration node!",
+            "invalid-custom-suntime": "Invalid custom suntime __name__ given!"
         }
     }
 }

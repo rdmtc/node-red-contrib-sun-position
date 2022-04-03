@@ -227,6 +227,7 @@ this software without specific prior written permission.
                             'str',
                             types.DateEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
@@ -239,6 +240,7 @@ this software without specific prior written permission.
                                 opType === types.TimeEntered.value ||
                                 opType === types.DateEntered.value ||
                                 opType === types.TimeSun.value ||
+                                opType === types.TimeSunCustom.value ||
                                 opType === types.TimeMoon.value ||
                                 opType === types.DayOfMonth.value) {
                                 $('.time-row-operand1Format').hide();
@@ -318,6 +320,7 @@ this software without specific prior written permission.
                             'str',
                             types.DateEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
@@ -330,6 +333,7 @@ this software without specific prior written permission.
                                 opType === types.TimeEntered.value ||
                                 opType === types.DateEntered.value ||
                                 opType === types.TimeSun.value ||
+                                opType === types.TimeSunCustom.value ||
                                 opType === types.TimeMoon.value ||
                                 opType === types.DayOfMonth.value) {
                                 $('.time-row-operand2Format').hide();
@@ -586,6 +590,7 @@ this software without specific prior written permission.
                                         types.TimeEntered,
                                         types.DateEntered,
                                         types.TimeSun,
+                                        types.TimeSunCustom,
                                         types.TimeSunNow,
                                         types.TimeMoon,
                                         types.DayOfMonth,
@@ -606,12 +611,11 @@ this software without specific prior written permission.
                                         types.MoonPhase,
                                         types.SunAzimuth,
                                         types.SunElevation,
-                                        types.SunAzimuthRad,
-                                        types.SunElevationRad,
                                         types.SunTimeByAzimuth,
                                         types.SunTimeByElevationObj,
-                                        types.SunTimeByAzimuthRad,
-                                        types.SunTimeByElevationObjRad,
+                                        types.SunTimeByElevationNext,
+                                        types.SunTimeByElevationRise,
+                                        types.SunTimeByElevationSet,
                                         types.isDST,
                                         types.WeekOfYear,
                                         types.WeekOfYearEven,
@@ -868,6 +872,7 @@ this software without specific prior written permission.
                                 const plVType = $propertyValue.typedInput('type');
                                 if (plVType === types.TimeEntered.value ||
                                     plVType === types.TimeSun.value ||
+                                    plVType === types.TimeSunCustom.value ||
                                     plVType === types.TimeMoon.value) {
                                     $row2a.hide(); // formatTS
                                     $row2b.show(); // format

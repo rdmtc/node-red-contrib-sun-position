@@ -458,7 +458,9 @@ function prepareRules(node, msg, tempData, dNow) {
                             callback: (result, _obj) => { // opCallback
                                 el.valueWorth = _obj.value;
                                 return evalTempData(node, _obj.type, _obj.value, result, tempData);
-                            }
+                            },
+                            noError:false,
+                            now: dNow
                         },
                         el.operator,
                         {
@@ -467,8 +469,10 @@ function prepareRules(node, msg, tempData, dNow) {
                             callback: (result, _obj) => { // opCallback
                                 el.thresholdWorth = _obj.value;
                                 return evalTempData(node, _obj.type, _obj.value, result, tempData);
-                            }
-                        }, false, dNow
+                            },
+                            noError:false,
+                            now: dNow
+                        }
                     );
                 }
                 rule.conditon = {

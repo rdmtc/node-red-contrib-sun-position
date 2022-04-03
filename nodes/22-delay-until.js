@@ -305,18 +305,18 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             if (node.delayTimer) {
                 clearTimer();
             }
-            const dNow = getIntDate(node.tsCompare, qObj.msg, node);
+            node.timeData.now = getIntDate(node.tsCompare, qObj.msg, node);
 
-            node.nextTime = node.positionConfig.getTimeProp(node, qObj.msg, node.timeData, dNow);
+            node.nextTime = node.positionConfig.getTimeProp(node, qObj.msg, node.timeData);
             if (node.nextTime.error) {
                 node.debug('node.nextTime=' + util.inspect(node.nextTime, { colors: true, compact: 10, breakLength: Infinity }));
                 hlp.handleError(node, node.nextTime.error, null, 'could not evaluate time');
                 return;
 
             }
-            let millisec = hlp.getTimeOut(dNow, node.nextTime.value);
-            // let millisec = node.nextTime.value.valueOf() - dNow.valueOf();
-            node.debug(`set timeout to ${node.nextTime.value.valueOf()} - ${dNow.valueOf()}`);
+            let millisec = hlp.getTimeOut(node.timeData.now, node.nextTime.value);
+            // let millisec = node.nextTime.value.valueOf() - node.timeData.now.valueOf();
+            node.debug(`set timeout to ${node.nextTime.value.valueOf()} - ${node.timeData.now.valueOf()}`);
             // while (millisec < 1) {
             //    millisec += 86400000; // 24h
             // }

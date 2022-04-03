@@ -191,6 +191,7 @@ this software without specific prior written permission.
                     types: [
                         types.TimeEntered,
                         types.TimeSun,
+                        types.TimeSunCustom,
                         types.TimeMoon,
                         'msg',
                         'flow',
@@ -199,11 +200,7 @@ this software without specific prior written permission.
                         types.SunTimeByAzimuth,
                         types.SunTimeByElevationNext,
                         types.SunTimeByElevationRise,
-                        types.SunTimeByElevationSet,
-                        types.SunTimeByAzimuthRad,
-                        types.SunTimeByElevationNextRad,
-                        types.SunTimeByElevationRiseRad,
-                        types.SunTimeByElevationSetRad
+                        types.SunTimeByElevationSet
                     ],
                     onChange(_type, _value) {
                         if ( onInit) { return; }

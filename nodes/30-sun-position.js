@@ -129,7 +129,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 ports[0].payload.pos = [];
                 ports[0].payload.posChanged = false;
                 if (node.startType !== 'none') {
-                    // const startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffsetType, node.startOffset, node.startOffsetMultiplier);
                     const startTime = node.positionConfig.getTimeProp(node, msg, {
                         type: node.startType,
                         value : node.start,
@@ -152,7 +151,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
 
                 if (node.endType !== 'none') {
-                    // const endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffsetType, node.endOffset, node.endOffsetMultiplier);
                     const endTime = node.positionConfig.getTimeProp(node, msg, {
                         type: node.endType,
                         value : node.end,
@@ -263,7 +261,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (vType === 'none') {
                     return undefined;
                 }
-                return node.positionConfig.getFloatProp(node, msg, vType, value, 0);
+                return node.positionConfig.getFloatProp(node, msg, { type: vType, value, def: 0 });
             } catch (err) {
                 return undefined;
             }

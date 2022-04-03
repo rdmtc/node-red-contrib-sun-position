@@ -188,7 +188,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (vType === 'none') {
                     return undefined;
                 }
-                return node.positionConfig.getFloatProp(node, msg, vType, value, 0);
+                return node.positionConfig.getFloatProp(node, msg, { type: vType, value, def: 0 });
             } catch (err) {
                 return undefined;
             }

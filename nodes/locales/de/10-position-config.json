@@ -53,6 +53,8 @@
             "dayofweek": "Wochentag",
             "timesun": "Uhrzeit Sonnenstand",
             "timesunnow": "nächste Uhrzeit Sonnenstand",
+            "timesuncustom":"Uhrzeit Sonnenstand (benutzerdefiniert)",
+            "timesuncustomnamed":"Uhrzeit Sonnenstand __value__",
             "timemoon": "Uhrzeit Mond Auf/Untergang",
             "randomNumber":"zufällige Zahl (immer neu)",
             "randmNumCachedDay":"zufällig Zahl (täglich neu)",
@@ -62,22 +64,14 @@
             "suninsky":"Sonne am Himmel (Prozent)",
             "sunAzimuth":"Sonnenrichtung",
             "sunElevation":"Sonnenhöhenwinkel",
-            "sunAzimuthRad":"Sonnenrichtung (rad)",
-            "sunElevationRad":"Sonnenhöhenwinkel (rad)",
             "numAzimuth":"Sonnenrichtung",
             "numAltitude":"Sonnenhöhenwinkel",
-            "numAzimuthRad":"Sonnenrichtung (rad)",
-            "numAltitudeRad":"Sonnenhöhenwinkel (rad)",
+            "numAnglePreDef":"Winkel aus Konfiguration",
             "SunTimeByAzimuth":"Zeit durch Sonnenrichtung",
-            "SunTimeByAzimuthRad":"Zeit durch Sonnenrichtung (rad)",
             "SunTimeByElevationObj":"Zeit Auf/Untergang Sonne durch Höhenwinkel",
-            "SunTimeByElevationObjRad":"Zeit Auf/Untergang Sonne durch Höhenwinkel (rad)",
             "SunTimeByElevationNext":"Zeit Auf/Untergang Sonne durch Höhenwinkel",
-            "SunTimeByElevationNextRad":"Zeit Auf/Untergang Sonne durch Höhenwinkel (rad)",
             "SunTimeByElevationRise":"Zeit Aufgang Sonne durch Höhenwinkel",
-            "SunTimeByElevationRiseRad":"Zeit Aufgang Sonne durch Höhenwinkel (rad)",
             "SunTimeByElevationSet":"Zeit Untergang Sonne durch Höhenwinkel",
-            "SunTimeByElevationSetRad":"Zeit Untergang Sonne durch Höhenwinkel (rad)",
             "suntime":"Sonnenzeit",
             "suntimes":"Sonnenzeiten",
             "mooncalc": "Mondposition",
@@ -446,7 +440,7 @@
 			"overwriteBlind": "manuelles Überschreiben der Rollladenposition",
 			"overwriteTimer": "manuelles Überschreiben der Regel",
 			"sunControlNotActive": "Nur Regelbasiert",
-			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden. <br><br>Der Modus kann über die eingehende Nachricht verändert werden. In diesem Falle ist der heir eingestellte Modus der maximal wählbare Modus. Der über eine nachricht eingestellte Modus wird im Node-Context persistiert und bleibt bei einem deploy erhalten.",
+			"sunControlMode": "Anstelle der standard Rollladenposition kann das Ausmaß in dem direktes Sonnenlicht in den Raum scheint eingeschränkt werden. <br><br>Der Modus kann über die eingehende Nachricht verändert werden. In diesem Falle ist der hier eingestellte Modus der maximal wählbare Modus. Der über eine Nachricht eingestellte Modus wird im Node-Context persistiert und bleibt bei einem deploy erhalten.",
 			"windowAzimuth": "Darstellung der Ausrichtung des Fensters zum geografischen Norden (in Grad), wenn die Sonne in das Fenster fällt (Sonnenrichtung/Azimuth).",
 			"windowPos": "Fenster Eigenschaften, Messung vom Boden bis zum unter und Oberseite des Fensters",
 			"oversteer": "erlaubt das Übersteuern der Position in Abhängigkeit von der Sonne unter definierten Bedingungen wie Sonnenwinkel oder Wetter (z. B. Wolkenhimmel, Beleuchtung, etc.). Hiermit kann auch eine minimale oder maximaler Höhenwinkel definiert werden, wenn Berge/Gebäude, etc das Fenster verdecken.",
@@ -459,7 +453,7 @@
 			"sunCtrlRestrict": "Begrenzen Sie die Häufigkeit von Änderungen nach Zeit und / oder Änderungsgröße (Delta).",
 			"ruleCondition": "Bedingung unter welcher diese Regel beachtet wird.<br/><small>Es gibt keine Operatorrangfolge! Die Verknüpfung von mehreren Bedingungen mit <kbd>UND</kbd> bzw. <kbd>ODER</kbd> bedeutet nur die jeweilige Bedingung zu den vorhergehenden. Die Auswertung wird abgebrochen sobald der Ausdruck true ergibt.</small>",
 			"enhanced":"erweiterte Einstellungen",
-            "startDelayTime":"Bei einem Wert von 0 wird die node nach einem Deploy oder Node-Red Start erst mit der nächsten eingehenden nachricht aktiviert und bis dahin auf keine Ereignise reagieren!"
+            "startDelayTime":"Bei einem Wert von 0 wird die node nach einem Deploy oder Node-Red Start erst mit der nächsten eingehenden Nachricht aktiviert und bis dahin auf keine Ereignise reagieren!"
 		}
     },
     "errors": {
@@ -475,6 +469,7 @@
         "notEvaluableProperty":"Kann den Wert von __type__.__value__ nicht ermitteln",
         "notEvaluablePropertyAdd":"\"__err__\", kann den Wert von __type__.__value__ nicht ermitteln!",
         "notEvaluablePropertyUsedValue": "kann den Wert von __type__.__value__ nicht ermitteln, verwende \"__usedValue__\"!",
+        "notEvaluableCustomAngle":"Benutzerdefinierter Winkel mit Namen \"__value__\" wurde im Konfigurationsknoten nicht definiert!",
         "invalidParameter":"Der Parameter \"__param__\" hat ist ungültig \"__type__\" (nutze __newValue__)",
         "invalid-expr": "Ungültiger JSONata Austruck: __error__",
         "getPropertyData": "Fehler bei der Ermittlung der Bedingung: \"__message__\" Zeit wird nicht verwendet",
@@ -486,6 +481,7 @@
             "position": "Position",
             "latitude": "Breitengrad",
             "longitude": "Längengrad",
+            "height":"(opt) Beobachterhöhe",
             "angleType": "Winkel Typ",
             "timeZoneOffset": "Zeitzone",
             "name": "Name",
@@ -497,13 +493,19 @@
             "timeZoneDST": "Sommerzeit",
             "noDST": "keine Sommerzeit",
             "addDST1Hour": "Sommerzeit 1 Stunde hinzufügen",
-            "addDST2Hour": "Sommerzeit 2 Stunden hinzufügen"
+            "addDST2Hour": "Sommerzeit 2 Stunden hinzufügen",
+            "sunPositions": "Benutzerdefinierte Sonnenpositionen",
+            "predefAngles":  "vordefinierte Winkel",
+            "angle":         "Winkel",
+            "riseName":      "Name Aufgang",
+            "setName":       "Name Untergang",
+            "angleDec":      "Dezimalgrad"
         },
         "placeholder": {
             "positionConfig": "wähle oder erstelle die Konfiguration",
             "latitude": "51.025",
             "longitude": "-1.4",
-            "angleType": "deg",
+            "height": "die Höhe des Beobachters (in Metern) in Bezug auf den Horizont",
             "timeZoneOffset": "0",
             "name": "Name",
             "stateDateFormat": "Format der Statusausgabe eines Datums. Standard ist toLocale​Date​String.",
@@ -511,13 +513,15 @@
         },
         "tips": {
             "config": "Starting from Version 2.0 the coordinates are not saved as credentials due to privacy reasons. So they no longer part of the regular flow and will not part of the export! To update from a previous version save and re-deploy is necessary.",
-            "sunPosControl": "Here you can specify the upper and lower limits for the solar radiation so that you can evaluate the sunshine on 4 sides of an object.",
-            "timeZoneOffset":"Änderungen am Format können einige zeit dauern, bis diese Auswirkung zeigen."
+            "timeZoneOffset":"Änderungen am Format können einige zeit dauern, bis diese Auswirkung zeigen.",
+            "sunPositions": "Hier können Sie Ihre eigenen Elevationswinkel für Sonnenpositionen definieren.",
+            "predefAngles": "Hier können Sie Winkelwerte in Dezimalgraden mit einem Namen angeben, der in verschiedenen Knoten verwendet werden kann. Zum Beispiel kann hier ein Azimutwinkel mit dem Namen N (für Nord) definiert werden. Für die Fensterposition im Knoten Jalousie wird nur die Seite des Fensters (N) angegeben."
         },
         "errors": {
             "latitude-missing": "Koordinate für den Breitengrad fehlt oder ist falsch!",
             "longitude-missing": "Koordinate für den Längengrad fehlt oder ist falsch!",
-            "coordinates-missing": "Koordinaten für den Breitengrad und Längengrad ist falsch!"
+            "coordinates-missing": "Koordinaten für den Breitengrad und Längengrad ist falsch!",
+            "invalid-custom-suntime": "Ungültige benutzerdefinierte Sonnenzeit __name__ angegeben!"
         }
     }
 }

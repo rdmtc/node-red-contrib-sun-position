@@ -654,7 +654,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 node.getIntervalTime();
                 node.doStartInterval(); // starte Interval
             } else if (node.injType === tInj.intervalAmount) {
-                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, {
+                    type: node.intervalCountType, value: node.intervalCount, def: 0
+                });
                 node.intervalTime = Math.floor((millisecEnd - millisecStart) / node.intervalCountMax);
                 node.intervalCountCurrent = 0;
                 node.doStartInterval(); // starte Interval
@@ -913,7 +915,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * get and validate a given interval
          */
         node.getIntervalTime = () => {
-            node.intervalTime = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+            node.intervalTime = node.positionConfig.getFloatProp(node, null, {
+                type: node.intervalCountType, value: node.intervalCount, def: 0
+            });
             if (node.intervalTime <= 0) {
                 throw new Error('Interval wrong!');
             } else {
@@ -979,7 +983,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
 
             if (node.injType === tInj.intervalAmount) {
-                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, {
+                    type: node.intervalCountType, value: node.intervalCount, def: 0
+                });
                 delete node.intervalTime;
             }
 

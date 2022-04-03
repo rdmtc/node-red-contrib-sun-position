@@ -36,8 +36,8 @@
             "timeAlt": "alternativer Zeitpunkt",
             "timeAltOffset": "offset des alternativen Zeitpunktes",
             "timeLimits":"Wählen Sie Tage und / oder Monate aus, für welche es gültig sein soll",
-            "days": "Tage auswählen, an denen die nachricht gesendet werden soll",
-            "months":"Monate auswählen, an denen die nachricht gesendet werden soll",
+            "days": "Tage auswählen, an denen die Nachricht gesendet werden soll",
+            "months":"Monate auswählen, an denen die Nachricht gesendet werden soll",
             "recalcTime": "Intervall in dem eine Neuberechnung des Zeitpunktes zum Senden der Nachricht stattfinden soll.",
             "once": "zusätzlich soll beim Start des Flows eine Nachricht (unabhängig von der Zeit) gesendet werden"
         },

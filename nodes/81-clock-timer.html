@@ -433,6 +433,7 @@ this software without specific prior written permission.
                             types.TimeEntered,
                             types.DateEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
@@ -442,12 +443,11 @@ this software without specific prior written permission.
                             types.MoonPhase,
                             types.SunAzimuth,
                             types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
                             types.SunTimeByAzimuth,
                             types.SunTimeByElevationObj,
-                            types.SunTimeByAzimuthRad,
-                            types.SunTimeByElevationObjRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationSet,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -458,6 +458,7 @@ this software without specific prior written permission.
                             const plVType = $('#node-input-payloadDefault').typedInput('type');
                             if (plVType ===  types.TimeEntered.value ||
                                 plVType === types.TimeSun.value ||
+                                plVType === types.TimeSunCustom.value ||
                                 plVType === types.TimeMoon.value ||
                                 plVType === types.DateSpecific.value) {
                                 $('.rdgtimer-rule-row-payloadDefaultTimeFormat').show();
@@ -917,7 +918,9 @@ this software without specific prior written permission.
                                 delete data.valid2OperandBType;
                             }
                             if(data.timeBType) {
-                                if (data.timeBType === types.TimeSun.value || data.timeBType === types.TimeMoon.value) {
+                                if (data.timeBType === types.TimeSun.value ||
+                                    data.timeBType === types.TimeSunCustom.value ||
+                                    data.timeBType === types.TimeMoon.value) {
                                     data.timeMinType = data.timeType;
                                     data.timeMinValue = data.timeValue;
                                     data.timeType = data.timeBType;
@@ -1586,6 +1589,7 @@ this software without specific prior written permission.
                                         'num',
                                         types.numAzimuth,
                                         types.numAltitude,
+                                        types.preDefAzimuth,
                                         'str',
                                         'bool',
                                         'flow',
@@ -1724,6 +1728,7 @@ this software without specific prior written permission.
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -1732,13 +1737,9 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
                             types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
                             types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
@@ -1779,6 +1780,7 @@ this software without specific prior written permission.
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -1787,13 +1789,9 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
                             types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
                             types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
@@ -1834,6 +1832,7 @@ this software without specific prior written permission.
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -1842,13 +1841,9 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
                             types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
                             types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
@@ -1949,6 +1944,7 @@ this software without specific prior written permission.
                             types.TimeEntered,
                             types.DateEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
@@ -1958,12 +1954,11 @@ this software without specific prior written permission.
                             types.MoonPhase,
                             types.SunAzimuth,
                             types.SunElevation,
-                            types.SunAzimuthRad,
-                            types.SunElevationRad,
                             types.SunTimeByAzimuth,
                             types.SunTimeByElevationObj,
-                            types.SunTimeByAzimuthRad,
-                            types.SunTimeByElevationObjRad,
+                            types.SunTimeByElevationNext,
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationSet,
                             types.isDST,
                             types.WeekOfYear,
                             types.WeekOfYearEven,
@@ -2027,6 +2022,7 @@ this software without specific prior written permission.
                         $dialogTimeRegOperator.show();
                         if (opType === types.TimeEntered.value ||
                             opType === types.TimeSun.value ||
+                            opType === types.TimeSunCustom.value ||
                             opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeReg').show();
                         } else {
@@ -2100,6 +2096,7 @@ this software without specific prior written permission.
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
+                                       opType === types.TimeSunCustom.value ||
                                        opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeMin').show();
                             } else {
@@ -2157,6 +2154,7 @@ this software without specific prior written permission.
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
+                                       opType === types.TimeSunCustom.value ||
                                        opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeMax').show();
                             } else {
@@ -2212,6 +2210,7 @@ this software without specific prior written permission.
                             return;
                         } else if (plVType ===  types.TimeEntered.value ||
                             plVType === types.TimeSun.value ||
+                            plVType === types.TimeSunCustom.value ||
                             plVType === types.TimeMoon.value ||
                             plVType === types.DateSpecific.value) {
                             $('#dialog-row-topic').show();

@@ -350,19 +350,22 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      */
     function clockTimerNode(config) {
         RED.nodes.createNode(this, config);
-        this.positionConfig = RED.nodes.getNode(config.positionConfig);
-        this.outputs = Number(config.outputs || 1);
         /** Copy 'this' object in case we need it in context of callbacks of other functions.
          * @type {IClockTimerNode}
          */
         // @ts-ignore
         const node = this;
-        if (!this.positionConfig) {
+
+        /** @type {IPositionConfigNode} */
+        node.positionConfig = RED.nodes.getNode(config.positionConfig);
+
+        // node.outputs = Number(config.outputs || 1);
+        if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
             return;
         }
-        if (this.positionConfig.checkNode(
+        if (node.positionConfig.checkNode(
             error => {
                 node.error(error);
                 node.status({fill: 'red', shape: 'dot', text: error });
@@ -406,7 +409,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             description: ''
         };
         // temporary node Data
-        node.contextStore = config.contextStore || this.positionConfig.contextStore;
+        node.contextStore = config.contextStore || node.positionConfig.contextStore;
         node.nodeData = {
             isDisabled: node.context().get('isDisabled', node.contextStore) || false,
             /** The Level of the window */
@@ -445,7 +448,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
             try {
                 node.debug(`--------- clock-timer - input msg.topic=${msg.topic} msg.payload=${msg.payload} msg.ts=${msg.ts}`);
-                if (!this.positionConfig) {
+                if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
                     node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
@@ -617,7 +620,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {
-                                this.error('error on getting result: "' + resultObj.error + '"');
+                                node.error('error on getting result: "' + resultObj.error + '"');
                             } else {
                                 node.positionConfig.setMessageProp(this, msgOut, prop.outType, prop.outValue, resultObj);
                             }

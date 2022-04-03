@@ -90,7 +90,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             offset: config.inputOffset,
             multiplier: config.inputOffsetMultiplier
         };
-        if (node.input.type !== 'entered' && node.input.type !== 'pdsTime' && node.input.type !== 'pdmTime') {
+        if (node.input.type !== 'entered' && node.input.type !== 'pdsTime' && node.input.type !== 'pdsTimeCustom' && node.input.type !== 'pdmTime') {
             node.input.next = false;
         }
 
@@ -143,7 +143,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 onlyEvenWeeks: prop.onlyEvenWeeks,
                 onlyOddWeeks : prop.onlyOddWeeks
             };
-            if (propNew.type !== 'entered' && propNew.type !== 'pdsTime' && propNew.type !== 'pdmTime') {
+            if (propNew.type !== 'entered' && propNew.type !== 'pdsTime' && propNew.type !== 'pdsTimeCustom' && propNew.type !== 'pdmTime') {
                 propNew.next = false;
             }
 
@@ -166,7 +166,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             if (rule.operator === 99) {
                 rule.next = false;
             } else {
-                if (rule.operandType !== 'entered' && rule.operandType !== 'pdsTime' && rule.operandType !== 'pdmTime') {
+                if (rule.operandType !== 'entered' && rule.operandType !== 'pdsTime' && rule.operandType !== 'pdsTimeCustom' && rule.operandType !== 'pdmTime') {
                     rule.next = false;
                 }
             }
@@ -217,7 +217,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
 
             try {
-                // const inputData = node.positionConfig.getDateFromProp(node, msg, node.input.type, node.input.value);
+                node.input.now = dNow;
                 const inputData = node.positionConfig.getTimeProp(node, msg, node.input);
                 if (inputData.error) {
                     throw new Error(inputData.error);

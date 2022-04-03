@@ -343,6 +343,9 @@ this software without specific prior written permission.
                                 RED.validators.typedInput('blindPosMaxType')(v);
                     }
                 },
+                windowSetMode: {
+                    value: 'startEnd'
+                },
                 windowAzimuthStartType: {
                     value: 'numAzimuth'
                 },
@@ -350,6 +353,7 @@ this software without specific prior written permission.
                     value: '',
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                getVal(this, 'windowSetMode') !== 'startEnd' ||
                                 RED.validators.typedInput('windowAzimuthStartType')(v);
                     }
                 },
@@ -360,7 +364,39 @@ this software without specific prior written permission.
                     value: '',
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                getVal(this, 'windowSetMode') !== 'startEnd' ||
                                 RED.validators.typedInput('windowAzimuthEndType')(v);
+                    }
+                },
+                windowOrientationType: {
+                    value: 'numAzimuth'
+                },
+                windowOrientation: {
+                    value: '',
+                    validate(v) {
+                        return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                getVal(this, 'windowSetMode') !== 'orientation' ||
+                                RED.validators.typedInput('windowOrientationType')(v);
+                    }
+                },
+                windowOffsetN: {
+                    value: '',
+                    validate(v) {
+                        const n = parseFloat(v);
+                        return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                getVal(this, 'windowSetMode') !== 'orientation' ||
+                                v==='' ||
+                                RED.validators.number()(v) && (n >= 0) && (n <= 90);
+                    }
+                },
+                windowOffsetP: {
+                    value: '',
+                    validate(v) {
+                        const n = parseFloat(v);
+                        return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                getVal(this, 'windowSetMode') !== 'orientation' ||
+                                v==='' ||
+                                RED.validators.number()(v) && (n >= 0) && (n <= 90);
                     }
                 },
                 // #endregion window settings
@@ -825,7 +861,7 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.numAzimuth.value,
                         defaultValue: '',
-                        types: [types.numAzimuth, types.MsgValue, types.MsgPayloadByTopic, 'msg', 'flow', 'global', 'env']
+                        types: [types.numAzimuth, types.numAnglePreDef, types.MsgValue, types.MsgPayloadByTopic, 'msg', 'flow', 'global', 'env']
                     });
 
                     setupTInput(node, {
@@ -834,7 +870,16 @@ this software without specific prior written permission.
                         width: 'calc(100% - 110px)',
                         defaultType: types.numAzimuth.value,
                         defaultValue: '',
-                        types: [types.numAzimuth, types.MsgValue, types.MsgPayloadByTopic, 'msg', 'flow', 'global', 'env']
+                        types: [types.numAzimuth, types.numAnglePreDef, types.MsgValue, types.MsgPayloadByTopic, 'msg', 'flow', 'global', 'env']
+                    });
+
+                    setupTInput(node, {
+                        typeProp: 'windowOrientationType',
+                        valueProp: 'windowOrientation',
+                        width: 'calc(100% - 110px)',
+                        defaultType: types.numAzimuth.value,
+                        defaultValue: '',
+                        types: [types.numAzimuth, types.numAnglePreDef, types.MsgValue, types.MsgPayloadByTopic, 'msg', 'flow', 'global', 'env']
                     });
 
                     setupTInput(node, {
@@ -845,6 +890,14 @@ this software without specific prior written permission.
                         defaultValue: '',
                         types: [types.Undefined, 'str', 'flow', 'global', 'env'] // types.MsgPayload, types.MsgTopic, types.MsgPayloadByTopic, types.MsgValue, 'msg',
                     });
+
+                    $('#node-input-windowSetMode').on('change focus focusout', () => {
+                        $('#node-input-sunControlMode').change();
+                    });
+                    if (!node.windowSetMode) {
+                        node.windowSetMode = 'startEnd';
+                        $('#node-input-windowSetMode').val('startEnd');
+                    }
                     // #endregion blind
                     // #region rules
                     const ruleVersion = 3;
@@ -1301,7 +1354,9 @@ this software without specific prior written permission.
                                 delete data.valid2OperandBType;
                             }
                             if (data.timeBType) {
-                                if (data.timeBType === types.TimeSun.value || data.timeBType === types.TimeMoon.value) {
+                                if (data.timeBType === types.TimeSun.value ||
+                                    data.timeBType === types.TimeSunCustom.value ||
+                                    data.timeBType === types.TimeMoon.value) {
                                     data.timeMinType = data.timeType;
                                     data.timeMinValue = data.timeValue;
                                     data.timeType = data.timeBType;
@@ -1614,30 +1669,44 @@ this software without specific prior written permission.
                     // #region sun
                     $('#node-input-sunControlMode').on('change focus focusin focusout', (_type, _value) => {
                         const val= Number($('#node-input-sunControlMode').val());
+                        let vis = false;
                         if (val === cNBC_MODE_SUN_CONTROL) {
                             $('.form-row-sunControlActive').show();
                             $('.form-row-sunControlRestriction').show();
                             $('.form-row-sunControlMaximization').hide();
                             $('.form-row-sunControlMinimization').hide();
                             resizeOversteerContainer();
+                            vis=true;
                         } else if (val === cNBC_MODE_MAXIMIZE ) {
                             $('.form-row-sunControlActive').show();
                             $('.form-row-sunControlRestriction').hide();
                             $('.form-row-sunControlMaximization').show();
                             $('.form-row-sunControlMinimization').hide();
                             resizeOversteerContainer();
+                            vis=true;
                         } else if (val === cNBC_MODE_MINIMIZE) {
                             $('.form-row-sunControlActive').show();
                             $('.form-row-sunControlRestriction').hide();
                             $('.form-row-sunControlMaximization').hide();
                             $('.form-row-sunControlMinimization').show();
                             resizeOversteerContainer();
+                            vis=true;
                         } else {
                             $('.form-row-sunControlActive').hide();
                             $('.form-row-sunControlRestriction').hide();
                             $('.form-row-sunControlMaximization').hide();
                             $('.form-row-sunControlMinimization').hide();
                             $('.row-oversteerTopic').hide();
+                        }
+                        if (vis) {
+                            const winAng = $('#node-input-windowSetMode').val();
+                            if (winAng === 'orientation') {
+                                $('.windowSetMode-azimuth').hide();
+                                $('.windowSetMode-orientation').show();
+                            } else {
+                                $('.windowSetMode-azimuth').show();
+                                $('.windowSetMode-orientation').hide();
+                            }
                         }
                     });
                     setupTInput(node, {
@@ -1813,6 +1882,7 @@ this software without specific prior written permission.
                                         'num',
                                         types.numAzimuth,
                                         types.numAltitude,
+                                        types.numAnglePreDef,
                                         'str',
                                         'bool',
                                         'flow',
@@ -2319,6 +2389,12 @@ this software without specific prior written permission.
                         min: 0,
                         step: 1
                     });
+                    $('.spinner-windowangle').spinner({
+                        max: 90,
+                        min: 0,
+                        step: 0.1,
+                        numberFormat: 'n'
+                    });
                     $('#node-input-autoTrigger').change( () => {
                         if ($('#node-input-autoTrigger').is(':checked')) {
                             $('#blind-control-autoTriggerTime-edit').show();
@@ -2508,6 +2584,7 @@ this software without specific prior written permission.
                                         'num',
                                         types.numAzimuth,
                                         types.numAltitude,
+                                        types.numAnglePreDef,
                                         'str',
                                         'bool',
                                         'flow',
@@ -2647,6 +2724,7 @@ this software without specific prior written permission.
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -2655,13 +2733,9 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
                             types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
                             types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeRegInput.typedInput('width', '40%');
@@ -2702,6 +2776,7 @@ this software without specific prior written permission.
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -2710,13 +2785,9 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
                             types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
                             types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeMinInput.typedInput('width', '40%');
@@ -2757,6 +2828,7 @@ this software without specific prior written permission.
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -2765,13 +2837,9 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
                             types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
                             types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeMaxInput.typedInput('width', '40%');
@@ -2991,6 +3059,7 @@ this software without specific prior written permission.
                         $dialogTimeRegOperator.show();
                         if (opType === types.TimeEntered.value ||
                            opType === types.TimeSun.value ||
+                           opType === types.TimeSunCustom.value ||
                            opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeReg').show();
                         } else {
@@ -3064,6 +3133,7 @@ this software without specific prior written permission.
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
+                                       opType === types.TimeSunCustom.value ||
                                        opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeMin').show();
                             } else {
@@ -3121,6 +3191,7 @@ this software without specific prior written permission.
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
+                                       opType === types.TimeSunCustom.value ||
                                        opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeMax').show();
                             } else {
@@ -3849,15 +3920,35 @@ this software without specific prior written permission.
             <div class="form-row form-row-sunControlActive block-noindent">
                 <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.windowAzimuth" class="row-full-width" style="word-wrap:break-word;"></span>
             </div>
-            <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
+            <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.windowSetMode">
+                <label for="node-input-windowSetMode"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowSetMode"></span></label>
+                <select id="node-input-windowSetMode" class="row-full-width">
+                    <option value="azimuth" data-i18n="[html]blind-control.label.windowSetModeAzimuthStartEnd"></option>
+                    <option value="orientation" data-i18n="[html]blind-control.label.windowSetModeOrientation"></option>
+                </select>
+            </div>
+            <div class="form-row form-row-sunControlActive block-indent1-noadd windowSetMode-azimuth" data-i18n="[title]blind-control.placeholder.windowAzimuthStart">
                 <label for="node-input-windowAzimuthStart"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthStart"></span></label>
                 <input type="text" class="row-full-width" id="node-input-windowAzimuthStart" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthStart"/>
                 <input type="hidden" id="node-input-windowAzimuthStartType"/>
             </div>
-            <div class="form-row form-row-sunControlActive block-indent1-noadd" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
+            <div class="form-row form-row-sunControlActive block-indent1-noadd windowSetMode-azimuth" data-i18n="[title]blind-control.placeholder.windowAzimuthEnd">
                 <label for="node-input-windowAzimuthEnd"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowAzimuthEnd"></span></label>
                 <input type="text" class="row-full-width" id="node-input-windowAzimuthEnd" data-i18n="[placeholder]blind-control.placeholder.windowAzimuthEnd"/>
                 <input type="hidden" id="node-input-windowAzimuthEndType"/>
+            </div>
+            <div class="form-row form-row-sunControlActive block-indent1-noadd windowSetMode-orientation is-initial-hidden" data-i18n="[title]blind-control.placeholder.windowOrientation">
+                <label for="node-input-windowOrientation"><i class="fa fa-compass fa-spin"></i> <span data-i18n="blind-control.label.windowOrientation"></span></label>
+                <input type="text" class="row-full-width" id="node-input-windowOrientation" data-i18n="[placeholder]blind-control.placeholder.windowOrientation"/>
+                <input type="hidden" id="node-input-windowOrientationType"/>
+            </div>
+            <div class="form-row form-row-sunControlActive block-indent1-noadd windowSetMode-orientation is-initial-hidden" data-i18n="[title]blind-control.placeholder.windowOffsetN">
+                <label for="node-input-windowOffsetN"><i class="fa fa-undo"></i> <span data-i18n="blind-control.label.windowOffsetN"></span></label>
+                <input type="text" class="row-full-width spinner-windowangle" id="node-input-windowOffsetN" data-i18n="[placeholder]blind-control.placeholder.windowOffsetN"/>
+            </div>
+            <div class="form-row form-row-sunControlActive block-indent1-noadd windowSetMode-orientation is-initial-hidden" data-i18n="[title]blind-control.placeholder.windowOffsetP">
+                <label for="node-input-windowOffsetP"><i class="fa fa-repeat"></i> <span data-i18n="blind-control.label.windowOffsetP"></span></label>
+                <input type="text" class="row-full-width spinner-windowangle" id="node-input-windowOffsetP" data-i18n="[placeholder]blind-control.placeholder.windowOffsetP"/>
             </div>
             <div class="form-row form-row-sunControlRestriction block-noindent">
                 <span data-i18n="[html]node-red-contrib-sun-position/position-config:ruleCtrl.text.windowPos" class="row-full-width" style="word-wrap:break-word;"></span>

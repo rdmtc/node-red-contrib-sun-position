@@ -62,10 +62,15 @@
  * @property {string} topType               - type of the top of the window
  * @property {*} bottom                     - the bottom of the window
  * @property {string} bottomType            - type of the bottom of the window
- * @property {*} azimuthStart               - the orientation angle to the geographical north
- * @property {string} azimuthStartType      - type of the orientation angle to the geographical north
- * @property {*} azimuthEnd                 - the offset for the angle clockwise offset
- * @property {string} azimuthEndType        - type of the offset for the angle clockwise offset
+ * @property {('setMode'|'orientation')} setMode   - mode of the start/end angles
+ * @property {*} azimuthStart               - the start position angle to the geographical north
+ * @property {string} azimuthStartType      - type of the start position angle to the geographical north
+ * @property {*} azimuthEnd                 - the end position angle to the geographical north
+ * @property {string} azimuthEndType        - type of the end position angle to the geographical north
+ * @property {*} windowOrientation          - the orientation angle to the geographical north
+ * @property {string} windowOrientationType - type of the  the orientation angle to the geographical north
+ * @property {number} windowOffsetP         - an offset for the angle clockwise offset
+ * @property {number} windowOffsetN         - an offset for the angle anti-clockwise offset
  */
 
 /**
@@ -199,8 +204,19 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
     /**
      * check if angle is between start and end
+     * @param {number} angle    - angle in decimal degree
+     * @param {number} start    - angle in decimal degree or rad, based on angleType
+     * @param {number} end      - angle in decimal degree
+     * @param {('deg'|'rad')} angleType      - angle type
+     * @return {Boolean}
      */
-    function angleBetween_(angle, start, end) {
+    function angleBetween_(angle, start, end, angleType) {
+        if (angleType === 'rad') {
+            start = hlp.toDec(start);
+            end = hlp.toDec(end);
+        }
+        start = hlp.angleNorm(start);
+        end = hlp.angleNorm(end);
         if(start<end) return start<=angle && angle<=end;
         return               start<=angle || angle<=end;
     }
@@ -226,7 +242,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         expr: el.valueExpr,
                         callback: (result, _obj) => {
                             return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
-                        }
+                        },
+                        noError:false,
+                        now:oNow.now
                     },
                     el.operator,
                     {
@@ -234,8 +252,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         type: el.thresholdType,
                         callback: (result, _obj) => {
                             return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
-                        }
-                    }, false, oNow.now)));
+                        },
+                        noError:false,
+                        now:oNow.now
+                    })));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.log(util.inspect(err));
@@ -278,7 +298,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
                 throw new Error(`unknown value "${value}" of type "${type}"` );
             }
-            const res = node.positionConfig.getFloatProp(node, msg, type, value, def);
+            const res = node.positionConfig.getFloatProp(node, msg, { type, value, def });
             if (node.levelReverse) {
                 return getInversePos_(node, res);
             }
@@ -415,19 +435,51 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         // sun control is active
         const sunPosition = node.positionConfig.getSunCalc(oNow.now, false, false);
         // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
+        let /** @type {number} */ azimuthStart, /** @type {number} */ azimuthEnd;
+        if (node.windowSettings.setMode === 'orientation') {
+            const orientationValue = node.positionConfig.getFloatProp(node, msg, {
+                type: node.windowSettings.windowOrientationType,
+                value: node.windowSettings.windowOrientation,
+                def: NaN,
+                callback: (result, _obj) => {
+                    if (result !== null && typeof result !== 'undefined') {
+                        tempData[_obj.type + '.' + _obj.value] = result;
+                    }
+                },
+                noError: true,
+                now: oNow.now
+            });
+            azimuthStart = orientationValue - node.windowSettings.windowOffsetN;
+            azimuthEnd = orientationValue + node.windowSettings.windowOffsetP;
+        } else {
+            azimuthStart = node.positionConfig.getFloatProp(node, msg, {
+                type: node.windowSettings.azimuthStartType,
+                value: node.windowSettings.azimuthStart,
+                def: NaN,
+                callback: (result, _obj) => {
+                    if (result !== null && typeof result !== 'undefined') {
+                        tempData[_obj.type + '.' + _obj.value] = result;
+                    }
+                },
+                noError: true,
+                now: oNow.now
+            });
 
-        const azimuthStart = node.positionConfig.getFloatProp(node, msg, node.windowSettings.azimuthStartType, node.windowSettings.azimuthStart, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
-        const azimuthEnd = node.positionConfig.getFloatProp(node, msg, node.windowSettings.azimuthEndType, node.windowSettings.azimuthEnd, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
+            azimuthEnd = node.positionConfig.getFloatProp(node, msg, {
+                type: node.windowSettings.azimuthEndType,
+                value: node.windowSettings.azimuthEnd,
+                def: NaN,
+                callback: (result, _obj) => {
+                    if (result !== null && typeof result !== 'undefined') {
+                        tempData[_obj.type + '.' + _obj.value] = result;
+                    }
+                },
+                noError: true,
+                now: oNow.now
+            });
+        }
+        sunPosition.InWindow = angleBetween_(sunPosition.azimuthDegrees, azimuthStart, azimuthEnd, node.positionConfig.angleType);
 
-        sunPosition.InWindow = angleBetween_(sunPosition.azimuthDegrees, azimuthStart, azimuthEnd);
         // node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${azimuthStart} AzimuthEnd=${azimuthEnd}`);
         if (node.autoTrigger ) {
             if ((sunPosition.altitudeDegrees <= 0)) {
@@ -516,21 +568,42 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             return sunPosition;
         }
 
-        const floorLength = node.positionConfig.getFloatProp(node, msg, node.sunData.floorLengthType, node.sunData.floorLength, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
-        const wTop = node.positionConfig.getFloatProp(node, msg, node.windowSettings.topType, node.windowSettings.top, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
-        const wBottom = node.positionConfig.getFloatProp(node, msg, node.windowSettings.bottomType, node.windowSettings.bottom, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
+        const floorLength = node.positionConfig.getFloatProp(node, msg, {
+            type: node.sunData.floorLengthType,
+            value: node.sunData.floorLength,
+            def: NaN,
+            callback: (result, _obj) => {
+                if (result !== null && typeof result !== 'undefined') {
+                    tempData[_obj.type + '.' + _obj.value] = result;
+                }
+            },
+            noError: true,
+            now: oNow.now
+        });
+        const wTop = node.positionConfig.getFloatProp(node, msg, {
+            type: node.windowSettings.topType,
+            value: node.windowSettings.top,
+            def: NaN,
+            callback: (result, _obj) => {
+                if (result !== null && typeof result !== 'undefined') {
+                    tempData[_obj.type + '.' + _obj.value] = result;
+                }
+            },
+            noError: true,
+            now: oNow.now
+        });
+        const wBottom = node.positionConfig.getFloatProp(node, msg, {
+            type: node.windowSettings.bottomType,
+            value: node.windowSettings.bottom,
+            def: NaN,
+            callback: (result, _obj) => {
+                if (result !== null && typeof result !== 'undefined') {
+                    tempData[_obj.type + '.' + _obj.value] = result;
+                }
+            },
+            noError: true,
+            now: oNow.now
+        });
 
         const height = Math.tan(sunPosition.altitudeRadians) * floorLength;
         // node.debug(`height=${height} - altitude=${sunPosition.altitudeRadians} - floorLength=${floorLength}`);
@@ -867,19 +940,22 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      */
     function sunBlindControlNode(config) {
         RED.nodes.createNode(this, config);
-        this.positionConfig = RED.nodes.getNode(config.positionConfig);
         /** Copy 'this' object in case we need it in context of callbacks of other functions.
          * @type {IBlindControlNode}
          */
         // @ts-ignore
         const node = this;
-        if (!this.positionConfig) {
+
+        /** @type {IPositionConfigNode} */
+        node.positionConfig = RED.nodes.getNode(config.positionConfig);
+
+        if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
             return;
         }
 
-        if (this.positionConfig.checkNode(
+        if (node.positionConfig.checkNode(
             error => {
                 node.error(error);
                 node.status({fill: 'red', shape: 'dot', text: error });
@@ -935,7 +1011,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         };
         // temporary node Data
         node.levelReverse = false;
-        node.contextStore = config.contextStore || this.positionConfig.contextStore;
+        node.contextStore = config.contextStore || node.positionConfig.contextStore;
         // Retrieve the config node
         node.sunData = {
             /** Defines if the sun control is active or not */
@@ -958,7 +1034,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         if (node.sunData.mode === 2) { node.sunData.mode = cSummerMode; } // backwards compatibility
         node.sunData.modeMax = node.sunData.mode;
 
-        /** type {IBlindWindowSettings} */
+        /** @type {IBlindWindowSettings} */
         node.windowSettings = {
             /** The top of the window */
             top: config.windowTop,
@@ -966,13 +1042,23 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             /** The bottom of the window */
             bottom: config.windowBottom,
             bottomType: config.windowBottomType || 'num',
+
+            setMode: config.windowSetMode || 'startEnd',
             /** the orientation angle to the geographical north */
             azimuthStart: config.windowAzimuthStart,
             azimuthStartType: config.windowAzimuthStartType || 'num',
             /** an offset for the angle clockwise offset */
             azimuthEnd: config.windowAzimuthEnd,
-            azimuthEndType: config.windowAzimuthEndType || 'num'
+            azimuthEndType: config.windowAzimuthEndType || 'num',
+            /** the orientation angle to the geographical north */
+            windowOrientation: config.windowOrientation,
+            windowOrientationType: config.windowOrientationType || 'num',
+            /** an offset for the angle clockwise offset */
+            windowOffsetP: config.windowOffsetP,
+            /** an offset for the angle anti-clockwise offset */
+            windowOffsetN: config.windowOffsetN
         };
+        // startEnd
 
         /** @type {IBlindNodeData} */
         node.nodeData = {
@@ -1174,7 +1260,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
             try {
                 node.debug(`--------- blind-control - input msg.topic=${msg.topic} msg.payload=${msg.payload} msg.ts=${msg.ts}`);
-                if (!this.positionConfig) {
+                if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
                     node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
@@ -1497,7 +1583,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {
-                                this.error('error on getting result: "' + resultObj.error + '"');
+                                node.error('error on getting result: "' + resultObj.error + '"');
                             } else {
                                 node.positionConfig.setMessageProp(this, msgOut, prop.outType, prop.outValue, resultObj);
                             }

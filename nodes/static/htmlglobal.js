@@ -376,7 +376,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             // @ts-ignore
             // eslint-disable-next-line no-useless-escape
-            validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
         },
         TimeSun: {
             value: 'pdsTime',
@@ -456,6 +456,14 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeNow.svg',
             hasValue: false
         },
+        TimeSunCustom: {
+            value: 'pdsTimeCustom',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.timesuncustom'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunClockCustom.svg',
+            hasValue: true,
+            // @ts-ignore
+            validate: RED.validators.regex(/^[0-9a-zA-Z_]+$/)()
+        },
         TimeMoon: {
             value: 'pdmTime',
             label: node._('node-red-contrib-sun-position/position-config:common.types.timemoon','moon time'),
@@ -491,16 +499,13 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
                 return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n >= -360) && (n <= 720));
             }
         },
-        numAzimuthRad: {
-            value: 'numAzimuthRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.numAzimuthRad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthRad.svg',
+        numAnglePreDef: {
+            value: 'numAnglePreDef',
+            label: node._('node-red-contrib-sun-position/position-config:common.types.numAnglePreDef'),
+            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthCfg.svg',
             hasValue: true,
-            validate(v) {
-                const n = parseFloat(v);
-                // @ts-ignore
-                return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n > -6.3) && (n < 12.6));
-            }
+            // @ts-ignore
+            validate: RED.validators.regex(/^[0-9a-zA-Z_]+$/)()
         },
         numAltitude: {
             value: 'numAltitude',
@@ -513,27 +518,10 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
                 return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n >= -90) && (n <= 90));
             }
         },
-        numAltitudeRad: {
-            value: 'numAltitudeRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.numAltitudeRad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevationRad.svg',
-            hasValue: true,
-            validate(v) {
-                const n = parseFloat(v);
-                // @ts-ignore
-                return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n > -1.56) && (n < 1.56));
-            }
-        },
         SunAzimuth: {
             value: 'pdsCalcAzimuth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuth','Azimuth'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuth.svg',
-            hasValue: false
-        },
-        SunAzimuthRad: {
-            value: 'pdsCalcAzimuthRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunAzimuthRad','Azimuth'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthRad.svg',
             hasValue: false
         },
         SunElevation: {
@@ -542,24 +530,10 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevation.svg',
             hasValue: false
         },
-        SunElevationRad: {
-            value: 'pdsCalcElevationRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.sunElevationRad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunElevationRad.svg',
-            hasValue: false
-        },
         SunTimeByAzimuth: {
             value: 'pdsTimeByAzimuth',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuth','Time by Azimuth'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuth.svg',
-            hasValue: true,
-            // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
-        },
-        SunTimeByAzimuthRad: {
-            value: 'pdsTimeByAzimuthRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByAzimuthRad','Time by Azimuth Rad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuthRad.svg',
             hasValue: true,
             // @ts-ignore
             validate: /** @type {runtimeRED} */ RED.validators.number()
@@ -572,26 +546,10 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             // @ts-ignore
             validate: /** @type {runtimeRED} */ RED.validators.number()
         },
-        SunTimeByElevationObjRad: {
-            value: 'pdsTimeByElevationRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationObjRad','next Time by Elevation Rad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
-            hasValue: true,
-            // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
-        },
         SunTimeByElevationNext: {
             value: 'pdsTimeByElevationNext',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNext','next Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
-            hasValue: true,
-            // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
-        },
-        SunTimeByElevationNextRad: {
-            value: 'pdsTimeByElevationNextRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationNextRad','next Time by Elevation Rad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRad.svg',
             hasValue: true,
             // @ts-ignore
             validate: /** @type {runtimeRED} */ RED.validators.number()
@@ -604,26 +562,10 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             // @ts-ignore
             validate: /** @type {runtimeRED} */ RED.validators.number()
         },
-        SunTimeByElevationRiseRad: {
-            value: 'pdsTimeByElevationRiseRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationRiseRad','next rise Time by Elevation Rad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRiseRad.svg',
-            hasValue: true,
-            // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
-        },
         SunTimeByElevationSet: {
             value: 'pdsTimeByElevationSet',
             label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSet','next set Time by Elevation'),
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSet.svg',
-            hasValue: true,
-            // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
-        },
-        SunTimeByElevationSetRad: {
-            value: 'pdsTimeByElevationSetRad',
-            label: node._('node-red-contrib-sun-position/position-config:common.types.SunTimeByElevationSetRad','next set Time by Elevation Rad'),
-            icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSetRad.svg',
             hasValue: true,
             // @ts-ignore
             validate: /** @type {runtimeRED} */ RED.validators.number()
