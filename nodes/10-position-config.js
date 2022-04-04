@@ -66,6 +66,8 @@
  * @property {FktFormatDate} toDateTimeString Formate a Date Object to a Date and Time String
  * @property {FktFormatDate} toTimeString Formate a Date Object to a Time String
  * @property {FktFormatDate} toDateString Formate a Date Object to a Date String
+ * @property {FktGetCustomAngles} getCustomAngles get list of custom angles
+ * @property {FktGetSunTimesList} getSunTimesList get list of all suntimes including custom ones
  * @property {FktGetFloatProp} getFloatProp get a float value from a type input in Node-Red
  * @property {FktFormatOutDate} formatOutDate get an formated date prepared for output
  * @property {FktGetOutDataProp} getOutDataProp get the time Data prepared for output
@@ -291,6 +293,21 @@
  */
 
 /**
+ * get list of custom angles
+ * @typedef {function} FktGetCustomAngles
+ * @param {string} filter filter to the angle names
+ * @returns {Array.<{value: string, name: string, angle: number, [i:number]}>}
+ */
+
+/**
+ * get list of all suntimes including custom ones
+ * @typedef {function} FktGetSunTimesList
+ * @param {string} filter filter to the angle names
+ * @param {boolean} [onlyCustom=false] if true only custom angles will be given
+ * @returns {Array.<{value: string, name: string, angle: number, [i:number]}>}
+ */
+
+/**
  * get a float value from a type input in Node-Red
  * @typedef {function} FktGetFloatProp
  * @param {runtimeNode} _srcNode - source node information
@@ -482,70 +499,36 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     });
                 };
 
-                /** @type {Array.<{name: String, angleDec: number, angleRad: number}>} - custom angle definition */
+                /** @type {Array.<{name: String, angle: number}>} - custom angle definition */
                 this.customAngles = [];
                 if (config.predefAngles && (config.predefAngles.length > 0)) {
-                    const EXP = /^[0-9a-zA-Z_]+$/;
-                    let valid = true;
+                    const EXP = /^[0-9a-zA-Z_\s]+$/;
                     const names = [];
 
                     config.predefAngles.forEach((/** @type {{ angle: number; name: String;rad: Boolean }} */ time) => {
                         if (!EXP.test(time.name) ||
                             isNaN(time.angle)) {
-                            valid = false;
+                            node.error(RED._('position-config.errors.custom-angles', time));
                         } else if (names.includes(time.name)) {
-                            valid = false;
+                            node.error(RED._('position-config.errors.custom-angles-duplicate', time));
                         } else {
                             names.push(time.name);
                             this.customAngles.push({
                                 name: time.name,
-                                angleDec: (time.rad ? hlp.toDec(time.angle) : time.angle),
-                                angleRad: (time.rad ? time.angle : hlp.toRad(time.angle))
+                                angle: time.angle
                             });
                         }
                     });
-                    if (!valid) {
-                        node.error(RED._('position-config.errors.custom-angles'));
-                    }
                 }
 
-                /** @type {FktValidateCustomTimes} - function for validating custom times */
-                this.validateCustomTimes = data => {
-                    if (data && (data.length > 0)) {
-                        const EXP = /^[0-9a-zA-Z_]+$/;
-                        let valid = true;
-                        const names = [];
-                        // check for invalid names
-                        for (let i=0; i<data.length; ++i) {
-                            if (!EXP.test(data[i].riseName) ||
-                                !EXP.test(data[i].setName) ||
-                                isNaN(data[i].angle)) {
-                                valid = false;
-                                break;
-                            }
-
-                            names.push(data[i].riseName);
-                            names.push(data[i].setName);
-                            if (this.hasDuplicates(names)) {
-                                valid = false;
-                                break;
-                            }
+                const times = config.sunPositions;
+                if (times) {
+                    times.forEach((/** @type {{ angle: number; riseName: String; setName: String }} */ time, /** @type {number} */ index) => {
+                        if (!sunCalc.addTime(time.angle, time.riseName, time.setName, index+100, index+200, this.angleType === 'deg')) {
+                            node.error(RED._('position-config.errors.invalid-custom-suntime', time));
                         }
-                        return valid;
-                    }
-                    return true;
-                };
-
-                if (this.validateCustomTimes(config.sunPositions)) {
-                    const times = config.sunPositions;
-                    if (times) {
-                        times.forEach((/** @type {{ angle: number; riseName: String; setName: String; rad: Boolean }} */ time, /** @type {number} */ index) => {
-                            const angle = (time.rad ? time.angle : hlp.toRad(time.angle));
-                            sunCalc.addTime(angle, '__cust_' + time.riseName, '__cust_' + time.setName, index+100, index+200);
-                        });
-                    }
+                    });
                 }
-                delete this.validateCustomTimes;
 
                 /** @type {INodeCacheData} - cache object */
                 this.cache = {
@@ -1101,6 +1084,99 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             return hlp.getFormattedDateOut(dt, this.stateDateFormat, (this.tzOffset === 0), this.tzOffset);
         }
+
+        /*******************************************************************************************************/
+        /**
+         * get list of custom angles
+         * @param {string} filter filter to the angle names
+         * @returns {Array.<{value: string, name: string, angle: number, [i:number]}>}
+         * @public
+         */
+        getCustomAngles(filter) {
+            const matches = [];
+            if (filter) {
+                filter = filter.toLowerCase();
+                this.customAngles.forEach(v => {
+                    const i = v.name.toLowerCase().indexOf(filter.toLowerCase());
+                    if (i > -1) {
+                        matches.push({
+                            value: v.name,
+                            label: v.name,
+                            angle: v.angle,
+                            i
+                        });
+                    }
+                });
+                matches.sort((a,b) => a.i-b.i);
+            } else {
+                this.customAngles.forEach(v => {
+                    matches.push({
+                        value: v.name,
+                        label: v.name,
+                        angle: v.angle
+                    });
+                });
+                matches.sort((a,b) => ((a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0)));
+            }
+            return matches;
+        }
+
+        /**
+         * get list of all suntimes including custom ones
+         * @param {string} filter filter to the angle names
+         * @returns {Array.<{value: string, name: string, angle: number, [i:number]}>}
+         * @public
+         */
+        getSunTimesList(filter) {
+            const matches = [];
+            if (filter) {
+                filter = filter.toLowerCase();
+                sunCalc.times.forEach(v => {
+                    const r = v.riseName.toLowerCase().indexOf(filter.toLowerCase());
+                    if (r > -1) {
+                        matches.push({
+                            value: v.riseName,
+                            label: v.riseName,
+                            angle: v.angle,
+                            pos: v.risePos,
+                            type: 'rise',
+                            i: r
+                        });
+                    }
+                    const s = v.setName.toLowerCase().indexOf(filter.toLowerCase());
+                    if (s > -1) {
+                        matches.push({
+                            value: v.setName,
+                            label: v.setName,
+                            angle: v.angle,
+                            pos: v.setPos,
+                            type: 'set',
+                            i: s
+                        });
+                    }
+                });
+                matches.sort((a,b) => a.i-b.i);
+            } else {
+                sunCalc.times.forEach(v => {
+                    matches.push({
+                        value: v.riseName,
+                        label: v.riseName,
+                        angle: v.angle,
+                        pos: v.risePos
+                    });
+                    matches.push({
+                        value: v.setName,
+                        label: v.setName,
+                        angle: v.angle,
+                        pos: v.setPos,
+                        type: 'set'
+                    });
+                });
+                matches.sort((a,b) => ((a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0)));
+            }
+            this.debug(`getSunTimesList filter=${filter} matches=${util.inspect(matches, { colors: true, compact: 10, breakLength: Infinity })}`);
+            return matches;
+        }
         /*******************************************************************************************************/
         /**
          * @typedef {Object} ICacheData
@@ -1238,9 +1314,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     throw new Error(RED._('errors.notEvaluableCustomAngle', data));
                 }
                 if (this.angleType === 'rad') {
-                    result = hlp.angleNormRad(Number(val.angleRad));
+                    result = hlp.angleNormRad(Number(val.angle));
                 } else {
-                    result = hlp.angleNorm(Number(val.angleDec));
+                    result = hlp.angleNorm(Number(val.angle));
                 }
             } else if (data.type === 'none') {
                 return data.def || NaN;
@@ -1693,9 +1769,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     throw new Error(RED._('errors.notEvaluableCustomAngle', data));
                 }
                 if (this.angleType === 'rad') {
-                    result = hlp.angleNormRad(Number(val.angleRad));
+                    result = hlp.angleNormRad(Number(val.angle));
                 } else {
-                    result = hlp.angleNorm(Number(val.angleDec));
+                    result = hlp.angleNorm(Number(val.angle));
                 }
             } else if (data.type === 'str') {
                 result = ''+data.value;
@@ -2278,6 +2354,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
     RED.httpAdmin.get('/sun-position/data', RED.auth.needsPermission('sun-position.read'), (req, res) => {
         if (req.query.config && req.query.config !== '_ADD_') {
+            /** @type {IPositionConfigNode} */
             const posConfig = RED.nodes.getNode(req.query.config);
             if (!posConfig) {
                 res.status(500).send(JSON.stringify({
@@ -2294,7 +2371,17 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             let obj = { value:'none', useful: false};
             try {
-                if (req.query.kind === 'getTimeData') {
+                if (req.query.kind === 'autoComplete') {
+                    if (req.query.type === 'numAnglePreDef') {
+                        obj = posConfig.getCustomAngles(req.query.value);
+                        res.status(200).send(JSON.stringify(obj)); // ...getOwnProper... does not work for arrays!
+                    } else if (req.query.type === 'pdsTimeCustom') {
+                        obj = posConfig.getSunTimesList(req.query.value);
+                        res.status(200).send(JSON.stringify(obj)); // ...getOwnProper... does not work for arrays!
+                    } else {
+                        res.status(400).send(JSON.stringify({value: '', error: 'no valid configuration!!'}));
+                    }
+                } else if (req.query.kind === 'getTimeData') {
                     obj = posConfig.getTimeProp(scrNode, undefined, req.query); // req.query.type, req.query.value, req.query.offsetType, req.query.offset, req.query.multiplier, req.query.next, req.query.days);
                     obj.useful = true;
                     res.status(200).send(JSON.stringify(obj, Object.getOwnPropertyNames(obj)));

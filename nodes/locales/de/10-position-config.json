@@ -521,7 +521,9 @@
             "latitude-missing": "Koordinate für den Breitengrad fehlt oder ist falsch!",
             "longitude-missing": "Koordinate für den Längengrad fehlt oder ist falsch!",
             "coordinates-missing": "Koordinaten für den Breitengrad und Längengrad ist falsch!",
-            "invalid-custom-suntime": "Ungültige benutzerdefinierte Sonnenzeit __name__ angegeben!"
+            "invalid-custom-suntime": "Ungültiger benutzerdefinierte Sonnenzeit __riseName__ oder __setName__ angegeben! Vielleicht ein Duplikat eines bestehenden Namens.",
+            "custom-angles":"Ungültiger benutzerdefinierter Winkel __name__! Der Name darf keine Sonderzeichen enthalten!",
+            "custom-angles-duplicate":"Ungültiger benutzerdefinierter Winkel __name__! Name existiert bereits, Duplikate sind nicht erlaubt!"
         }
     }
 }

@@ -206,7 +206,7 @@ this software without specific prior written permission.
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
                     /* global getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox getBackendData bdDateToTime getCheckboxesStr setTInputValue */
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     const selFields = getSelectFields();
                     // #region operand1
                     setupTInput(node, {

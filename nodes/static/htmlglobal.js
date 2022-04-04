@@ -194,9 +194,10 @@ function checkDeprecatedValues(type, value) {
 /**
  * get types for typeInputs
  * @param {*} node - node representation for access to i18N function (node._())
+ * @param {function} getConfig - function to get configuration
  * @returns {Object} object of types
  */
-function getTypes(node) { // eslint-disable-line no-unused-vars
+function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
     return {
         Unlimited: {
             value: 'none',
@@ -358,7 +359,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             // @ts-ignore
             // eslint-disable-next-line no-useless-escape
-            validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)
         },
         randmNumCachedDay: {
             value: 'randmNumCachedDay',
@@ -367,7 +368,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             // @ts-ignore
             // eslint-disable-next-line no-useless-escape
-            validate: /** @type {runtimeRED} */ RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)
         },
         randmNumCachedWeek: {
             value: 'randmNumCachedWeek',
@@ -376,7 +377,7 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             hasValue: true,
             // @ts-ignore
             // eslint-disable-next-line no-useless-escape
-            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)()
+            validate: RED.validators.regex(/^(?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?([\/|](?:[1-9]|-0\.|0\.|-)\d*(?:\.\d+)?)?$/)
         },
         TimeSun: {
             value: 'pdsTime',
@@ -462,7 +463,21 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunClockCustom.svg',
             hasValue: true,
             // @ts-ignore
-            validate: RED.validators.regex(/^[0-9a-zA-Z_]+$/)()
+            validate: RED.validators.regex(/^(?![0-9])[a-zA-Z0-9$_]+$/),
+            autoComplete(val, done) {
+                if (getConfig) {
+                    // @ts-ignore
+                    const url = 'sun-position/data?' + jQuery.param({
+                        nodeId:         node.id,
+                        kind:           'autoComplete',
+                        config:         getConfig(),
+                        type:           'pdsTimeCustom',
+                        value:          val
+                    });
+                    // @ts-ignore
+                    $.getJSON(url, done);
+                }
+            }
         },
         TimeMoon: {
             value: 'pdmTime',
@@ -505,7 +520,21 @@ function getTypes(node) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunAzimuthCfg.svg',
             hasValue: true,
             // @ts-ignore
-            validate: RED.validators.regex(/^[0-9a-zA-Z_]+$/)()
+            validate: RED.validators.regex(/^[0-9a-zA-Z_\s]+$/),
+            autoComplete(val, done) {
+                if (getConfig) {
+                    // @ts-ignore
+                    const url = 'sun-position/data?' + jQuery.param({
+                        nodeId:         node.id,
+                        kind:           'autoComplete',
+                        config:         getConfig(),
+                        type:           'numAnglePreDef',
+                        value:          val
+                    });
+                    // @ts-ignore
+                    $.getJSON(url, done);
+                }
+            }
         },
         numAltitude: {
             value: 'numAltitude',
@@ -935,6 +964,10 @@ function setupTInput(node, data) { // eslint-disable-line no-unused-vars
     } else {
         type = node[data.typeProp];
         $typeField.val(type);
+    }
+    if (type.endsWith('Rad')) {
+        // deprecated Radiant types
+        type = type.replace('Rad','');
     }
     // @ts-ignore
     if (Array.isArray(data.types) && !data.types.find(el => (el === type || el.value === type))) {

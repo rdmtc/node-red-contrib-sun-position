@@ -23,6 +23,17 @@ this software without specific prior written permission.
 
 <script type="text/javascript">
     (function() {
+        const preassignedSunPositions = ['goldenHourDawnEnd', 'goldenHourDuskStart',
+            'sunriseEnd',  'sunsetStart',
+            'sunriseStart',  'sunsetEnd',
+            'goldenHourDawnStart',  'goldenHourDuskEnd',
+            'blueHourDawnEnd',  'blueHourDuskStart',
+            'civilDawn', 'civilDusk',
+            'blueHourDawnStart',  'blueHourDuskEnd',
+            'nauticalDawn',  'nauticalDusk',
+            'amateurDawn',  'amateurDusk',
+            'astronomicalDawn', 'astronomicalDusk'];
+
         RED.nodes.registerType('position-config', {
             category: 'config',
             credentials: {
@@ -89,9 +100,9 @@ this software without specific prior written permission.
                     value: [],
                     validate(v) {
                         if (v && (v.length > 0)) {
-                            const EXP = /^[0-9a-zA-Z_]+$/;
+                            const EXP = /^(?![0-9])[a-zA-Z0-9$_]+$/;
+                            const names = preassignedSunPositions.slice();
                             let valid = true;
-                            const names = [];
 
                             // check for invalid names
                             for (let i=0; i<v.length; ++i) {
@@ -125,7 +136,7 @@ this software without specific prior written permission.
                     value: [],
                     validate(v) {
                         if (v && (v.length > 0)) {
-                            const EXP = /^[0-9a-zA-Z_]+$/;
+                            const EXP = /^[0-9a-zA-Z_\s]+$/;
                             let valid = true;
                             const names = [];
 
@@ -162,7 +173,8 @@ this software without specific prior written permission.
                 const node = this;
 
                 const validateCoords = function(_event, _ui) {
-                    if (/^(\+|-)?\d+(\.\d+)?$/.test($(this).spinner('value'))) {
+                    const val = $(this).spinner('value');
+                    if (/^(\+|-)?\d+(\.\d+)?$/.test(val)) {
                         const value = parseFloat($(this).spinner('value'));
                         const min = $(this).spinner('option', 'min');
                         const max = $(this).spinner('option', 'max');
@@ -175,7 +187,6 @@ this software without specific prior written permission.
                     } else {
                         $(this).spinner('value', 0);
                     }
-
                     coordChanged();
                 };
 
@@ -287,47 +298,75 @@ this software without specific prior written permission.
                 $lat.change();
                 $lon.change();
 
-                const sunAngleInput = {
-                    min: -90,
-                    max: 90,
-                    step: 1,
-                    numberFormat: 'n',
-                    change: validateCoords
-                };
-
-                const predefAngles = $('#node-input-predefAngles').css('min-width', '500px').css('min-height', '150px')
+                const predefAngleList = $('#node-input-predefAngleList').css('min-width', '500px').css('min-height', '150px')
                     .editableList({
                         removable: true,
                         sortable: true,
                         addItem(item, index, data) {
                             const fragment = document.createDocumentFragment();
 
-                            const angleLabel = $('<label/>', {class: 'spinner-Small', style: 'width: auto; margin-left: 5px; margin-bottom: 0px;'})
+                            const $angleLabel = $('<label/>', {class: 'spinner-Small', style: 'width: auto; margin-left: 5px; margin-bottom: 0px;'})
                             // .html("<i class='fa fa-sun-o' aria-hidden='true'></i> " + node._("position-config.label.angle") + " ")
                                 .text(node._('position-config.label.angle') + ' ')
                                 .appendTo(fragment);
-                            const angle = $('<input/>', {class: 'node-input-angle', style: 'width: 60px; margin-left: 4px;'})
-                                .appendTo(angleLabel)
-                                .spinner(sunAngleInput).width(60);
-                            const nameLabel = $('<label/>', {title: node._('position-config.label.name'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
+                            const $angle = $('<input/>', {class: 'node-input-angle', style: 'width: 60px; margin-left: 4px;'})
+                                .appendTo($angleLabel)
+                                .spinner({
+                                    step: 0.1,
+                                    min: -360,
+                                    max: 720,
+                                    numberFormat: 'n',
+                                    change(_event, _ui) {
+                                        const angleValue = $(this).spinner('value');
+                                        // Show a red border around the fileName field, when the same file name value is used in multiple input fields
+                                        if (isNaN(angleValue) || angleValue === null || typeof angleValue !== 'number') {
+                                            $(this).css('border', '1px solid rgb(214, 97, 95)');
+                                            $(this).addClass('input-error');
+                                        } else {
+                                            if (angleValue < -360) {
+                                                $(this).spinner('value', -360);
+                                            } else if (angleValue > 720) {
+                                                $(this).spinner('value', 720);
+                                            }
+                                            $(this).css('border', '');
+                                            $(this).removeClass('input-error');
+                                        }
+                                    }
+                                }).width(60);
+                            const $nameLabel = $('<label/>', {title: node._('position-config.label.name'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
                                 .html("<i class='fa fa-tag' aria-hidden='true'></i>")
                                 .appendTo(fragment);
-                            const name = $('<input/>', {type: 'text', class: 'node-input-name', placeholder: node._('position-config.label.name'), style: 'width: 110px; margin-left: 4px;'})
-                                .appendTo(nameLabel);
-                            const angleRadLabel = $('<label/>', {title: node._('position-config.label.angleRad'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
-                                .html("<i class='fa fa-angle-right' aria-hidden='true'></i>㎭")
-                                .appendTo(fragment);
-                            const angleRad = $('<input/>', {type: 'checkbox', class: 'node-input-angleRad', placeholder: node._('position-config.label.angleRad'), style: 'width: 10px; margin-left: 4px; margin-top:auto;'})
-                                .appendTo(angleRadLabel);
+                            const $name = $('<input/>', {type: 'text', class: 'node-input-name', placeholder: node._('position-config.label.name'), style: 'width: 110px; margin-left: 4px;'})
+                                .appendTo($nameLabel);
 
                             if (!('angle' in data)) {
-                                data = {angle: 0, name: '', rad: false};
+                                data = {angle: 0, name: ''};
                             }
+                            $name.prop('required',true);
+                            $angle.prop('required',true);
+                            $angle.spinner('value', data.angle);
+                            $name.val(data.name);
 
-                            angle.spinner('value', data.angle);
-                            name.val(data.name);
-                            angleRad.prop('checked', data.rad);
+                            $name.on('change keyup paste', function() {
+                                const angleName = this.value;
 
+                                // Find all fileName input fields with the same file name value
+                                const angleNameFields = predefAngleList.find('.node-input-name').filter(function() {
+                                    return this.value === angleName;
+                                });
+
+                                // Show a red border around the fileName field, when the same file name value is used in multiple input fields
+                                if (angleNameFields.length > 1 || !(/^[0-9a-zA-Z_\s]+$/.test(angleName))) {
+                                    $(this).css('border', '1px solid rgb(214, 97, 95)');
+                                    $(this).addClass('input-error');
+                                } else {
+                                    $(this).css('border', '');
+                                    $(this).removeClass('input-error');
+                                }
+                            });
+
+                            $name.change();
+                            $angle.change();
                             item[0].appendChild(fragment);
                         }
                     });
@@ -336,7 +375,7 @@ this software without specific prior written permission.
                 }
 
                 node.predefAngles.forEach(data => {
-                    predefAngles.editableList('addItem', data);
+                    predefAngleList.editableList('addItem', data);
                 });
 
                 const sunPositionList = $('#node-input-sunPositionList').css('min-width', '500px').css('min-height', '150px').editableList(
@@ -346,38 +385,84 @@ this software without specific prior written permission.
                         addItem(item, index, data) {
                             const fragment = document.createDocumentFragment();
 
-                            const angleLabel = $('<label/>', {class: 'spinner-Small', style: 'width: auto; margin-left: 5px; margin-bottom: 0px;'})
+                            const $angleLabel = $('<label/>', {class: 'spinner-Small', style: 'width: auto; margin-left: 5px; margin-bottom: 0px;'})
                             // .html("<i class='fa fa-sun-o' aria-hidden='true'></i> " + node._("position-config.label.angle") + " ")
                                 .text(node._('position-config.label.angle') + ' ')
                                 .appendTo(fragment);
-                            const angle = $('<input/>', {class: 'node-input-angle', style: 'width: 60px; margin-left: 4px;'})
-                                .appendTo(angleLabel)
-                                .spinner(sunAngleInput).width(60);
-                            const riseLabel = $('<label/>', {title: node._('position-config.label.riseName'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
+                            const $angle = $('<input/>', {class: 'node-input-angle', style: 'width: 60px; margin-left: 4px;'})
+                                .appendTo($angleLabel)
+                                .spinner({
+                                    step: 0.1,
+                                    min: -360,
+                                    max: 720,
+                                    numberFormat: 'n',
+                                    change(_event, _ui) {
+                                        const angleValue = $(this).spinner('value');
+                                        // Show a red border around the fileName field, when the same file name value is used in multiple input fields
+                                        if (isNaN(angleValue) || angleValue === null || typeof angleValue !== 'number') {
+                                            $(this).css('border', '1px solid rgb(214, 97, 95)');
+                                            $(this).addClass('input-error');
+                                        } else {
+                                            if (angleValue < -360) {
+                                                $(this).spinner('value', -360);
+                                            } else if (angleValue > 720) {
+                                                $(this).spinner('value', 720);
+                                            }
+                                            $(this).css('border', '');
+                                            $(this).removeClass('input-error');
+                                        }
+                                    }
+                                }).width(60);
+                            const $riseLabel = $('<label/>', {title: node._('position-config.label.riseName'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
                                 .html("<i class='fa fa-arrow-up' aria-hidden='true'></i>")
                                 .appendTo(fragment);
-                            const riseName = $('<input/>', {type: 'text', class: 'node-input-riseName', placeholder: node._('position-config.label.riseName'), style: 'width: 110px; margin-left: 4px;'})
-                                .appendTo(riseLabel);
-                            const setLabel = $('<label/>', {title: node._('position-config.label.setName'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
+                            const $riseName = $('<input/>', {type: 'text', class: 'node-input-riseName', placeholder: node._('position-config.label.riseName'), style: 'width: 110px; margin-left: 4px;'})
+                                .appendTo($riseLabel);
+                            const $setLabel = $('<label/>', {title: node._('position-config.label.setName'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
                                 .html("<i class='fa fa-arrow-down' aria-hidden='true'></i>")
                                 .appendTo(fragment);
-                            const setName = $('<input/>', {type: 'text', class: 'node-input-setName', placeholder: node._('position-config.label.setName'), style: 'width: 110px; margin-left: 4px;'})
-                                .appendTo(setLabel);
-                            const angleRadLabel = $('<label/>', {title: node._('position-config.label.angleRad'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
-                                .html("<i class='fa fa-angle-right' aria-hidden='true'></i>㎭")
-                                .appendTo(fragment);
-                            const angleRad = $('<input/>', {type: 'checkbox', class: 'node-input-angleRad', placeholder: node._('position-config.label.angleRad'), style: 'width: 10px; margin-left: 4px; margin-top:auto;'})
-                                .appendTo(angleRadLabel);
+                            const $setName = $('<input/>', {type: 'text', class: 'node-input-setName', placeholder: node._('position-config.label.setName'), style: 'width: 110px; margin-left: 4px;'})
+                                .appendTo($setLabel);
 
                             if (!('angle' in data)) {
-                                data = {angle: 0, riseName: '', setName: '', rad: false};
+                                data = {angle: 0, riseName: '', setName: ''};
                             }
+                            $riseName.prop('required',true);
+                            $setName.prop('required',true);
+                            $angle.prop('required',true);
+                            $angle.spinner('value', data.angle);
+                            $riseName.val(data.riseName);
+                            $setName.val(data.setName);
+                            const validateName = function() {
+                                const angleName = this.value;
 
-                            angle.spinner('value', data.angle);
-                            riseName.val(data.riseName);
-                            setName.val(data.setName);
-                            angleRad.prop('checked', data.rad);
+                                // Find all fileName input fields with the same file name value
+                                const riseNameFields = predefAngleList.find('.node-input-riseName').filter(function() {
+                                    return this.value === angleName;
+                                });
+                                const setNameFields = predefAngleList.find('.node-input-setName').filter(function() {
+                                    return this.value === angleName;
+                                });
 
+                                // Show a red border around the fileName field, when the same file name value is used in multiple input fields
+                                if (preassignedSunPositions.includes(angleName) ||
+                                    riseNameFields.length > 1 ||
+                                    setNameFields.length > 1 ||
+                                    !(/^(?![0-9])[a-zA-Z0-9$_]+$/.test(angleName))) {
+                                    $(this).css('border', '1px solid rgb(214, 97, 95)');
+                                    $(this).addClass('input-error');
+                                } else {
+                                    $(this).css('border', '');
+                                    $(this).removeClass('input-error');
+                                }
+                            };
+
+                            $riseName.on('change keyup paste', validateName);
+                            $setName.on('change keyup paste', validateName);
+
+                            $riseName.change();
+                            $setName.change();
+                            $angle.change();
                             item[0].appendChild(fragment);
                         }
                     });
@@ -417,21 +502,19 @@ this software without specific prior written permission.
                 delete this.latitude;
                 const node = this;
 
-                const predefAngles = $('#node-input-predefAngles').editableList('items');
+                const predefAngleList = $('#node-input-predefAngleList').editableList('items');
 
                 node.predefAngles = [];
-                predefAngles.each(function(_index)             {
+                predefAngleList.each(function(_index)             {
                     const data = {};
 
                     const angle = $(this).find('.node-input-angle');
                     const name = $(this).find('.node-input-name');
-                    const angleRad = $(this).find('.node-input-angleRad');
 
                     data.angle = angle.spinner('value');
                     data.name = name.val();
-                    data.rad = angleRad.prop('checked');
 
-                    node.sunPositions.push(data);
+                    node.predefAngles.push(data);
                 });
 
                 const sunPositionList = $('#node-input-sunPositionList').editableList('items');
@@ -443,12 +526,10 @@ this software without specific prior written permission.
                     const angle = $(this).find('.node-input-angle');
                     const riseName = $(this).find('.node-input-riseName');
                     const setName = $(this).find('.node-input-setName');
-                    const angleRad = $(this).find('.node-input-angleRad');
 
                     data.angle = angle.spinner('value');
                     data.riseName = riseName.val();
                     data.setName = setName.val();
-                    data.rad = angleRad.prop('checked');
 
                     node.sunPositions.push(data);
                 });
@@ -913,7 +994,7 @@ this software without specific prior written permission.
     <div class="form-row node-input-predefAngles-row" style="padding-top: 10px">
         <label for="node-input-predefAngles" style="width: auto;"><i class="fa fa-calendar-o"></i> <span data-i18n="position-config.label.predefAngles"></span></label>
         <div class="form-row">
-            <ol id="node-input-predefAngles"></ol>
+            <ol id="node-input-predefAngleList"></ol>
         </div>
     </div>
 

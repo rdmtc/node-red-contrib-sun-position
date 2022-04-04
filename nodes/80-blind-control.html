@@ -604,7 +604,7 @@ this software without specific prior written permission.
                 const setup = function(node) {
                     /* global getTypes getSelectFields setupTInput appendOptions addLabel getBackendData bdDateToTime initCheckboxesBlock getCheckboxesStr setTInputValue */
                     // #region initialize
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     types.LevelEntered = {
                         value: 'num',
                         label: node._('node-red-contrib-sun-position/position-config:common.types.levelfree'),

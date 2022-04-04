@@ -730,7 +730,7 @@ this software without specific prior written permission.
                     }, 300);
 
                     /* global initializeValue getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox initCheckboxesBlock getBackendData bdDateToTime getCheckboxesStr setTInputValue */
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     const selFields = getSelectFields();
                     // #region initialize
                     /**

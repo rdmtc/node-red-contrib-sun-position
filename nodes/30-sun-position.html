@@ -165,9 +165,10 @@ this software without specific prior written permission.
                     $('.is-to-hide-initially').hide();
                 }, 300);
                 const node = this;
+                const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
                     /* global getTypes appendOptions setupTInput */
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     // #region initialize
                     /**
                     * update multiplier settings from a previous version

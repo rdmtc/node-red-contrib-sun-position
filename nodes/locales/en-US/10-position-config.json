@@ -536,7 +536,9 @@
             "latitude-missing": "Latitude is missing or wrong!",
             "longitude-missing": "Longitude is missing or wrong!",
             "coordinates-missing": "Coordinates Latitude and Longitude is missing in the configuration node!",
-            "invalid-custom-suntime": "Invalid custom suntime __name__ given!"
+            "invalid-custom-suntime": "Invalid custom suntime __riseName__ or __setName__ given! Maybe duplicate to existing name.",
+            "custom-angles":"Invalid user-defined angle __name__! The name must not contain special characters!",
+            "custom-angles-duplicate":"Invalid custom angle __name__! Name already exists, duplicates are not allowed!"
         }
     }
 }

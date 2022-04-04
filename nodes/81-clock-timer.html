@@ -304,7 +304,7 @@ this software without specific prior written permission.
                 const setup = function(node) {
                     /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initCheckboxesBlock autocomplete getCheckboxesStr setTInputValue */
                     // #region initialize
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     types.OutputPayload = {
                         value: 'payload',
                         label: node._('node-red-contrib-sun-position/position-config:common.types.payload'),

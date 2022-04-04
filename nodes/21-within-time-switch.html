@@ -355,7 +355,7 @@ this software without specific prior written permission.
                 const setup = function(node) {
                     /* global getTypes getSelectFields appendOptions setupTInput initializeValue initCheckboxesBlock getCheckboxesStr getBackendData bdDateToTime */
 
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     const selFields = getSelectFields();
                     let onInit = true;
                     // #region initialize
