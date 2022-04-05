@@ -35,8 +35,7 @@ Breaking changes: removed all "Radiant" angle selection from typed input. The st
 This is still a beta
 
 - TODO:
-  - implement start and end definition in blind-control and clock timer for rules.
-  - implement minimal tests for sun-position
+
   - implement minimal tests for moon-position
   - maybe
     - implement minimal tests for blind-controller
@@ -56,6 +55,7 @@ Changes:
     - next time by elevation (set or rise in rad)
     - next rise time by elevation (rad)
     - next set time by elevation (rad)
+  - sun-times and moon-times have now every angle in Radians and Degree
 
 - inject enhance (time-inject)
   - added repletely inject with CRON expression
@@ -69,6 +69,9 @@ Changes:
     - basic test for configuration
     - test for message passing is for later
 
+- sun-position + moon-position
+  - smaller rework
+
 - new Node `delay-until` which allows to delay messages until defined time
 
 - blind-control
@@ -78,6 +81,10 @@ Changes:
   - fix not working oversteer mode limitation #431
   - show rule edit dialog no longer modal to allow usage of JSON and JSONATA editor #432
   - implemented optional alternative alternative azimuth input like node-red-contrib-blindcontroller #430
+  - implement start and end time for rules  and clock timer for rules #357
+
+- clock-timer
+  - implement start and end time for rules  and clock timer for rules #357
 
 - time-comp
   - better adjustable of next time, fixes #420

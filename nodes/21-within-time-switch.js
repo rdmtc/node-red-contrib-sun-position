@@ -384,8 +384,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             return;
         } else if (node.positionConfig.checkNode(
             error => {
-                node.error(error);
-                node.status({fill: 'red', shape: 'dot', text: error });
+                const text = RED._('node-red-contrib-sun-position/position-config:errors.config-error', { error });
+                node.error(text);
+                node.status({fill: 'red', shape: 'dot', text });
+                return true;
             }, false)) {
             return;
         }

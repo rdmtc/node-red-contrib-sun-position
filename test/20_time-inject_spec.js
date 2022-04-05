@@ -132,8 +132,10 @@ describe('time inject node', () => {
                 const nc1 = helper.getNode('nc1');
                 try {
                     n1.status.should.be.called();
-                    n1.error.should.be.called().and.calledWith('position-config.errors.latitude-missing');
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
                     nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.latitude-missing');
                     done();
                 } catch (err) {
                     done(err);
@@ -160,8 +162,10 @@ describe('time inject node', () => {
                 const nc1 = helper.getNode('nc1');
                 try {
                     n1.status.should.be.called();
-                    n1.error.should.be.called().and.calledWith('position-config.errors.longitude-missing');
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
                     nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.longitude-missing');
                     done();
                 } catch (err) {
                     done(err);
@@ -188,8 +192,10 @@ describe('time inject node', () => {
                 const nc1 = helper.getNode('nc1');
                 try {
                     n1.status.should.be.called();
-                    n1.error.should.be.called().and.calledWith('position-config.errors.latitude-missing');
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
                     nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.latitude-missing');
                     done();
                 } catch (err) {
                     done(err);
@@ -216,8 +222,232 @@ describe('time inject node', () => {
                 const nc1 = helper.getNode('nc1');
                 try {
                     n1.status.should.be.called();
-                    n1.error.should.be.called().and.calledWith('position-config.errors.longitude-missing');
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
                     nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.longitude-missing');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+
+        it('fail if height invalid ', done => {
+            const flow = [
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, cfgNode];
+            const invalidCreds = {'nc1': { 'posLatitude': '51', 'posLongitude': '180', 'height': 'NA'}};
+            helper.load([nodeConfig, nodeTimeInject], flow, invalidCreds, () => {
+                const n1 = helper.getNode('n1');
+                const nc1 = helper.getNode('nc1');
+                try {
+                    n1.status.should.be.called();
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
+                    nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.height-wrong');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+
+        it('fail if custom angle invalid ', done => {
+            const flow = [
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, {
+                    id: 'nc1',
+                    type: 'position-config',
+                    name: 'Mitte von Deutschland',
+                    isValide: 'true',
+                    angleType: 'deg',
+                    timeZoneOffset: '99',
+                    timeZoneDST: '0',
+                    stateTimeFormat: '3',
+                    stateDateFormat: '12',
+                    contextStore: '',
+                    sunPositions: [
+                        { angle: -2, riseName: 'robHourDawn', setName: 'robHourDusk'},
+                        { angle: -6, riseName: 'civilDawnRob', setName: 'civilDuskRob'}
+                    ],
+                    predefAngles: [
+                        { angle: 0, name: 'North'},
+                        { angle: 90, name: 'East'},
+                        { angle: 180, name: 'South'},
+                        { angle: null, name: 'West'}
+                    ]
+                }];
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
+                const n1 = helper.getNode('n1');
+                const nc1 = helper.getNode('nc1');
+                try {
+                    n1.status.should.be.called();
+                    nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.custom-angles');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+
+        it('fail if custom angle duplicated ', done => {
+            const flow = [
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, {
+                    id: 'nc1',
+                    type: 'position-config',
+                    name: 'Mitte von Deutschland',
+                    isValide: 'true',
+                    angleType: 'deg',
+                    timeZoneOffset: '99',
+                    timeZoneDST: '0',
+                    stateTimeFormat: '3',
+                    stateDateFormat: '12',
+                    contextStore: '',
+                    sunPositions: [
+                        { angle: -2, riseName: 'robHourDawn', setName: 'robHourDusk'},
+                        { angle: -6, riseName: 'civilDawnRob', setName: 'civilDuskRob'}
+                    ],
+                    predefAngles: [
+                        { angle: 0, name: 'North'},
+                        { angle: 90, name: 'East'},
+                        { angle: 180, name: 'South'},
+                        { angle: 270, name: 'South'}
+                    ]
+                }];
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
+                const n1 = helper.getNode('n1');
+                const nc1 = helper.getNode('nc1');
+                try {
+                    n1.status.should.be.called();
+                    nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.custom-angles-duplicate');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+
+        it('fail if custom sun time invalid ', done => {
+            const flow = [
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, {
+                    id: 'nc1',
+                    type: 'position-config',
+                    name: 'Mitte von Deutschland',
+                    isValide: 'true',
+                    angleType: 'deg',
+                    timeZoneOffset: '99',
+                    timeZoneDST: '0',
+                    stateTimeFormat: '3',
+                    stateDateFormat: '12',
+                    contextStore: '',
+                    sunPositions: [
+                        { angle: -2, riseName: 'robHourDawn', setName: 'robHourDusk'},
+                        { angle: -6, riseName: 'civilDawn', setName: 'civilDuskRob'}
+                    ],
+                    predefAngles: [
+                        { angle: 0, name: 'North'},
+                        { angle: 90, name: 'East'},
+                        { angle: 180, name: 'South'},
+                        { angle: 270, name: 'West'}
+                    ]
+                }];
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
+                const n1 = helper.getNode('n1');
+                const nc1 = helper.getNode('nc1');
+                try {
+                    n1.status.should.be.called();
+                    nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.invalid-custom-suntime');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+
+        it('fail if custom sun time duplicated ', done => {
+            const flow = [
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: '',
+                    nameInt: 'Zeitpunkt',
+                    positionConfig: 'nc1',
+                    props: [{p: '', pt: 'msgPayload', v: 'foo', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [[]]
+                }, {
+                    id: 'nc1',
+                    type: 'position-config',
+                    name: 'Mitte von Deutschland',
+                    isValide: 'true',
+                    angleType: 'deg',
+                    timeZoneOffset: '99',
+                    timeZoneDST: '0',
+                    stateTimeFormat: '3',
+                    stateDateFormat: '12',
+                    contextStore: '',
+                    sunPositions: [
+                        { angle: -2, riseName: 'robHourDawn', setName: 'robHourDusk'},
+                        { angle: null, riseName: 'civilDawnRob', setName: 'civilDuskRob'}
+                    ],
+                    predefAngles: [
+                        { angle: 0, name: 'North'},
+                        { angle: 90, name: 'East'},
+                        { angle: 180, name: 'South'},
+                        { angle: 270, name: 'West'}
+                    ]
+                }];
+            helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
+                const n1 = helper.getNode('n1');
+                const nc1 = helper.getNode('nc1');
+                try {
+                    n1.status.should.be.called();
+                    nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.invalid-custom-suntime');
                     done();
                 } catch (err) {
                     done(err);
@@ -1473,11 +1703,15 @@ describe('time inject node', () => {
             helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n2 = helper.getNode('n2');
                 n2.on('input', function(msg) {
-                    msg.should.have.property('topic', 't1');
-                    msg.should.have.property('payload');
-                    msg.should.have.property('_inject_type', 'once/startup');
-                    should(msg.payload).be.greaterThan(timestamp.getTime());
-                    done();
+                    try {
+                        msg.should.have.property('topic', 't1');
+                        msg.should.have.property('payload');
+                        msg.should.have.property('_inject_type', 'once/startup');
+                        should(msg.payload).be.greaterThan(timestamp.getTime());
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 });
             });
         });
@@ -1507,13 +1741,17 @@ describe('time inject node', () => {
                 const n2 = helper.getNode('n2');
                 let count = 0;
                 n2.on('input', function(msg) {
-                    msg.should.have.property('topic', 't2');
-                    msg.should.have.property('payload', 'payload');
-                    count += 1;
-                    if (count > 2) {
-                        helper.clearFlows().then(() => {
-                            done();
-                        });
+                    try {
+                        msg.should.have.property('topic', 't2');
+                        msg.should.have.property('payload', 'payload');
+                        count += 1;
+                        if (count > 2) {
+                            helper.clearFlows().then(() => {
+                                done();
+                            });
+                        }
+                    } catch(err) {
+                        done(err);
                     }
                 });
             });
@@ -1546,13 +1784,17 @@ describe('time inject node', () => {
                 const n2 = helper.getNode('n2');
                 let count = 0;
                 n2.on('input', function(msg) {
-                    msg.should.have.property('topic', 'tx2');
-                    should(msg.payload).be.greaterThan(timestamp.getTime());
-                    count += 1;
-                    if (count > 2) {
-                        helper.clearFlows().then(() => {
-                            done();
-                        });
+                    try {
+                        msg.should.have.property('topic', 'tx2');
+                        should(msg.payload).be.greaterThan(timestamp.getTime());
+                        count += 1;
+                        if (count > 2) {
+                            helper.clearFlows().then(() => {
+                                done();
+                            });
+                        }
+                    } catch(err) {
+                        done(err);
                     }
                 });
             });
@@ -1715,11 +1957,15 @@ describe('time inject node', () => {
             helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n3 = helper.getNode('n3');
                 n3.on('input', function(msg) {
-                    msg.should.have.property('topic', 't3');
-                    msg.should.have.property('payload').be.a.Number();
-                    helper.clearFlows().then(function() {
-                        done();
-                    });
+                    try{
+                        msg.should.have.property('topic', 't3');
+                        msg.should.have.property('payload').be.a.Number();
+                        helper.clearFlows().then(function() {
+                            done();
+                        });
+                    } catch(err) {
+                        done(err);
+                    }
                 });
             });
         }); /* should inject with cron */
@@ -1747,11 +1993,15 @@ describe('time inject node', () => {
             helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n4 = helper.getNode('n4');
                 n4.on('input', function(msg) {
-                    msg.should.have.property('topic', 't4');
-                    msg.should.have.property('payload', 'hello');
-                    helper.clearFlows().then(() => {
-                        done();
-                    });
+                    try{
+                        msg.should.have.property('topic', 't4');
+                        msg.should.have.property('payload', 'hello');
+                        helper.clearFlows().then(() => {
+                            done();
+                        });
+                    } catch(err) {
+                        done(err);
+                    }
                 });
                 try {
                     helper.request()
@@ -1791,15 +2041,19 @@ describe('time inject node', () => {
             helper.load([nodeConfig, nodeTimeInject], flow, credentials, () => {
                 const n4 = helper.getNode('n4');
                 n4.on('input', function(msg) {
-                    msg.should.not.have.property('payload'); // payload removed
-                    msg.should.have.property('topic', 't_override'); // changed value to t_override
-                    msg.should.have.property('str1', '1'); // injected prop
-                    msg.should.have.property('num1', 1); // injected prop
-                    msg.should.have.property('bool1', true); // injected prop
+                    try{
+                        msg.should.not.have.property('payload'); // payload removed
+                        msg.should.have.property('topic', 't_override'); // changed value to t_override
+                        msg.should.have.property('str1', '1'); // injected prop
+                        msg.should.have.property('num1', 1); // injected prop
+                        msg.should.have.property('bool1', true); // injected prop
 
-                    helper.clearFlows().then(() => {
-                        done();
-                    });
+                        helper.clearFlows().then(() => {
+                            done();
+                        });
+                    } catch(err) {
+                        done(err);
+                    }
                 });
                 try {
                     helper.request()

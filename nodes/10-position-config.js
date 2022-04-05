@@ -278,11 +278,19 @@
  */
 
 /**
+ * This callback type is called `requestCallback` and is displayed as a global symbol.
+ *
+ * @callback onErrorCallback
+ * @param {String} errorMessage - the error message
+ * @return {Boolean|String} returns true if ok otherwise an string with the error
+ */
+
+/**
  * check this node for configuration errors
  * @typedef {function} FktCheckNode
  * @property {onErrorCallback} [onError] - if an error occurs this function will be called
- * @property {any} [onOk] - the return value in case of ok
- * @return {Boolean|String} returns the result of onrror if an error occurs, otherwise onOK
+ * @property {Boolean|function} [onOk=false] - if no error, this function will be called or the return value in case of ok
+ * @return {Boolean|String} returns the result of onError if an error occurs, otherwise result of onOk
  */
 
 /**
@@ -473,6 +481,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 this.height = parseFloat(
                     // @ts-ignore
                     this.credentials.height);
+                // @ts-ignore
+                if (typeof this.credentials.height === 'undefined' || this.credentials.height === '') { this.height = 0; }
+
                 /** @type {FktCheckNode} - checkNode checks the node configuration */
                 this.checkNode(
                     error => {
@@ -620,18 +631,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         /*******************************************************************************************************/
         /**
-         * This callback type is called `requestCallback` and is displayed as a global symbol.
-         *
-         * @callback onErrorCallback
-         * @param {String} errorMessage - the error message
-         * @return {Boolean|String} returns true if ok otherwise an string with the error
-         */
-
-        /**
          * check this node for configuration errors
          * @property {onErrorCallback} [onError] - if an error occurs this function will be called
-         * @property {any} [onOk] - the return value in case of ok
-         * @return {Boolean|String} returns the result of onrror if an error occurs, otherwise onOK
+         * @property {Boolean|function} [onOk=false] - if no error, this function will be called or the return value in case of ok
+         * @return {Boolean|String} returns the result of onError if an error occurs, otherwise result of onOk
          * @public
          */
         checkNode(onError, onOk) {
@@ -644,7 +647,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             if (isNaN(this.longitude) || (this.longitude < -180) || (this.longitude > 180)) {
                 return onError(RED._('position-config.errors.longitude-missing'));
             }
-            return onOk;
+            if (Number.isNaN(this.height)) {
+                return onError(RED._('position-config.errors.height-wrong'));
+            }
+            if (typeof onOk === 'function') {
+                return onOk();
+            }
+            return onOk ? true : false;
         }
         /*******************************************************************************************************/
         /**
@@ -2034,9 +2043,25 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             specHeight = specHeight || this.height;
 
             const sunPos = sunCalc.getPosition(date.valueOf(), specLatitude, specLongitude);
+            this._fixAngles(sunPos);
 
             /** @type {ISunDataResult} */
-            const result = {
+            const result = Object.assign({},sunPos, {
+                ts: date.getTime(),
+                lastUpdate:     date,
+                lastUpdateStr:  date.getFullYear() + '-' // return custom format
+                                + hlp.pad2(date.getMonth() + 1) + '-'
+                                + hlp.pad2(date.getDate()) + 'T'
+                                + hlp.pad2(date.getHours()) + ':'
+                                + hlp.pad2(date.getMinutes()) + ':'
+                                + hlp.pad2(date.getSeconds()),
+                latitude:       specLatitude,
+                longitude:      specLongitude,
+                height:         specHeight,
+                angleType:      this.angleType
+            });
+
+            /* {
                 ts: date.getTime(),
                 lastUpdate:     date,
                 lastUpdateStr:  date.getFullYear() + '-' // return custom format
@@ -2056,7 +2081,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 altitudeRadians:    sunPos.altitude,
                 azimuthRadians:     sunPos.azimuth,
                 times:              undefined
-            };
+            }; */
 
             if (!calcTimes) { return result; }
 
@@ -2078,6 +2103,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             if (!result.positionAtSolarNoon && sunInSky && result.times.solarNoon.valid) {
                 result.positionAtSolarNoon = sunCalc.getPosition(result.times.solarNoon.value.valueOf(), specLatitude, specLongitude);
+                this._fixAngles(result.positionAtSolarNoon);
             }
 
             if (result.positionAtSolarNoon && result.times.solarNoon.valid) {
@@ -2174,8 +2200,23 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             specLongitude = specLongitude || this.longitude;
 
             const moonData = sunCalc.getMoonData(date.valueOf(), specLatitude, specLongitude);
+            this._fixAngles(moonData);
 
             /** @type {IMoonDataResult} */
+            const result = Object.assign({},moonData , {
+                ts: date.getTime(),
+                lastUpdate:     date,
+                lastUpdateStr:  date.getFullYear() + '-'
+                                + hlp.pad2(date.getMonth() + 1) + '-'
+                                + hlp.pad2(date.getDate()) + 'T'
+                                + hlp.pad2(date.getHours()) + ':'
+                                + hlp.pad2(date.getMinutes()) + ':'
+                                + hlp.pad2(date.getSeconds()),
+                latitude:       specLatitude,
+                longitude:      specLongitude,
+                angleType:      this.angleType
+            });
+            /*
             const result = {
                 ts: date.getTime(),
                 lastUpdate:     date,
@@ -2199,7 +2240,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 illumination:       moonData.illumination,
                 zenithAngle:        (this.angleType === 'deg') ? hlp.toDec(moonData.zenithAngle) : moonData.zenithAngle,
                 times: undefined
-            };
+            }; */
 
             if (!calcTimes) { return result; }
 
@@ -2226,15 +2267,18 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             if (moonInSky) {
                 if (!result.positionAtRise && result.times.rise) {
                     result.positionAtRise = sunCalc.getMoonPosition(result.times.rise.valueOf(), specLatitude, specLongitude);
+                    this._fixAngles(result.positionAtRise);
                 }
 
                 if (!result.positionAtSet && result.times.set) {
                     result.positionAtSet = sunCalc.getMoonPosition(result.times.set.valueOf(), specLatitude, specLongitude);
+                    this._fixAngles(result.positionAtSet);
                 }
             }
 
             if (result.times.highest) {
                 result.highestPosition = sunCalc.getMoonPosition(result.times.highest.valueOf(), specLatitude, specLongitude);
+                this._fixAngles(result.highestPosition);
                 result.altitudePercent = (result.altitudeDegrees / result.highestPosition.altitudeDegrees) * 100;
             }
 
@@ -2257,6 +2301,26 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         /**************************************************************************************************************/
         /**
+         * fixes angle object
+         * @param {{altitude:number, azimuth:number, azimuthDegrees:number, altitudeDegrees:number, zenith?:number, zenithDegrees?:number, parallacticAngle?:number, parallacticAngleDegrees?:number, azimuthRadians?:number, altitudeRadians?:number, zenithRadians?:number, parallacticAngleRadians?:number }} angleObj  angle object to fix
+         * @return {any}
+         * @private
+         */
+        _fixAngles(angleObj) {
+            angleObj.azimuthRadians = angleObj.altitude;
+            angleObj.altitudeRadians = angleObj.azimuth;
+            angleObj.azimuth = (this.angleType === 'deg') ? angleObj.azimuthDegrees : angleObj.azimuth;
+            angleObj.altitude = (this.angleType === 'deg') ? angleObj.altitudeDegrees : angleObj.altitude;
+            if (Object.prototype.hasOwnProperty.call(angleObj, 'zenith') && Object.prototype.hasOwnProperty.call(angleObj, 'zenithDegrees')) {
+                angleObj.zenithRadians = angleObj.zenith;
+                angleObj.zenith = (this.angleType === 'deg') ? angleObj.zenithDegrees : angleObj.zenith;
+            }
+            if (Object.prototype.hasOwnProperty.call(angleObj, 'parallacticAngle') && Object.prototype.hasOwnProperty.call(angleObj, 'parallacticAngleDegrees')) {
+                angleObj.parallacticAngleRadians = angleObj.parallacticAngle;
+                angleObj.parallacticAngle = (this.angleType === 'deg') ? angleObj.parallacticAngleDegrees : angleObj.parallacticAngle;
+            }
+        }
+        /**
          * refreshes cached sun times
          * @param {Number} todayValue - timestamp of today
          * @param {Number} dayId - number of current day
@@ -2271,12 +2335,14 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             } else {
                 this.cache.sunTimesToday.times = sunCalc.getSunTimes(todayValue, this.latitude, this.longitude, this.height, true);
                 this.cache.sunTimesToday.sunPosAtSolarNoon = sunCalc.getPosition(this.cache.sunTimesToday.times.solarNoon.value.valueOf(), this.latitude, this.longitude);
+                this._fixAngles(this.cache.sunTimesToday.sunPosAtSolarNoon);
                 this.cache.sunTimesToday.dayId = dayId;
             }
             // @ts-ignore
             this.cache.sunTimesTomorrow = {};
             this.cache.sunTimesTomorrow.times = sunCalc.getSunTimes(todayValue + hlp.TIME_24h, this.latitude, this.longitude, this.height, true);
             this.cache.sunTimesTomorrow.sunPosAtSolarNoon = sunCalc.getPosition(this.cache.sunTimesTomorrow.times.solarNoon.value.valueOf(), this.latitude, this.longitude);
+            this._fixAngles(this.cache.sunTimesTomorrow.sunPosAtSolarNoon);
             this.cache.sunTimesTomorrow.dayId = (dayId + 1);
 
             // this.debug(`sunTimesRefresh - calculate sun times - dayId=${dayId}, today=${today.toISOString()}, this.cache=${util.inspect(this.cache, { colors: true, compact: 10, breakLength: Infinity })}`);

@@ -495,6 +495,7 @@
         "warn-init": "warning '__message__', retry in __time__min",
         "config-missing": "Node not properly configured!! Configuration is missing or wrong (no valid configuration is selected)!",
         "config-missing-state": "No valid configuration is selected!",
+        "config-error": "Error in used configuration node: __error__",
         "unknownPropertyOperator": "error, the used property operator __propertyOp__=\"__propertyOpText__\" is unknown!",
         "unknownCompareOperator": "error, the used compare operator \"__operator__\" is unknown! (\"__opTypeA__.__opValueA__\" compare to \"__opTypeB__.__opValueB__\")",
         "notEvaluableProperty":"Error: could not evaluate __type__.__value__!",
@@ -505,7 +506,9 @@
         "invalid-expr": "Invalid JSONata expression: __error__",
         "getPropertyData": "error getting condition data: \"__message__\" skipping time",
         "error-time": "Error get time: __message__",
-        "usingTempValue": "Could not evaluate __type__.__value__ and using stored value \"__usedValue__\"!"
+        "usingTempValue": "Could not evaluate __type__.__value__ and using stored value \"__usedValue__\"!",
+        "latitude-wrong":"Given Latitude __latitude__ is wrong. Using default from config!",
+        "longitude-wrong":"Given Longitude __longitude__ is wrong. Using default from config!"
     },
     "position-config": {
         "label": {
@@ -552,6 +555,7 @@
             "latitude-missing": "Latitude is missing or wrong!",
             "longitude-missing": "Longitude is missing or wrong!",
             "coordinates-missing": "Coordinates Latitude and Longitude is missing in the configuration node!",
+            "height-wrong": "Observer height has wrong value in the configuration node! Must be a number or empty!",
             "invalid-custom-suntime": "Invalid custom suntime __riseName__ or __setName__ given! Maybe duplicate to existing name.",
             "custom-angles":"Invalid user-defined angle __name__! The name must not contain special characters!",
             "custom-angles-duplicate":"Invalid custom angle __name__! Name already exists, duplicates are not allowed!"

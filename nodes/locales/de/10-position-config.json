@@ -480,6 +480,7 @@
         "warn-init": "Warnung '__message__', wiederhole in __time__min",
         "config-missing": "Node ist nicht richtig konfiguriert!! Fehlende oder falsche positionsangaben!",
         "config-missing-state": "Node ist nicht richtig konfiguriert!!",
+        "config-error": "Error in used configuration node: __error__",
         "unknownPropertyOperator": "Fehler, der verwendete Operator __propertyOp__=\"__propertyOpText__\" ist unbekannt!",
         "unknownCompareOperator": "Fehler, der verwendete vergleichs-Operator \"__operator__\" ist unbekannt! (Vergleich \"__opTypeA__.__opValueA__\" mit \"__opTypeB__.__opValueB__\")",
         "notEvaluableProperty":"Kann den Wert von __type__.__value__ nicht ermitteln",
@@ -537,6 +538,7 @@
             "latitude-missing": "Koordinate für den Breitengrad fehlt oder ist falsch!",
             "longitude-missing": "Koordinate für den Längengrad fehlt oder ist falsch!",
             "coordinates-missing": "Koordinaten für den Breitengrad und Längengrad ist falsch!",
+            "height-wrong": "Beobachter höhe ist Falsch. Es sind nur zahlen oder leer erlaubt!",
             "invalid-custom-suntime": "Ungültiger benutzerdefinierte Sonnenzeit __riseName__ oder __setName__ angegeben! Vielleicht ein Duplikat eines bestehenden Namens.",
             "custom-angles":"Ungültiger benutzerdefinierter Winkel __name__! Der Name darf keine Sonderzeichen enthalten!",
             "custom-angles-duplicate":"Ungültiger benutzerdefinierter Winkel __name__! Name existiert bereits, Duplikate sind nicht erlaubt!"
