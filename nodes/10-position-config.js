@@ -1174,7 +1174,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 });
                 matches.sort((a,b) => ((a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0)));
             }
-            this.debug(`getSunTimesList filter=${filter} matches=${util.inspect(matches, { colors: true, compact: 10, breakLength: Infinity })}`);
             return matches;
         }
         /*******************************************************************************************************/
