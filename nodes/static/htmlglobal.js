@@ -24,10 +24,10 @@
 'use strict';
 
 /** --- Type Defs ---
- * @typedef {import('./../types/typedefs.js').runtimeRED} runtimeRED
  * @typedef {import('jquery')} $
  */
-// @typedef {import('jquery-ui')}
+// @typedef {import('jqueryui')}
+//  * @typedef {import('./../types/typedefs.js')}
 /************************************************************************/
 /**
  * get selection firlds
