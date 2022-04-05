@@ -59,7 +59,9 @@ this software without specific prior written permission.
                     type: 'text',
                     value: '0',
                     required: false,
-                    validate: RED.validators.number()
+                    validate(v){
+                        return (v === '') || RED.validators.number()(v);
+                    }
                 }
             },
             defaults: {
@@ -108,7 +110,9 @@ this software without specific prior written permission.
                             for (let i=0; i<v.length; ++i) {
                                 if (!EXP.test(v[i].riseName) ||
                                     !EXP.test(v[i].setName) ||
-                                    isNaN(v[i].angle)) {
+                                    !RED.validators.number()(v[i].angle) ||
+                                    isNaN(v[i].angle) ||
+                                    typeof v[i].angle !== 'number') {
                                     valid = false;
                                     break;
                                 }
@@ -143,7 +147,9 @@ this software without specific prior written permission.
                             // check for invalid names
                             for (let i=0; i<v.length; ++i) {
                                 if (!EXP.test(v[i].name) ||
-                                    isNaN(v[i].angle)) {
+                                    !RED.validators.number()(v[i].angle) ||
+                                    isNaN(v[i].angle) ||
+                                    typeof v[i].angle !== 'number') {
                                     valid = false;
                                     break;
                                 }
@@ -298,6 +304,26 @@ this software without specific prior written permission.
                 $lat.change();
                 $lon.change();
 
+                const validateMyAngle = function(_event, _ui) {
+                    const angleValue = $(this).spinner('value');
+                    // Show a red border around the fileName field, when the same file name value is used in multiple input fields
+                    if (isNaN(angleValue) ||
+                        angleValue === null ||
+                        typeof angleValue !== 'number' ||
+                        !RED.validators.number()(angleValue)) {
+                        $(this).css('border', '1px solid rgb(214, 97, 95)');
+                        $(this).addClass('input-error');
+                    } else {
+                        if (angleValue < -360) {
+                            $(this).spinner('value', -360);
+                        } else if (angleValue > 720) {
+                            $(this).spinner('value', 720);
+                        }
+                        $(this).css('border', '');
+                        $(this).removeClass('input-error');
+                    }
+                };
+
                 const predefAngleList = $('#node-input-predefAngleList').css('min-width', '500px').css('min-height', '150px')
                     .editableList({
                         removable: true,
@@ -316,22 +342,7 @@ this software without specific prior written permission.
                                     min: -360,
                                     max: 720,
                                     numberFormat: 'n',
-                                    change(_event, _ui) {
-                                        const angleValue = $(this).spinner('value');
-                                        // Show a red border around the fileName field, when the same file name value is used in multiple input fields
-                                        if (isNaN(angleValue) || angleValue === null || typeof angleValue !== 'number') {
-                                            $(this).css('border', '1px solid rgb(214, 97, 95)');
-                                            $(this).addClass('input-error');
-                                        } else {
-                                            if (angleValue < -360) {
-                                                $(this).spinner('value', -360);
-                                            } else if (angleValue > 720) {
-                                                $(this).spinner('value', 720);
-                                            }
-                                            $(this).css('border', '');
-                                            $(this).removeClass('input-error');
-                                        }
-                                    }
+                                    change: validateMyAngle
                                 }).width(60);
                             const $nameLabel = $('<label/>', {title: node._('position-config.label.name'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
                                 .html("<i class='fa fa-tag' aria-hidden='true'></i>")
@@ -344,9 +355,6 @@ this software without specific prior written permission.
                             }
                             $name.prop('required',true);
                             $angle.prop('required',true);
-                            $angle.spinner('value', data.angle);
-                            $name.val(data.name);
-
                             $name.on('change keyup paste', function() {
                                 const angleName = this.value;
 
@@ -364,9 +372,11 @@ this software without specific prior written permission.
                                     $(this).removeClass('input-error');
                                 }
                             });
-
+                            $angle.spinner('value', data.angle);
+                            $name.val(data.name);
                             $name.change();
                             $angle.change();
+                            validateMyAngle.call($angle[0]);
                             item[0].appendChild(fragment);
                         }
                     });
@@ -396,22 +406,7 @@ this software without specific prior written permission.
                                     min: -360,
                                     max: 720,
                                     numberFormat: 'n',
-                                    change(_event, _ui) {
-                                        const angleValue = $(this).spinner('value');
-                                        // Show a red border around the fileName field, when the same file name value is used in multiple input fields
-                                        if (isNaN(angleValue) || angleValue === null || typeof angleValue !== 'number') {
-                                            $(this).css('border', '1px solid rgb(214, 97, 95)');
-                                            $(this).addClass('input-error');
-                                        } else {
-                                            if (angleValue < -360) {
-                                                $(this).spinner('value', -360);
-                                            } else if (angleValue > 720) {
-                                                $(this).spinner('value', 720);
-                                            }
-                                            $(this).css('border', '');
-                                            $(this).removeClass('input-error');
-                                        }
-                                    }
+                                    change: validateMyAngle
                                 }).width(60);
                             const $riseLabel = $('<label/>', {title: node._('position-config.label.riseName'), style: 'width: auto; margin-left: 12px; margin-bottom: 0px;'})
                                 .html("<i class='fa fa-arrow-up' aria-hidden='true'></i>")
@@ -430,9 +425,6 @@ this software without specific prior written permission.
                             $riseName.prop('required',true);
                             $setName.prop('required',true);
                             $angle.prop('required',true);
-                            $angle.spinner('value', data.angle);
-                            $riseName.val(data.riseName);
-                            $setName.val(data.setName);
                             const validateName = function() {
                                 const angleName = this.value;
 
@@ -460,9 +452,13 @@ this software without specific prior written permission.
                             $riseName.on('change keyup paste', validateName);
                             $setName.on('change keyup paste', validateName);
 
+                            $angle.spinner('value', data.angle);
+                            $riseName.val(data.riseName);
+                            $setName.val(data.setName);
                             $riseName.change();
                             $setName.change();
                             $angle.change();
+                            validateMyAngle.call($angle[0]);
                             item[0].appendChild(fragment);
                         }
                     });

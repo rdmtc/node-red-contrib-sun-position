@@ -506,10 +506,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
                     config.predefAngles.forEach((/** @type {{ angle: number; name: String;rad: Boolean }} */ time) => {
                         if (!EXP.test(time.name) ||
-                            isNaN(time.angle)) {
+                            isNaN(time.angle) ||
+                            typeof time.angle !== 'number') {
                             node.error(RED._('position-config.errors.custom-angles', time));
+                            this.valid = false;
                         } else if (names.includes(time.name)) {
                             node.error(RED._('position-config.errors.custom-angles-duplicate', time));
+                            this.valid = false;
                         } else {
                             names.push(time.name);
                             this.customAngles.push({
@@ -525,6 +528,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     times.forEach((/** @type {{ angle: number; riseName: String; setName: String }} */ time, /** @type {number} */ index) => {
                         if (!sunCalc.addTime(time.angle, time.riseName, time.setName, index+100, index+200, this.angleType === 'deg')) {
                             node.error(RED._('position-config.errors.invalid-custom-suntime', time));
+                            this.valid = false;
                         }
                     });
                 }

@@ -50,6 +50,28 @@ const cfgNode = {
     stateDateFormat: '12',
     contextStore: ''
 };
+const cfgNode2 = {
+    id: 'nc1',
+    type: 'position-config',
+    name: 'Mitte von Deutschland',
+    isValide: 'true',
+    angleType: 'deg',
+    timeZoneOffset: '99',
+    timeZoneDST: '0',
+    stateTimeFormat: '3',
+    stateDateFormat: '12',
+    contextStore: '',
+    sunPositions: [
+        { angle: -2, riseName: 'robHourDawn', setName: 'robHourDusk'},
+        { angle: -6, riseName: 'civilDawnRob', setName: 'civilDuskRob'}
+    ],
+    predefAngles: [
+        { angle: 0, name: 'North'},
+        { angle: 90, name: 'East'},
+        { angle: 180, name: 'South'},
+        { angle: 270, name: 'West'}
+    ]
+};
 const tabNode = {id: 'flow', type: 'tab', label: 'FLOW' };
 const groupNode = {id: 'g0', type: 'group', name: 'GROUP' };
 const hlpNode = {id: 'n2', type: 'helper'};
@@ -558,6 +580,46 @@ describe('time inject node', () => {
                 n2.on('input', function(msg) {
                     try {
                         msg.should.have.property('topic', 'tx');
+                        msg.should.have.property('payload');
+                        msg.payload.should.equal(1577861034863); // Wed Jan 01 2020 06:43:54 GMT+0000
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({ __ts__input_date: new Date(1577851200000)}); // 1577851200000 - 1.1.2020 5:00
+            });
+        });
+
+        it('inject value (pdsTimeCustom) ', function(done) {
+            const flow1 = [
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: 'myNode',
+                    nameInt: 'test',
+                    positionConfig: 'nc1',
+                    props: [
+                        {
+                            p: '', pt: 'msgPayload', v: 'civilDawnRob', vt: 'pdsTimeCustom',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {p: '', pt: 'msgTopic', v: 'tx2', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [['n2']]
+                }, cfgNode2, hlpNode];
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
+                const n1 = helper.getNode('n1');
+                const n2 = helper.getNode('n2');
+                n1.status.should.be.calledOnce();
+                n1.should.have.property('name', 'myNode');
+                n2.on('input', function(msg) {
+                    try {
+                        msg.should.have.property('topic', 'tx2');
                         msg.should.have.property('payload');
                         msg.payload.should.equal(1577861034863); // Wed Jan 01 2020 06:43:54 GMT+0000
                         done();
