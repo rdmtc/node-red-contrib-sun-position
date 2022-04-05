@@ -165,6 +165,8 @@
  * @property {Object} [level]                       - rule time Data
  * @property {Object} [slat]                        - rule time Data
  * @property {string} topic                         - rule time Data
+ * @property {Object} [outputValue]                 - rule time Data
+ * @property {string} [outputType]                  - rule time Data
  */
 
 /**
@@ -190,6 +192,19 @@
  */
 
 /**
+ * @typedef {Object} ISunData object for a rule
+ * @property {(0|1|3|16)} mode                 - mode of the sun
+ * @property {(0|1|3|16)} modeMax              - maximum mode
+ * @property {string} floorLength              - floorLength value
+ * @property {string} floorLengthType          - type of the floorLength
+ * @property {number} changeAgain              - timestamp of the next change
+ * @property {number} minDelta                 - minimum delta
+ * @property {Object} [level]                  - rule time Data
+ * @property {Object} [slat]                   - rule time Data
+ * @property {string} topic                    - rule time Data
+ */
+
+/**
  * @typedef {Object} ITimeControlNodeInstance Extensions for the nodeInstance object type
  * @property {IPositionConfigNode} positionConfig    -   tbd
  * @property {string} addId internal used additional id
@@ -199,12 +214,13 @@
  * @property {IRulesData} rules    -   definition of the rule Data
  *
  * @property {boolean} [levelReverse]    -   indicator if the Level is in reverse order
- * @property {Object} [sunData]    -   the sun data Object
+ * @property {ISunData} [sunData]    -   the sun data Object
  * @property {Object} nowarn    -   tbd
  *
  * @property {Array.<Object>} results    -   tbd
  *
  * @property {IAutoTrigger} autoTrigger autotrigger options
+ * @property {NodeJS.Timeout} [autoTriggerObj] - autotrigger TimeOut Object
  *
  * @property {Object} startDelayTimeOut    -   tbd
  * @property {NodeJS.Timeout} startDelayTimeOutObj    -   tbd
@@ -259,6 +275,14 @@ module.exports = {
 };
 
 let RED = null;
+/******************************************************************************************/
+/**
+* Timestamp compare function
+* @callback ICompareTimeStamp
+* @param {number} timeStamp The timestamp which should be compared
+* @returns {Boolean} return true if if the timestamp is valid, otherwise false
+*/
+
 /******************************************************************************************/
 
 /**
@@ -468,7 +492,9 @@ function prepareRules(node, msg, tempData, dNow) {
                             callback: (result, _obj) => { // opCallback
                                 el.valueWorth = _obj.value;
                                 return evalTempData(node, _obj.type, _obj.value, result, tempData);
-                            }
+                            },
+                            noError:false,
+                            now: dNow
                         },
                         el.operator,
                         {
@@ -477,8 +503,10 @@ function prepareRules(node, msg, tempData, dNow) {
                             callback: (result, _obj) => { // opCallback
                                 el.thresholdWorth = _obj.value;
                                 return evalTempData(node, _obj.type, _obj.value, result, tempData);
-                            }
-                        }, false, dNow
+                            },
+                            noError:false,
+                            now: dNow
+                        }
                     );
                 }
                 rule.conditonResult = {
@@ -570,11 +598,11 @@ function getRuleTimeData(node, msg, rule, timep, dNow, def) {
  * @param {ITimeControlNode} node the node object
  * @param {Object} msg the message object
  * @param {IRuleData} rule a rule object to test
- * @param {ITimeObject} data Now time object
+ * @param {ITimeObject} tData Now time object
  * @returns {IRuleData|null} returns the rule if rule is valid, otherwhise null
  */
-function compareRules(node, msg, rule, data) {
-    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) data=${util.inspect(rule, {colors:true, compact:10})}`);
+function compareRules(node, msg, rule, tData) {
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) rule=${util.inspect(rule, {colors:true, compact:10})}`);
     if (rule.conditional) {
         try {
             if (!rule.conditonResult.result) {
@@ -592,43 +620,43 @@ function compareRules(node, msg, rule, data) {
     }
 
     // @ts-ignore
-    if (rule.time.days && !rule.time.days.includes(data.dayNr)) {
+    if (rule.time.days && !rule.time.days.includes(tData.dayNr)) {
         node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
         return null;
     }
     // @ts-ignore
-    if (rule.time.months && !rule.time.months.includes(data.monthNr)) {
+    if (rule.time.months && !rule.time.months.includes(tData.monthNr)) {
         node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
         return null;
     }
-    if (rule.time.onlyOddDays && (data.dateNr % 2 === 0)) { // even
+    if (rule.time.onlyOddDays && (tData.dateNr % 2 === 0)) { // even
         node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
         return null;
     }
-    if (rule.time.onlyEvenDays && (data.dateNr % 2 !== 0)) { // odd
+    if (rule.time.onlyEvenDays && (tData.dateNr % 2 !== 0)) { // odd
         node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
         return null;
     }
-    if (rule.time.onlyOddWeeks && (data.weekNr % 2 === 0)) { // even
+    if (rule.time.onlyOddWeeks && (tData.weekNr % 2 === 0)) { // even
         node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
         return null;
     }
-    if (rule.time.onlyEvenWeeks && (data.weekNr % 2 !== 0)) { // odd
+    if (rule.time.onlyEvenWeeks && (tData.weekNr % 2 !== 0)) { // odd
         node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
         return null;
     }
     if (rule.time.dateStart || rule.time.dateEnd) {
-        rule.time.dateStart.setFullYear(data.yearNr);
-        rule.time.dateEnd.setFullYear(data.yearNr);
+        rule.time.dateStart.setFullYear(tData.yearNr);
+        rule.time.dateEnd.setFullYear(tData.yearNr);
         if (rule.time.dateEnd > rule.time.dateStart) {
             // in the current year
-            if (data.now < rule.time.dateStart || data.now > rule.time.dateEnd) {
+            if (tData.now < rule.time.dateStart || tData.now > rule.time.dateEnd) {
                 node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
                 return null;
             }
         } else {
             // switch between year from end to start
-            if (data.now < rule.time.dateStart && data.now > rule.time.dateEnd) {
+            if (tData.now < rule.time.dateStart && tData.now > rule.time.dateEnd) {
                 node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
                 return null;
             }
@@ -636,40 +664,40 @@ function compareRules(node, msg, rule, data) {
     }
 
     rule.timeResult = {
-        now: data.now
+        now: tData.now
     };
     if (rule.time.start) {
-        getRuleTimeData(node, msg, rule, 'start', data.now, Number.MIN_VALUE);
+        getRuleTimeData(node, msg, rule, 'start', tData.now, Number.MIN_VALUE);
         if (rule.time.end) {
-            getRuleTimeData(node, msg, rule, 'end', data.now, Number.MAX_VALUE);
+            getRuleTimeData(node, msg, rule, 'end', tData.now, Number.MAX_VALUE);
             if (rule.timeResult.start.ts > rule.timeResult.end.ts) {
-                if ((data.dayId === rule.timeResult.start.dayId &&
-                        rule.timeResult.start.ts <= data.nowNr) ||
-                    (data.dayId === rule.timeResult.end.dayId &&
-                        rule.timeResult.end.ts > data.nowNr)) {
+                if ((tData.dayId === rule.timeResult.start.dayId &&
+                        rule.timeResult.start.ts <= tData.nowNr) ||
+                    (tData.dayId === rule.timeResult.end.dayId &&
+                        rule.timeResult.end.ts > tData.nowNr)) {
                     return rule;
                 }
                 return null;
             }
-            if (rule.timeResult.start.ts <= data.nowNr &&
-                data.dayId === rule.timeResult.start.dayId &&
-                rule.timeResult.end.ts > data.nowNr &&
-                data.dayId === rule.timeResult.end.dayId) {
+            if (rule.timeResult.start.ts <= tData.nowNr &&
+                tData.dayId === rule.timeResult.start.dayId &&
+                rule.timeResult.end.ts > tData.nowNr &&
+                tData.dayId === rule.timeResult.end.dayId) {
                 return rule;
             }
         }
-        if (rule.timeResult.start.ts <= data.nowNr &&
-            data.dayId === rule.timeResult.start.dayId) {
+        if (rule.timeResult.start.ts <= tData.nowNr &&
+            tData.dayId === rule.timeResult.start.dayId) {
             return rule;
         }
     } else if (rule.time.end) {
-        getRuleTimeData(node, msg, rule, 'end', data.now, Number.MAX_VALUE);
-        if (rule.timeResult.end.ts > data.nowNr &&
-            data.dayId === rule.timeResult.end.dayId) {
+        getRuleTimeData(node, msg, rule, 'end', tData.now, Number.MAX_VALUE);
+        if (rule.timeResult.end.ts > tData.nowNr &&
+            tData.dayId === rule.timeResult.end.dayId) {
             return rule;
         }
     }
-    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${data.dayId} rule-DayID=${rule.timeResult[timep].dayId} num=${num} invalid time`);
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${tData.dayId} rule-DayID=${rule.timeResult[timep].dayId} num=${num} invalid time`);
     return null;
 }
 /******************************************************************************************/
@@ -980,7 +1008,11 @@ function initializeCtrl(REDLib, node, config) {
                     // @ts-ignore
                     offset          : (rule.offsetValue || 1),
                     // @ts-ignore
-                    multiplier      : (parseInt(rule.multiplier) || 60000)
+                    multiplier      : (parseInt(rule.multiplier) || hlp.TIME_1min),
+                    // @ts-ignore
+                    days            : (rule.timeDays || '*'),
+                    // @ts-ignore
+                    months          : (rule.timeMonths || '*')
                 };
                 // @ts-ignore
                 if (rule.timeMinType && rule.timeMinType !== 'none') {
@@ -990,7 +1022,8 @@ function initializeCtrl(REDLib, node, config) {
                         value           : (rule.timeMinValue || ''), // @ts-ignore
                         offsetType      : (rule.offsetMinType || 'none'), // @ts-ignore
                         offset          : (rule.offsetMinValue || 1), // @ts-ignore
-                        multiplier      : (parseInt(rule.multiplierMin) || 60000)
+                        multiplier      : (parseInt(rule.multiplierMin) || 60000),
+                        next            : false
                     };
                 }
                 // @ts-ignore
@@ -1001,7 +1034,8 @@ function initializeCtrl(REDLib, node, config) {
                         value           : (rule.timeMaxValue || ''), // @ts-ignore
                         offsetType      : (rule.offsetMaxType || 'none'), // @ts-ignore
                         offset          : (rule.offsetMaxValue || 1), // @ts-ignore
-                        multiplier      : (parseInt(rule.multiplierMax) || 60000)
+                        multiplier      : (parseInt(rule.multiplierMax) || 60000),
+                        next            : false
                     };
                 }
             }
@@ -1012,6 +1046,7 @@ function initializeCtrl(REDLib, node, config) {
             if (rule.timeOnlyEvenDays) rule.time.onlyEvenDays = rule.timeOnlyEvenDays; // @ts-ignore
             if (rule.timeDateStart) rule.time.dateStart = rule.timeDateStart; // @ts-ignore
             if (rule.timeDateEnd) rule.time.dateEnd = rule.timeDateEnd;
+
             // @ts-ignore
             delete rule.timeType; // @ts-ignore
             delete rule.timeValue; // @ts-ignore
@@ -1116,7 +1151,7 @@ function initializeCtrl(REDLib, node, config) {
             if ((rule.level.operator === 3) || (rule.level.operator === 4)) { // 3 -> ⭳✋ reset minimum; 4 -> ⭱️✋ reset maximum
                 rule.level.type = 'levelND';
                 rule.level.value = '';
-                rule.level.operator = cRuleType.absolute; // rule.level.operator - 2;
+                rule.level.operator = rule.level.operator - 2; // cRuleType.absolute;
             }
             // @ts-ignore
             delete rule.levelType; // @ts-ignore
@@ -1138,7 +1173,7 @@ function initializeCtrl(REDLib, node, config) {
                     // @ts-ignore
                     offset          : (rule.payloadOffsetValue || '1'),
                     // @ts-ignore
-                    multiplier      : (parseInt(rule.payloadOffsetMultiplier) || 60000),
+                    multiplier      : (parseInt(rule.payloadOffsetMultiplier) || hlp.TIME_1min),
                     // @ts-ignore
                     format          : (parseInt(rule.payloadFormat) || 99)
                 };

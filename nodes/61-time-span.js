@@ -40,7 +40,6 @@
  * @property {ITimePropertyType} operand1      -   operand1 data
  * @property {ITimePropertyType} operand2      -   operand2 data
  * @property {number} operand                  -   operand
- * operand
  * @property {Array} results                -   output data
  * @property {Array} rules                  -   input data
  * @property {boolean|string} checkall      -   define if check all rules
@@ -58,12 +57,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
     const util = require('util');
     const hlp = require('./lib/dateTimeHelper.js');
-
-    const perSecond = 1000;
-    const perMinute = 60000;
-    const perHour = 3600000;
-    const perDay = 86400000;
-    const perWeek = 604800000;
 
     /**
      * get the differense between two month relative
@@ -138,17 +131,17 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
 
         const tl = timeSpan;
-        const ts = Math.floor(timeSpan / perSecond);
-        const tm = Math.floor(timeSpan / perMinute);
-        const tH = Math.floor(timeSpan / perHour);
-        const td = Math.floor(timeSpan / perDay);
-        const tw = Math.floor(timeSpan / perWeek);
+        const ts = Math.floor(timeSpan / hlp.TIME_1s);
+        const tm = Math.floor(timeSpan / hlp.TIME_1min);
+        const tH = Math.floor(timeSpan / hlp.TIME_1h);
+        const td = Math.floor(timeSpan / hlp.TIME_24h);
+        const tw = Math.floor(timeSpan / hlp.TIME_WEEK);
 
         const l = timeSpan % 1000;
-        const s = Math.floor(timeSpan / perSecond) % 60;
-        const m = Math.floor(timeSpan / perMinute) % 60;
-        const H = Math.floor(timeSpan / perHour) % 24;
-        const d = Math.floor(timeSpan / perDay) % 7;
+        const s = Math.floor(timeSpan / hlp.TIME_1s) % 60;
+        const m = Math.floor(timeSpan / hlp.TIME_1min) % 60;
+        const H = Math.floor(timeSpan / hlp.TIME_1h) % 24;
+        const d = Math.floor(timeSpan / hlp.TIME_24h) % 7;
         const M = getMonthDiffAbs(d1, d2);
         const y = getYearDiffAbs(d1, d2);
 
@@ -226,15 +219,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         switch (Number(format)) {
             case 1: // sec
-                return (timeSpan) / perSecond;
+                return (timeSpan) / hlp.TIME_1s;
             case 2: // min
-                return (timeSpan) / perMinute;
+                return (timeSpan) / hlp.TIME_1min;
             case 3: // hour
-                return (timeSpan) / perHour;
+                return (timeSpan) / hlp.TIME_1h;
             case 4: // days
-                return (timeSpan) / perDay;
+                return (timeSpan) / hlp.TIME_24h;
             case 5: // weeks
-                return (timeSpan) / perWeek;
+                return (timeSpan) / hlp.TIME_WEEK;
             case 6: // month
                 if (date1.getTime() > date2.getTime()) {
                     return getMonthDiff(date2, date1) * -1;
@@ -246,15 +239,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
                 return (getMonthDiff(date1, date2) / 12);
             case 11: // sec
-                return Math.floor((timeSpan) / perSecond);
+                return Math.floor((timeSpan) / hlp.TIME_1s);
             case 12: // min
-                return Math.floor((timeSpan) / perMinute);
+                return Math.floor((timeSpan) / hlp.TIME_1min);
             case 13: // hour
-                return Math.floor((timeSpan) / perHour);
+                return Math.floor((timeSpan) / hlp.TIME_1h);
             case 14: // days
-                return Math.floor((timeSpan) / perDay);
+                return Math.floor((timeSpan) / hlp.TIME_24h);
             case 15: // weeks
-                return Math.floor((timeSpan) / perWeek);
+                return Math.floor((timeSpan) / hlp.TIME_WEEK);
             case 16: // full month
                 if (date1.getTime() > date2.getTime()) {
                     return getMonthDiffAbs(date2, date1) * -1;
@@ -287,20 +280,20 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             timeSpan,
             timeSpanAbs: {
                 ms: timeSpan % 1000,
-                sec: Math.floor(timeSpan / perSecond) % 60,
+                sec: Math.floor(timeSpan / hlp.TIME_1s) % 60,
                 min: timeSpan % 1000,
-                hours: Math.floor(timeSpan / perHour) % 24,
-                days: Math.floor(timeSpan / perDay) % 7,
+                hours: Math.floor(timeSpan / hlp.TIME_1h) % 24,
+                days: Math.floor(timeSpan / hlp.TIME_24h) % 7,
                 month: getMonthDiffAbs(date1, date2),
                 years: getYearDiffAbs(date1, date2)
             },
             timeSpanRel: {
                 ms: timeSpan,
-                sec: (timeSpan / perSecond),
-                min: (timeSpan / perMinute),
-                hour: (timeSpan / perHour),
-                day: (timeSpan / perDay),
-                week: (timeSpan / perWeek),
+                sec: (timeSpan / hlp.TIME_1s),
+                min: (timeSpan / hlp.TIME_1min),
+                hour: (timeSpan / hlp.TIME_1h),
+                day: (timeSpan / hlp.TIME_24h),
+                week: (timeSpan / hlp.TIME_WEEK),
                 month: getMonthDiff(date1, date2),
                 year:  getMonthDiff(date1, date2) / 12
             }
@@ -323,7 +316,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         node.positionConfig = RED.nodes.getNode(config.positionConfig);
         if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
-            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
         }
         if (node.positionConfig.checkNode(
@@ -336,20 +329,28 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         node.operand1 = {
             type: config.operand1Type,
             value: config.operand1,
+            next: hlp.isTrue(config.operand1Next),
             format: config.operand1Format,
             offsetType: config.operand1OffsetType,
             offset: config.operand1Offset,
             multiplier: config.operand1OffsetMultiplier
         };
+        if (node.operand1.type !== 'entered' && node.operand1.type !== 'pdsTime' && node.operand1.type !== 'pdsTimeCustom' && node.operand1.type !== 'pdmTime') {
+            node.operand1.next = false;
+        }
 
         node.operand2 = {
             type: config.operand2Type,
             value: config.operand2,
+            next: hlp.isTrue(config.operand2Next),
             format: config.operand2Format,
             offsetType: config.operand2OffsetType,
             offset: config.operand2Offset,
             multiplier: config.operand2OffsetMultiplier
         };
+        if (node.operand2.type !== 'entered' && node.operand2.type !== 'pdsTime' && node.operand2.type !== 'pdsTimeCustom' && node.operand2.type !== 'pdmTime') {
+            node.operand2.next = false;
+        }
 
         if (!Array.isArray(config.results)) {
             config.results = [];
@@ -393,20 +394,23 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 format          : prop.f,
                 offsetType      : prop.oT,
                 offset          : prop.o,
-                multiplier      : prop.oM,
+                multiplier      : parseFloat(prop.oM) || 60000,
                 outTSFormat     : prop.fTs,
                 next            : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next)) ? true : false,
                 days            : prop.days,
                 months          : prop.months,
-                onlyEvenDays    : prop.onlyEvenDays,
-                onlyOddDays     : prop.onlyOddDays,
-                onlyEvenWeeks   : prop.onlyEvenWeeks,
-                onlyOddWeeks    : prop.onlyOddWeeks
+                onlyEvenDays    : prop.onlyEvenDays === 'true' || prop.onlyEvenDays === true,
+                onlyOddDays     : prop.onlyOddDays === 'true' || prop.onlyOddDays === true,
+                onlyEvenWeeks   : prop.onlyEvenWeeks === 'true' || prop.onlyEvenWeeks === true,
+                onlyOddWeeks    : prop.onlyOddWeeks === 'true' || prop.onlyOddWeeks === true
             };
+            if (propNew.type !== 'entered' && propNew.type !== 'pdsTime' && propNew.type !== 'pdsTimeCustom' && propNew.type !== 'pdmTime') {
+                propNew.next = false;
+            }
 
             if (node.positionConfig && propNew.type === 'jsonata') {
                 try {
-                    propNew.expr = node.positionConfig.getJSONataExpression(this, propNew.value);
+                    propNew.expr = node.positionConfig.getJSONataExpression(node, propNew.value);
                 } catch (err) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error: err.message }));
                     propNew.expr = null;
@@ -414,9 +418,46 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             node.results.push(propNew);
         });
-        node.operand = config.operand;
+        node.checkall = config.checkall === 'true' || config.checkall === true;
         node.rules = config.rules;
-        node.checkall = config.checkall;
+        const rulesLength = node.rules.length;
+        for (let i = 0; i < rulesLength; ++i) {
+            const rule = node.rules[i];
+            rule.operator = Number(rule.operator);
+
+            if (rule.operator === 99) {
+                rule.next = false;
+            } else {
+                if (rule.operandType !== 'entered' && rule.operandType !== 'pdsTime' && rule.operandType !== 'pdsTimeCustom' && rule.operandType !== 'pdmTime') {
+                    rule.next = false;
+                }
+            }
+            rule.compare = null;
+            rule.result = false;
+            switch (rule.operator) {
+                case 1: // equal             { id: 1, group: "ms", label: "==", "text": "equal" },
+                    rule.compare = (op1, op2) => op1 === op2;
+                    break;
+                case 2: // unequal           { id: 2, group: "ms", label: "!=", "text": "unequal" },
+                    rule.compare = (op1, op2) => op1 !== op2;
+                    break;
+                case 3: // greater           { id: 3, group: "ms", label: ">", "text": "greater" },
+                    rule.compare = (op1, op2) => op1 > op2;
+                    break;
+                case 4: // greaterOrEqual    { id: 5, group: "ms", label: ">=", "text": "greater or equal" },
+                    rule.compare = (op1, op2) => op1 >= op2;
+                    break;
+                case 5: // lesser            { id: 6, group: "ms", label: "<", "text": "lesser" },
+                    rule.compare = (op1, op2) => op1 < op2;
+                    break;
+                case 6: // lesserOrEqual     { id: 7, group: "ms", label: "<=", "text": "lesser or equal" },
+                    rule.compare = (op1, op2) => op1 <= op2;
+                    break;
+                case 99: // otherwise
+                    rule.result = true;
+                    break;
+            }
+        }
 
         node.on('input', (msg, send, done) => {
             // If this is pre-1.0, 'done' will be undefined
@@ -452,21 +493,17 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 // node.debug('operand1=' + util.inspect(operand1, { colors: true, compact: 10, breakLength: Infinity }));
                 // node.debug('operand2=' + util.inspect(operand2, { colors: true, compact: 10, breakLength: Infinity }));
 
-                let timeSpan = operand1.value.getTime() - operand2.value.getTime();
-                if (node.operand === 0) {
-                    timeSpan = Math.abs(timeSpan);
-                }
-
                 for (let i = 0; i < node.results.length; i++) {
                     const prop = node.results[i];
                     // node.debug(`prepOutMsg-${i} node.results[${i}]=${util.inspect(prop, { colors: true, compact: 10, breakLength: Infinity })}`);
+
                     let resultObj = null;
                     if (prop.type === 'timespan') {
                         resultObj = getFormattedTimeSpanOut(node, operand1.value, operand2.value, prop.outTSFormat);
                     } else if (prop.type === 'operand1') {
-                        resultObj = node.positionConfig.formatOutDate(this, msg, operand1.value, prop);
+                        resultObj = node.positionConfig.formatOutDate(node, msg, operand1.value, prop);
                     } else if (prop.type === 'operand2') {
-                        resultObj = node.positionConfig.formatOutDate(this, msg, operand2.value, prop);
+                        resultObj = node.positionConfig.formatOutDate(node, msg, operand2.value, prop);
                     } else {
                         resultObj = node.positionConfig.getOutDataProp(node, msg, prop, dNow);
                     }
@@ -476,48 +513,29 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     } else if (resultObj.error) {
                         node.error('error on getting result: "' + resultObj.error + '"');
                     } else {
-                        node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
+                        node.positionConfig.setMessageProp(node, msg, prop.outType, prop.outValue, resultObj);
                     }
                     // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
                 }
 
-                const resObj = [];
-                const rulesLength = node.rules.length;
-                for (let i = 0; i < rulesLength; ++i) {
-                    const rule =  node.rules[i];
-                    try {
-                        let ruleoperand = node.positionConfig.getFloatProp(node, msg, rule.operandType, rule.operandValue, 0);
-                        if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
-                            ruleoperand = ruleoperand * rule.multiplier;
-                        }
+                const timeSpan = operand1.value.getTime() - operand2.value.getTime();
 
-                        let result = false;
-                        switch (parseInt(rule.operator)) {
-                            case 1: // equal
-                                result = (timeSpan === ruleoperand);
-                                break;
-                            case 2: // unequal
-                                result = (timeSpan !== ruleoperand);
-                                break;
-                            case 3: // greater
-                                result = (timeSpan > ruleoperand);
-                                break;
-                            case 4: // greaterOrEqual
-                                result = (timeSpan >= ruleoperand);
-                                break;
-                            case 5: // lesser
-                                result = (timeSpan < ruleoperand);
-                                break;
-                            case 6: // lesserOrEqual
-                                result = (timeSpan <= ruleoperand);
-                                break;
-                            case 99: // otherwise
-                                result = true;
-                                break;
+                const resObj = [];
+                for (let i = 0; i < rulesLength; ++i) {
+                    const rule = node.rules[i];
+                    try {
+                        rule.result =  rule.operator === 99;
+                        if (rule.compare) {
+                            let ruleoperand = node.positionConfig.getFloatProp(node, msg,
+                                { type: rule.operandType, value: rule.operandValue, def: 0 });
+                            if (!isNaN(rule.multiplier) && rule.multiplier !== 0) {
+                                ruleoperand = ruleoperand * rule.multiplier;
+                            }
+                            rule.result = rule.compare(timeSpan, ruleoperand);
                         }
-                        if (result) {
+                        if (rule.result) {
                             resObj.push(msg);
-                            if (node.checkall != 'true') { // eslint-disable-line eqeqeq
+                            if (!node.checkall) { // eslint-disable-line eqeqeq
                                 break;
                             }
                         } else {
@@ -560,6 +578,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             return null;
         });
+        node.status({});
     }
 
     RED.nodes.registerType('time-span', timeSpanNode);

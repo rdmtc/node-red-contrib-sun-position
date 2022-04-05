@@ -1,4 +1,3 @@
-// @ts-nocheck
 /* eslint-disable no-template-curly-in-string */
 /* eslint-disable require-jsdoc */
 /* eslint-disable prefer-arrow-callback */
@@ -694,6 +693,50 @@ describe('time inject node', () => {
             });
         });
 
+        it('inject value (pdsTimeNow) 2 ', function(done) {
+            const flow1 = [
+                {
+                    id: 'n1',
+                    type: 'time-inject',
+                    name: 'myNode',
+                    nameInt: 'test',
+                    positionConfig: 'nc1',
+                    props: [
+                        {
+                            p: '', pt: 'msgPayload', v: '', vt: 'pdsTimeNow',
+                            o: '', oT: 'none', oM: '60000',
+                            f: 0, fS: 0, fI: '0',
+                            next: true,
+                            days: '*', months: '*',
+                            onlyOddDays: false, onlyEvenDays: false, onlyOddWeeks: false, onlyEvenWeeks: false },
+                        {p: '', pt: 'msgTopic', v: 'tx', vt: 'str'}],
+                    injectTypeSelect: 'none',
+                    once: false,
+                    wires: [['n2']]
+                }, cfgNode, hlpNode];
+            helper.load([nodeConfig, nodeTimeInject], flow1, credentials, () => {
+                const n1 = helper.getNode('n1');
+                const n2 = helper.getNode('n2');
+                n1.status.should.be.calledOnce();
+                n1.should.have.property('name', 'myNode');
+                n2.on('input', function(msg) {
+                    try {
+                        msg.should.have.property('topic', 'tx');
+                        msg.should.have.property('payload');
+                        msg.payload.should.have.keys('next', 'last');
+                        msg.payload.next.should.have.keys('value', 'name', 'pos', 'valid', 'elevation');
+                        msg.payload.last.should.have.keys('value', 'name', 'pos', 'valid', 'elevation');
+                        msg.payload.next.name.should.equal('solarNoon');
+                        msg.payload.last.name.should.equal('goldenHourDawnEnd');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({ __ts__input_date: new Date(1577869200000)}); // 1577851200000 - 1.1.2020 10:00
+            });
+        });
+
         /*
         // TODO: add test for ...
         types.SunCalc,
@@ -702,12 +745,11 @@ describe('time inject node', () => {
         types.MoonPhase,
         types.SunAzimuth,
         types.SunElevation,
-        types.SunAzimuthRad,
-        types.SunElevationRad,
         types.SunTimeByAzimuth,
         types.SunTimeByElevationObj,
-        types.SunTimeByAzimuthRad,
-        types.SunTimeByElevationObjRad,
+        types.SunTimeByElevationNext,
+        types.SunTimeByElevationRise,
+        types.SunTimeByElevationSet,
         types.isDST,
         types.WeekOfYear,
         types.WeekOfYearEven,

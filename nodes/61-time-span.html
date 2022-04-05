@@ -131,7 +131,7 @@ this software without specific prior written permission.
                             pt: 'msgPayload',
                             v: '',
                             vt: 'input',
-                            o: '',
+                            o: 1,
                             oT: 'none',
                             oM: 60000,
                             fTs: 1,
@@ -206,7 +206,7 @@ this software without specific prior written permission.
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
                     /* global getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox getBackendData bdDateToTime getCheckboxesStr setTInputValue */
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     const selFields = getSelectFields();
                     // #region operand1
                     setupTInput(node, {
@@ -219,6 +219,7 @@ this software without specific prior written permission.
                             types.MsgPayload,
                             types.MsgTs,
                             types.MsgLc,
+                            types.MsgValue,
                             'flow',
                             'global',
                             'date',
@@ -227,6 +228,7 @@ this software without specific prior written permission.
                             'str',
                             types.DateEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
@@ -239,6 +241,7 @@ this software without specific prior written permission.
                                 opType === types.TimeEntered.value ||
                                 opType === types.DateEntered.value ||
                                 opType === types.TimeSun.value ||
+                                opType === types.TimeSunCustom.value ||
                                 opType === types.TimeMoon.value ||
                                 opType === types.DayOfMonth.value) {
                                 $('.time-row-operand1Format').hide();
@@ -246,6 +249,8 @@ this software without specific prior written permission.
                             } else if (opType === 'msg' ||
                                         opType === types.MsgPayload.value ||
                                         opType === types.MsgTs.value ||
+                                        opType === types.MsgLc.value ||
+                                        opType === types.MsgValue.value ||
                                         opType === 'flow' ||
                                         opType === 'global' ||
                                         opType === 'str' ||
@@ -257,7 +262,6 @@ this software without specific prior written permission.
                                 $('.time-row-operand1Format').hide();
                                 $('.time-row-operand1Offset').hide();
                             }
-
                             getBackendData(d => {
                                 const $div = $('#node-input-operand1-div');
                                 const titleOrg = $div.attr('titleOrg');
@@ -268,6 +272,7 @@ this software without specific prior written permission.
                                 config:     $nodeConfig.val(),
                                 type:       opType,
                                 value:      $operand1.typedInput('value'),
+                                next:       $('#node-input-operand1Next').is(':checked'),
                                 format:     $('#node-input-operand1Format').val(),
                                 offsetType: $('#node-input-operand1Offset').typedInput('type'),
                                 offset:     $('#node-input-operand1Offset').typedInput('value'),
@@ -310,6 +315,7 @@ this software without specific prior written permission.
                             types.MsgPayload,
                             types.MsgTs,
                             types.MsgLc,
+                            types.MsgValue,
                             'flow',
                             'global',
                             'date',
@@ -318,6 +324,7 @@ this software without specific prior written permission.
                             'str',
                             types.DateEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
@@ -330,6 +337,7 @@ this software without specific prior written permission.
                                 opType === types.TimeEntered.value ||
                                 opType === types.DateEntered.value ||
                                 opType === types.TimeSun.value ||
+                                opType === types.TimeSunCustom.value ||
                                 opType === types.TimeMoon.value ||
                                 opType === types.DayOfMonth.value) {
                                 $('.time-row-operand2Format').hide();
@@ -337,6 +345,8 @@ this software without specific prior written permission.
                             } else if (opType === 'msg' ||
                                         opType === types.MsgPayload.value ||
                                         opType === types.MsgTs.value ||
+                                        opType === types.MsgLc.value ||
+                                        opType === types.MsgValue.value ||
                                         opType === 'flow' ||
                                         opType === 'global' ||
                                         opType === 'str' ||
@@ -360,6 +370,7 @@ this software without specific prior written permission.
                                 type:       opType,
                                 value:      $operand2.typedInput('value'),
                                 format:     $('#node-input-operand2Format').val(),
+                                next:       $('#node-input-operand2Next').is(':checked'),
                                 offsetType: $('#node-input-operand2Offset').typedInput('type'),
                                 offset:     $('#node-input-operand2Offset').typedInput('value'),
                                 multiplier: $('#node-input-operand2OffsetMultiplier').val(),
@@ -493,9 +504,7 @@ this software without specific prior written permission.
                     }
                     // #endregion rule-container
                     // #region result-container
-                    /**
-                    * resizes result container
-                    */
+                    /** resizes result container */
                     function resizeResultContainer() {
                         const editorRow = $('.node-input-result-container-row ol');
                         const height = editorRow.outerHeight(true);
@@ -586,6 +595,7 @@ this software without specific prior written permission.
                                         types.TimeEntered,
                                         types.DateEntered,
                                         types.TimeSun,
+                                        types.TimeSunCustom,
                                         types.TimeSunNow,
                                         types.TimeMoon,
                                         types.DayOfMonth,
@@ -606,12 +616,11 @@ this software without specific prior written permission.
                                         types.MoonPhase,
                                         types.SunAzimuth,
                                         types.SunElevation,
-                                        types.SunAzimuthRad,
-                                        types.SunElevationRad,
                                         types.SunTimeByAzimuth,
                                         types.SunTimeByElevationObj,
-                                        types.SunTimeByAzimuthRad,
-                                        types.SunTimeByElevationObjRad,
+                                        types.SunTimeByElevationNext,
+                                        types.SunTimeByElevationRise,
+                                        types.SunTimeByElevationSet,
                                         types.isDST,
                                         types.WeekOfYear,
                                         types.WeekOfYearEven,
@@ -868,6 +877,7 @@ this software without specific prior written permission.
                                 const plVType = $propertyValue.typedInput('type');
                                 if (plVType === types.TimeEntered.value ||
                                     plVType === types.TimeSun.value ||
+                                    plVType === types.TimeSunCustom.value ||
                                     plVType === types.TimeMoon.value) {
                                     $row2a.hide(); // formatTS
                                     $row2b.show(); // format
@@ -925,8 +935,8 @@ this software without specific prior written permission.
                                         months:         getCheckboxesStr($divMonths.find('input[type=checkbox]:checked'), 12),
                                         onlyOddDays:    $cbOnlyEvenDays.is(':checked'),
                                         onlyEvenDays:   $cbOnlyOddDays.is(':checked'),
-                                        onlyOddWeeks:    $cbOnlyEvenWeeks.is(':checked'),
-                                        onlyEvenWeeks:   $cbOnlyOddWeeks.is(':checked'),
+                                        onlyOddWeeks:   $cbOnlyEvenWeeks.is(':checked'),
+                                        onlyEvenWeeks:  $cbOnlyOddWeeks.is(':checked'),
                                         noOffsetError:  true
                                     });
                                 }
@@ -1010,6 +1020,24 @@ this software without specific prior written permission.
                     $('#node-input-operand2Format').val($('#node-input-operand2Formatsel').val());
                     node.operand2Format = $('#node-input-operand2Formatsel').val();
                 }
+                if (node.operand1 === 'payload' && (!node.operand1Type || node.operand1Type === 'msg')) {
+                    node.operand1Type = 'msgPayload';
+                } else if (node.operand1  === 'ts' && (!node.operand1Type || node.operand1Type === 'msg')) {
+                    node.operand1Type = 'msgTs';
+                } else if (node.operand1  === 'lc' && (!node.operand1Type || node.operand1Type === 'msg')) {
+                    node.operand1Type = 'msgLC';
+                } else if (node.operand1  === 'value' && (!node.operand1Type || node.operand1Type === 'msg')) {
+                    node.operand1Type = 'msgValue';
+                }
+                if (node.operand2 === 'payload' && (!node.operand2Type || node.operand2Type === 'msg')) {
+                    node.operand2Type = 'msgPayload';
+                } else if (node.operand2  === 'ts' && (!node.operand2Type || node.operand2Type === 'msg')) {
+                    node.operand2Type = 'msgTs';
+                } else if (node.operand2  === 'lc' && (!node.operand2Type || node.operand2Type === 'msg')) {
+                    node.operand2Type = 'msgLC';
+                } else if (node.operand2  === 'value' && (!node.operand2Type || node.operand2Type === 'msg')) {
+                    node.operand2Type = 'msgValue';
+                }
                 // #region rule-container
                 node.rules = [];
                 const rules = $('#node-input-rule-container').editableList('items');
@@ -1038,6 +1066,7 @@ this software without specific prior written permission.
                 delete node.result1Offset;
                 delete node.result1OffsetType;
                 delete node.result1OffsetMultiplier;
+                delete node.operand;
 
                 const results = $('#node-input-result-container').editableList('items');
                 node.results = [];

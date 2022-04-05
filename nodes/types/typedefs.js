@@ -38,7 +38,7 @@
  * @property {function} fatal Lvel 0. Lowest level, things that have broken Node-RED only.
  * @property {function} error Level 1. Copy is sent to Editor debug panel as well as error log.
  * @property {function} warn Level 2.
- * @property {function} info Level 3.
+ * @property {function} log Level 3.
  * @property {function} debug Level 4.
  * @property {function} trace Level 5. Very verbose output. Should tell the operator everything that is going on.
  * @property {function} metric
@@ -122,8 +122,7 @@
  * @property {Function} removeListener Event handling
  * @property {function} error Error log output, also logs to the Editor's debug panel
  * @property {function} warn Warning log output, also logs to the Editor's debug panel
- * @property {function} info information log output
- * @property {function} log log output
+ * @property {function} log information log output
  * @property {function} debug debugging log output
  * @property {function} status set the node status
  * @property {Object=} credentials Optional secured credentials

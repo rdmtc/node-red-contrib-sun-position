@@ -52,6 +52,7 @@
   * @type {runtimeRED} */
 module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
+
     const util = require('util');
     const hlp = require('./lib/dateTimeHelper.js');
 
@@ -66,6 +67,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          */
         // @ts-ignore
         const node = this;
+
         // Retrieve the config node
         node.positionConfig = RED.nodes.getNode(config.positionConfig);
         // node.debug('initialize time Node ' + util.inspect(config, { colors: true, compact: 10, breakLength: Infinity }));
@@ -90,6 +92,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             offset: config.inputOffset,
             multiplier: config.inputOffsetMultiplier
         };
+        if (node.input.type !== 'entered' && node.input.type !== 'pdsTime' && node.input.type !== 'pdsTimeCustom' && node.input.type !== 'pdmTime') {
+            node.input.next = false;
+        }
 
         if (!Array.isArray(config.results)) {
             config.results = [];
@@ -103,7 +108,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     oT          : (config.result1OffsetType === 0 || config.result1OffsetType === '') ? 'none' : (config.result1OffsetType ? config.result1OffsetType : 'num'),
                     oM          : config.result1OffsetMultiplier ? config.result1OffsetMultiplier : 60000,
                     f           : config.result1Format ? config.result1Format : 0,
-                    next        : false,
+                    next        : true,
                     days        : '*',
                     months      : '*',
                     onlyEvenDays: false,
@@ -124,26 +129,29 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         node.results = [];
         config.results.forEach(prop => {
             const propNew = {
-                outType     : prop.pt,
-                outValue    : prop.p,
-                type        : prop.vt,
-                value       : prop.v,
-                format      : prop.f,
-                offsetType  : prop.oT,
-                offset      : prop.o,
-                multiplier  : prop.oM,
-                next        : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next)) ? true : false,
-                days        : prop.days,
-                months      : prop.months,
-                onlyEvenDays: prop.onlyEvenDays,
-                onlyOddDays : prop.onlyOddDays,
-                onlyEvenWeeks: prop.onlyEvenWeeks,
-                onlyOddWeeks : prop.onlyOddWeeks
+                outType         : prop.pt,
+                outValue        : prop.p,
+                type            : prop.vt,
+                value           : prop.v,
+                format          : prop.f,
+                offsetType      : prop.oT,
+                offset          : prop.o,
+                multiplier      : parseFloat(prop.oM) || 60000,
+                next            : (typeof prop.next === 'undefined' || prop.next === null || hlp.isTrue(prop.next)) ? true : false,
+                days            : prop.days,
+                months          : prop.months,
+                onlyEvenDays    : prop.onlyEvenDays === 'true' || prop.onlyEvenDays === true,
+                onlyOddDays     : prop.onlyOddDays === 'true' || prop.onlyOddDays === true,
+                onlyEvenWeeks   : prop.onlyEvenWeeks === 'true' || prop.onlyEvenWeeks === true,
+                onlyOddWeeks    : prop.onlyOddWeeks === 'true' || prop.onlyOddWeeks === true
             };
+            if (propNew.type !== 'entered' && propNew.type !== 'pdsTime' && propNew.type !== 'pdsTimeCustom' && propNew.type !== 'pdmTime') {
+                propNew.next = false;
+            }
 
             if (node.positionConfig && propNew.type === 'jsonata') {
                 try {
-                    propNew.expr = node.positionConfig.getJSONataExpression(this, propNew.value);
+                    propNew.expr = node.positionConfig.getJSONataExpression(node, propNew.value);
                 } catch (err) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.invalid-expr', { error: err.message }));
                     propNew.expr = null;
@@ -153,16 +161,44 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         });
 
         node.rules = config.rules;
-        node.checkall = config.checkall;
-
-        if (!node.positionConfig) {
-            node.status({
-                fill: 'red',
-                shape: 'dot',
-                text: 'Node not properly configured!!'
-            });
-            return;
+        const rulesLength = node.rules.length;
+        for (let i = 0; i < rulesLength; ++i) {
+            const rule = node.rules[i];
+            rule.operator = Number(rule.operator);
+            if (rule.operator === 99) {
+                rule.next = false;
+            } else {
+                if (rule.operandType !== 'entered' && rule.operandType !== 'pdsTime' && rule.operandType !== 'pdsTimeCustom' && rule.operandType !== 'pdmTime') {
+                    rule.next = false;
+                }
+            }
+            rule.compare = null;
+            rule.result = false;
+            switch (rule.operator) {
+                case 1: // equal             { id: 1, group: "ms", label: "==", "text": "equal" },
+                    rule.compare = (op1, op2) => op1 === op2;
+                    break;
+                case 2: // unequal           { id: 2, group: "ms", label: "!=", "text": "unequal" },
+                    rule.compare = (op1, op2) => op1 !== op2;
+                    break;
+                case 3: // greater           { id: 3, group: "ms", label: ">", "text": "greater" },
+                    rule.compare = (op1, op2) => op1 > op2;
+                    break;
+                case 4: // greaterOrEqual    { id: 5, group: "ms", label: ">=", "text": "greater or equal" },
+                    rule.compare = (op1, op2) => op1 >= op2;
+                    break;
+                case 5: // lesser            { id: 6, group: "ms", label: "<", "text": "lesser" },
+                    rule.compare = (op1, op2) => op1 < op2;
+                    break;
+                case 6: // lesserOrEqual     { id: 7, group: "ms", label: "<=", "text": "lesser or equal" },
+                    rule.compare = (op1, op2) => op1 <= op2;
+                    break;
+                case 99: // otherwise
+                    rule.result = true;
+                    break;
+            }
         }
+        node.checkall = config.checkall === true || config.checkall === 'true';
 
         node.on('input', (msg, send, done) => {
             // If this is pre-1.0, 'done' will be undefined
@@ -183,7 +219,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
 
             try {
-                // const inputData = node.positionConfig.getDateFromProp(node, msg, node.input.type, node.input.value);
+                node.input.now = dNow;
                 const inputData = node.positionConfig.getTimeProp(node, msg, node.input);
                 if (inputData.error) {
                     throw new Error(inputData.error);
@@ -195,16 +231,17 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
                     let resultObj = null;
                     if (prop.type === 'input') {
-                        resultObj = node.positionConfig.formatOutDate(this, msg, inputData.value, prop);
+                        resultObj = node.positionConfig.formatOutDate(node, msg, inputData.value, prop);
                     } else {
-                        resultObj = node.positionConfig.getOutDataProp(this, msg, prop, dNow);
+                        resultObj = node.positionConfig.getOutDataProp(node, msg, prop, dNow);
                     }
+
                     if (resultObj === null || (typeof resultObj === 'undefined')) {
                         node.error('Could not evaluate ' + prop.type + '.' + prop.value + '. - Maybe settings outdated (open and save again)!');
                     } else if (resultObj.error) {
                         node.error('error on getting result: "' + resultObj.error + '"');
                     } else {
-                        node.positionConfig.setMessageProp(this, msg, prop.outType, prop.outValue, resultObj);
+                        node.positionConfig.setMessageProp(node, msg, prop.outType, prop.outValue, resultObj);
                     }
                     // node.debug(`prepOutMsg-${i} msg=${util.inspect(msg, { colors: true, compact: 10, breakLength: Infinity })}`);
                 }
@@ -224,33 +261,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             rule.format = 0;
                         }
 
-                        let compare = null;
-                        let result = false;
-                        switch (Number(rule.operator)) {
-                            case 1: // equal             { id: 1, group: "ms", label: "==", "text": "equal" },
-                                compare = (op1, op2) => op1 === op2;
-                                break;
-                            case 2: // unequal           { id: 2, group: "ms", label: "!=", "text": "unequal" },
-                                compare = (op1, op2) => op1 !== op2;
-                                break;
-                            case 3: // greater           { id: 3, group: "ms", label: ">", "text": "greater" },
-                                compare = (op1, op2) => op1 > op2;
-                                break;
-                            case 4: // greaterOrEqual    { id: 5, group: "ms", label: ">=", "text": "greater or equal" },
-                                compare = (op1, op2) => op1 >= op2;
-                                break;
-                            case 5: // lesser            { id: 6, group: "ms", label: "<", "text": "lesser" },
-                                compare = (op1, op2) => op1 < op2;
-                                break;
-                            case 6: // lesserOrEqual     { id: 7, group: "ms", label: "<=", "text": "lesser or equal" },
-                                compare = (op1, op2) => op1 <= op2;
-                                break;
-                            case 99: // otherwise
-                                result = true;
-                                break;
-                        }
-
-                        if (compare) {
+                        rule.result = rule.operator === 99;
+                        if (rule.compare) {
                             let ruleoperand = null;
                             try {
                                 ruleoperand = node.positionConfig.getTimeProp(node, msg, {
@@ -278,28 +290,28 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             if (rule.operatorType !== '*' && typeof rule.operatorType !== 'undefined') {
                                 switch (rule.operatorType) {
                                     case '11': // ms
-                                        result = compare(inputOperant.getMilliseconds(), ruleoperand.getMilliseconds());
+                                        rule.result = rule.compare(inputOperant.getMilliseconds(), ruleoperand.getMilliseconds());
                                         break;
                                     case '12': // only sec
-                                        result = compare(inputOperant.getSeconds(), ruleoperand.getSeconds());
+                                        rule.result = rule.compare(inputOperant.getSeconds(), ruleoperand.getSeconds());
                                         break;
                                     case '13': // only min
-                                        result = compare(inputOperant.getMinutes(), ruleoperand.getMinutes());
+                                        rule.result = rule.compare(inputOperant.getMinutes(), ruleoperand.getMinutes());
                                         break;
                                     case '14': // only hour
-                                        result = compare(inputOperant.getHours(), ruleoperand.getHours());
+                                        rule.result = rule.compare(inputOperant.getHours(), ruleoperand.getHours());
                                         break;
                                     case '15': // only day
-                                        result = compare(inputOperant.getDate(), ruleoperand.getDate());
+                                        rule.result = rule.compare(inputOperant.getDate(), ruleoperand.getDate());
                                         break;
                                     case '16': // only Month
-                                        result = compare(inputOperant.getMonth(), ruleoperand.getMonth());
+                                        rule.result = rule.compare(inputOperant.getMonth(), ruleoperand.getMonth());
                                         break;
                                     case '17': // only FullYear
-                                        result = compare(inputOperant.getFullYear(), ruleoperand.getFullYear());
+                                        rule.result = rule.compare(inputOperant.getFullYear(), ruleoperand.getFullYear());
                                         break;
                                     case '18': // only dayOfWeek
-                                        result = compare(inputOperant.getDay(), ruleoperand.getDay());
+                                        rule.result = rule.compare(inputOperant.getDay(), ruleoperand.getDay());
                                         break;
                                     default:
                                         if (rule.operatorType.indexOf('11') < 0) {
@@ -337,9 +349,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                                             ruleoperand.setFullYear(0);
                                         }
 
-                                        result = compare(inputOperant.getTime(), ruleoperand.getTime());
+                                        rule.result = rule.compare(inputOperant.getTime(), ruleoperand.getTime());
                                         if (rule.operatorType.indexOf('18') >= 0) {
-                                            result = result && compare(inputOperant.getDay(), ruleoperand.getDay());
+                                            rule.result = rule.result && rule.compare(inputOperant.getDay(), ruleoperand.getDay());
                                         }
                                         break;
                                 }
@@ -347,10 +359,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         }
                         // node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
 
-                        if (result) {
+                        if (rule.result) {
                             resObj.push(msg);
-                            node.debug(i + ' result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }));
-                            if (node.checkall != 'true') { // eslint-disable-line eqeqeq
+                            node.debug(i + ' result=' + util.inspect(rule.result, { colors: true, compact: 10, breakLength: Infinity }));
+                            if (!node.checkall) { // eslint-disable-line eqeqeq
                                 node.debug(i + ' end cause checkall');
                                 break;
                             }
@@ -384,6 +396,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             return null;
         });
+        node.status({});
     }
 
     RED.nodes.registerType('time-comp', timeCompNode);

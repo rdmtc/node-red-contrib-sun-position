@@ -100,6 +100,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
                     node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
+                    done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
                     return null;
                 }
                 const ports = new Array(node.rules.length);
@@ -187,7 +188,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (vType === 'none') {
                     return undefined;
                 }
-                return node.positionConfig.getFloatProp(node, msg, vType, value, 0);
+                return node.positionConfig.getFloatProp(node, msg, { type: vType, value, def: 0 });
             } catch (err) {
                 return undefined;
             }

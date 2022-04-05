@@ -62,14 +62,24 @@
 
 const util = require('util');
 const TIME_WEEK = 604800000;
+const TIME_5d = 432000000;
+const TIME_4d = 345600000;
+const TIME_3d = 259200000;
+const TIME_36h = 129600000;
 const TIME_24h = 86400000;
+const TIME_12h = 43200000;
 const TIME_1h = 3600000;
 const TIME_1min = 60000;
 const TIME_1s = 1000;
 
 module.exports = {
     TIME_WEEK,
+    TIME_5d,
+    TIME_4d,
+    TIME_3d,
+    TIME_36h,
     TIME_24h,
+    TIME_12h,
     TIME_1h,
     TIME_1min,
     TIME_1s,
@@ -82,6 +92,8 @@ module.exports = {
     pad,
     angleNorm,
     angleNormRad,
+    toDec,
+    toRad,
     clipStrLength,
     countDecimals,
     handleError,
@@ -238,6 +250,24 @@ function angleNormRad(angle) {
         angle -= dr;
     }
     return angle;
+}
+
+/**
+ * radians to decimal grad
+ * @param {number} rad angle in radians
+ * @return {number} angle in decimal grad
+ */
+function toDec(rad) {
+    return rad * ( 180 / Math.PI );
+}
+
+/**
+ * decimal grad to radians
+ * @param {number} dec angle in decimal grad
+ * @return {number} angle in radians
+ */
+function toRad(dec) {
+    return dec * ( Math.PI / 180 );
 }
 /*******************************************************************************************************/
 /**
@@ -1509,7 +1539,7 @@ _dateFormat.format = [
 /**
  * pre defined formats of a given date
  * @param  {Date | number}            date            -  JavaScript Date to format
- * @param  {string}          [format]        -  format of the date
+ * @param  {string | number}          [format]        -  format of the date
  * @param  {boolean} [utc] - indicates if the formatted date should be in utc or not
  * @param  {number} [timeZoneOffset] - timezone offset for conversation in minutes
  * @return {any}   returns a number, string or object depending on the given Format
