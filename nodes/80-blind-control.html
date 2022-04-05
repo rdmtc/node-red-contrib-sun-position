@@ -22,16 +22,15 @@ this software without specific prior written permission.
 -->
 
 <script type="text/javascript">
-    // @ts-check
     /* eslint-env browser es6 */
     // Isolate this code
     (function() {
         'use strict';
         /// <reference path="./types/typedefs.js" />
-        /// <reference path="./static/htmlglobal.js" />
+        /// <reference lib="./static/htmlglobal.js" />
 
         /** --- Type Defs ---
-         * @typedef {import('node-red').Red} Red
+         * @typedef {import("node-red").Red} Red
          */
 
         const cNBC_MODE_OFF = 0;
@@ -79,7 +78,7 @@ this software without specific prior written permission.
             return { min:Math.min(min, max), max:Math.max(min, max) };
         }
 
-        /** @type {RED} */
+        /** @type {Red} */
         // @ts-ignore
         RED.nodes.registerType('blind-control', {
             category: 'time and astro',
@@ -101,6 +100,7 @@ this software without specific prior written permission.
                 },
                 addId: {
                     value: '',
+                    // @ts-ignore
                     validate: RED.validators.typedInput('addIdType')
                 },
                 positionConfig: {
@@ -114,7 +114,9 @@ this software without specific prior written permission.
                     validate(v) {
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
-                               (RED.validators.number()(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                        // @ts-ignore
+                               (RED.validators.number()(v) &&
+                               (n >= 60000) && (n < 0x7FFFFFFF));
                     }
                 },
                 startDelayTime: {
@@ -122,7 +124,9 @@ this software without specific prior written permission.
                     validate(v) {
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
-                               (RED.validators.number()(v) && (n >= 0) && (n < 0x7FFFFFFF));
+                        // @ts-ignore
+                               (RED.validators.number()(v) &&
+                               (n >= 0) && (n < 0x7FFFFFFF));
                     },
                     required: false
                 },
@@ -162,7 +166,7 @@ this software without specific prior written permission.
                     validate(v) {
                         const n = parseFloat(v);
                         const mm = getMinMaxBlindPos(this);
-
+                        // @ts-ignore
                         return (RED.validators.number()(v) &&
                                 (n < mm.max) &&
                                 (n > 0));
@@ -173,6 +177,7 @@ this software without specific prior written permission.
                     required: true,
                     validate(v) {
                         const n = parseFloat(v);
+                        // @ts-ignore
                         return RED.validators.number()(v) &&
                                 (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
                                 (n !== parseFloat(getVal(this, 'blindClosedPos')));
@@ -183,6 +188,7 @@ this software without specific prior written permission.
                     required: true,
                     validate(v) {
                         const n = parseFloat(v);
+                        // @ts-ignore
                         return RED.validators.number()(v) &&
                                 (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
                                 (n !== parseFloat(getVal(this, 'blindOpenPos')));
@@ -193,6 +199,7 @@ this software without specific prior written permission.
                 },
                 blindPosDefault: {
                     value: 'open (max)',
+                    // @ts-ignore
                     validate: RED.validators.typedInput('blindPosDefaultType')
                 },
                 blindPosDefaultType: {
@@ -200,6 +207,7 @@ this software without specific prior written permission.
                 },
                 slatPosDefault: {
                     value: '',
+                    // @ts-ignore
                     validate: RED.validators.typedInput('slatPosDefaultType')
                 },
                 slatPosDefaultType: {
@@ -214,6 +222,7 @@ this software without specific prior written permission.
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
                                (v === '') ||
+                               // @ts-ignore
                                (RED.validators.number()(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }
                 },
@@ -229,6 +238,7 @@ this software without specific prior written permission.
                     required: true,
                     validate(v) {
                         const n = Number(v);
+                        // @ts-ignore
                         return (RED.validators.number()(v) &&
                                 ((n === cNBC_MODE_OFF) || (n === cNBC_MODE_MINIMIZE) || (n === cNBC_MODE_MAXIMIZE) || (n === cNBC_MODE_SUN_CONTROL)));
                     }
@@ -244,6 +254,7 @@ this software without specific prior written permission.
                         return (mode === cNBC_MODE_OFF) ||
                                 (mode === cNBC_MODE_MAXIMIZE) ||
                                 (mode === cNBC_MODE_MINIMIZE) ||
+                                // @ts-ignore
                                 RED.validators.typedInput('sunFloorLengthType')(v);
                     }
                 },
@@ -267,6 +278,7 @@ this software without specific prior written permission.
                     value: 'closed (min)',
                     validate(v) {
                         return ((Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                // @ts-ignore
                                 RED.validators.typedInput('blindPosMinType')(v));
                     }
                 },
@@ -277,6 +289,7 @@ this software without specific prior written permission.
                     value: 'open (max)',
                     validate(v) {
                         return ((Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                // @ts-ignore
                                 RED.validators.typedInput('blindPosMaxType')(v));
                     }
                 },
@@ -291,6 +304,7 @@ this software without specific prior written permission.
                         const n = parseFloat(v);
                         const mm = getMinMaxBlindPos(this);
                         return n === 0.00 ||
+                            // @ts-ignore
                             (RED.validators.number()(v) &&
                             (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
                             (n < mm.max) &&
@@ -305,6 +319,7 @@ this software without specific prior written permission.
                         const n = parseFloat(v);
                         const mm = getMinMaxBlindPos(this);
                         return n === 0.00 ||
+                            // @ts-ignore
                             (RED.validators.number()(v) &&
                             (Number.isInteger(n / parseFloat(getVal(this, 'blindIncrement')))) &&
                             (n < mm.max) &&
@@ -313,6 +328,7 @@ this software without specific prior written permission.
                 },
                 sunSlat: {
                     value: '',
+                    // @ts-ignore
                     validate: RED.validators.typedInput('sunSlatType')
                 },
                 sunSlatType: {
@@ -324,6 +340,7 @@ this software without specific prior written permission.
                         const n = parseFloat(v);
                         return ((Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 (v === '') ||
+                                // @ts-ignore
                                 (RED.validators.number()(v) && (n > -2147483647) && (n < 0x7FFFFFFF)));
                     }
                 },
@@ -340,6 +357,7 @@ this software without specific prior written permission.
                     value: '',
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                // @ts-ignore
                                 RED.validators.typedInput('blindPosMaxType')(v);
                     }
                 },
@@ -350,6 +368,7 @@ this software without specific prior written permission.
                     value: '',
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
+                                // @ts-ignore
                                 RED.validators.typedInput('blindPosMaxType')(v);
                     }
                 },
@@ -364,6 +383,7 @@ this software without specific prior written permission.
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 getVal(this, 'windowSetMode') !== 'startEnd' ||
+                                // @ts-ignore
                                 RED.validators.typedInput('windowAzimuthStartType')(v);
                     }
                 },
@@ -375,6 +395,7 @@ this software without specific prior written permission.
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 getVal(this, 'windowSetMode') !== 'startEnd' ||
+                                // @ts-ignore
                                 RED.validators.typedInput('windowAzimuthEndType')(v);
                     }
                 },
@@ -386,6 +407,7 @@ this software without specific prior written permission.
                     validate(v) {
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 getVal(this, 'windowSetMode') !== 'orientation' ||
+                                // @ts-ignore
                                 RED.validators.typedInput('windowOrientationType')(v);
                     }
                 },
@@ -396,6 +418,7 @@ this software without specific prior written permission.
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 getVal(this, 'windowSetMode') !== 'orientation' ||
                                 v==='' ||
+                                // @ts-ignore
                                 RED.validators.number()(v) && (n >= 0) && (n <= 90);
                     }
                 },
@@ -406,6 +429,7 @@ this software without specific prior written permission.
                         return (Number(getVal(this, 'sunControlMode')) === cNBC_MODE_OFF) ||
                                 getVal(this, 'windowSetMode') !== 'orientation' ||
                                 v==='' ||
+                                // @ts-ignore
                                 RED.validators.number()(v) && (n >= 0) && (n <= 90);
                     }
                 },
@@ -589,10 +613,12 @@ this software without specific prior written permission.
                 const node = this;
 
                 const $nodeInputContextStore = $('#node-input-contextStore');
+                // @ts-ignore
                 RED.settings.context.stores.forEach(store => {
                     $nodeInputContextStore.append('<option value="' + store + '"' + (this.contextStore === store ? ' selected' : '') + '>' + store + '</option>');
                 });
 
+                // @ts-ignore
                 const tabs = RED.tabs.create({
                     id: 'node-config-blind-control-tabs',
                     onchange(tab) {
@@ -1064,10 +1090,10 @@ this software without specific prior written permission.
                                     if (addBrac && i > 0 && i < l) {
                                         result += '(&nbsp;';
                                     }
-                                    if (cond.valueType === 'sunControlMode') {
-                                        result += 'Mode is <var>' + cond.value + '</var>';
-                                    } else if (cond.valueType === 'pdmPhaseCheck') {
+                                    if (cond.valueType === 'pdmPhaseCheck') {
                                         result += 'Moon phase is <var>' + cond.value + '</var>';
+                                    } else if (cond.valueType === 'sunControlMode') {
+                                        result += 'Mode is <var>' + cond.value + '</var>';
                                     } else {
                                         result += '<var>' + RED.nodes.getType('position-config').getRDGNodeValLbl(node, cond.valueType, cond.value, null, null, null, length) + '</var>';
                                         result += ' ' + cond.operatorText;
@@ -2875,6 +2901,7 @@ this software without specific prior written permission.
                             types.UndefinedTimeFrom,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeMoon,
                             'msg',
                             'flow',
@@ -3027,6 +3054,7 @@ this software without specific prior written permission.
                             types.UndefinedTimeUntil,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -3134,6 +3162,7 @@ this software without specific prior written permission.
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -3367,6 +3396,7 @@ this software without specific prior written permission.
                         }
                         if (opType === types.TimeEntered.value ||
                             opType === types.TimeSun.value ||
+                            opType === types.TimeSunCustom.value ||
                             opType === types.TimeMoon.value) {
                             $('#dialog-row-offset-timeStartReg').show();
                         } else {
@@ -3440,6 +3470,7 @@ this software without specific prior written permission.
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
+                                       opType === types.TimeSunCustom.value ||
                                        opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeStartMin').show();
                             } else {
@@ -3497,6 +3528,7 @@ this software without specific prior written permission.
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
+                                       opType === types.TimeSunCustom.value ||
                                        opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeStartMax').show();
                             } else {

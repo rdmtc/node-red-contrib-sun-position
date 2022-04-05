@@ -26,14 +26,6 @@
  ******************************************************************************************************/
 
 'use strict';
-/** --- Type Defs ---
- * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
- * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
- * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
- * @typedef {import("./lib/dateTimeHelper").ITimeObject} ITimeObject
- * @typedef {import("./lib/dateTimeHelper").ILimitationsObj} ILimitationsObj
- * @typedef {import("./lib/suncalc.js").ISunTimeSingle} ISunTimeSingle
- */
 
 /*******************************************************************************************************
  * --- imported type definitions ---
@@ -1899,7 +1891,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 try {
                     result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);
                 } catch (err) {
-                    _srcNode.info(util.inspect(err));
+                    _srcNode.log(util.inspect(err));
                 }
             }
             if (typeof data.callback === 'function') {

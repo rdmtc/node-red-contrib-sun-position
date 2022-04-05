@@ -220,7 +220,6 @@
  * @property {Array.<Object>} results    -   tbd
  *
  * @property {IAutoTrigger} autoTrigger autotrigger options
- * @property {NodeJS.Timeout} [autoTriggerObj] - autotrigger TimeOut Object
  *
  * @property {Object} startDelayTimeOut    -   tbd
  * @property {NodeJS.Timeout} startDelayTimeOutObj    -   tbd
@@ -992,6 +991,7 @@ function initializeCtrl(REDLib, node, config) {
                 // @ts-ignore
                 const operator = (parseInt(rule.timeOp) || cNBC_RULE_TYPE_UNTIL);
                 rule.time = { };
+                /** @type {('start'|'end')} */
                 let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
                 if (operator === cNBC_RULE_TYPE_FROM) {
                     // @ts-ignore
@@ -1009,6 +1009,7 @@ function initializeCtrl(REDLib, node, config) {
                     offset          : (rule.offsetValue || 1),
                     // @ts-ignore
                     multiplier      : (parseInt(rule.multiplier) || hlp.TIME_1min),
+                    next            : false,
                     // @ts-ignore
                     days            : (rule.timeDays || '*'),
                     // @ts-ignore
@@ -1076,6 +1077,7 @@ function initializeCtrl(REDLib, node, config) {
         }
         // @ts-ignore
         if (rule.time && (typeof rule.time.operator !== 'undefined')) {
+            /** @type {('start'|'end')} */
             let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
             // @ts-ignore
             if (rule.time.operator === cNBC_RULE_TYPE_FROM) {
@@ -1091,7 +1093,8 @@ function initializeCtrl(REDLib, node, config) {
                 // @ts-ignore
                 offset          : rule.time.offset,
                 // @ts-ignore
-                multiplier      : rule.time.multiplier
+                multiplier      : rule.time.multiplier,
+                next            : false
             }, rule.time[ttype]);
             // @ts-ignore
             if (rule.timeMin && rule.timeMin.type !== 'none' ) {
@@ -1105,7 +1108,8 @@ function initializeCtrl(REDLib, node, config) {
                     // @ts-ignore
                     offset          : (rule.timeMin.offset || 1),
                     // @ts-ignore
-                    multiplier      : (parseInt(rule.timeMin.multiplier) || 60000)
+                    multiplier      : (parseInt(rule.timeMin.multiplier) || 60000),
+                    next            : false
                 }, rule.time[ttype].min);
             }
             // @ts-ignore
@@ -1120,7 +1124,8 @@ function initializeCtrl(REDLib, node, config) {
                     // @ts-ignore
                     offset          : (rule.timeMax.offset || 1),
                     // @ts-ignore
-                    multiplier      : (parseInt(rule.timeMax.multiplier) || 60000)
+                    multiplier      : (parseInt(rule.timeMax.multiplier) || 60000),
+                    next            : false
                 }, rule.time[ttype].max);
             }
             // @ts-ignore

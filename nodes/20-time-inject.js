@@ -701,7 +701,6 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     if (!node.initializeStartTimer()) {
                         node.doCreateStartTimeout('initial');
                     }
-                    node.doCreateCRONSetup();
                     break;
                 case tInj.cron:
                     // node.debug('initialize - Intervall cron');

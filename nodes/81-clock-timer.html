@@ -22,23 +22,27 @@ this software without specific prior written permission.
 -->
 
 <script type="text/javascript">
-    // @ts-cehck
     /* eslint-env browser es6 */
     // Isolate this code
     (function() {
         'use strict';
+        /// <reference path="./types/typedefs.js" />
+        /// <reference lib="./static/htmlglobal.js" />
+
         /** --- Type Defs ---
          * @typedef {import("node-red").Red} Red
          */
-        const cNBC_RULE_TYPE_UNTIL = 0;
-        const cNBC_RULE_TYPE_FROM = 1;
+
         const cNBC_RULE_EXEC = {
             auto: 0,
             first:1,
             last:2
         };
+        const cNBC_RULE_TYPE_UNTIL = 0;
+        const cNBC_RULE_TYPE_FROM = 1;
 
         /** @type {Red} */
+        // @ts-ignore
         RED.nodes.registerType('clock-timer', {
             category: 'time and astro',
             color: '#FFCC66',
@@ -59,6 +63,7 @@ this software without specific prior written permission.
                 },
                 addId: {
                     value: '',
+                    // @ts-ignore
                     validate: RED.validators.typedInput('addIdType')
                 },
                 positionConfig: {
@@ -72,7 +77,9 @@ this software without specific prior written permission.
                     validate(v) {
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
-                               (RED.validators.number()(v) && (n >= 60000) && (n < 0x7FFFFFFF));
+                        // @ts-ignore
+                               (RED.validators.number()(v) &&
+                               (n >= 60000) && (n < 0x7FFFFFFF));
                     }
                 },
                 startDelayTime: {
@@ -80,7 +87,9 @@ this software without specific prior written permission.
                     validate(v) {
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
-                               (RED.validators.number()(v) && (n >= 0) && (n < 0x7FFFFFFF));
+                        // @ts-ignore
+                               (RED.validators.number()(v) &&
+                               (n >= 0) && (n < 0x7FFFFFFF));
                     },
                     required: false
                 },
@@ -115,6 +124,7 @@ this software without specific prior written permission.
                         const n = parseFloat(v);
                         return (typeof v === 'undefined') ||
                                (v === '') ||
+                               // @ts-ignore
                                (RED.validators.number()(v) && (n >= 200) && (n < 0x7FFFFFFF));
                     }
                 },
@@ -125,6 +135,7 @@ this software without specific prior written permission.
                 },
                 payloadDefault: {
                     value: '',
+                    // @ts-ignore
                     validate: RED.validators.typedInput('payloadDefaultType')
                 },
                 payloadDefaultType: {
@@ -139,6 +150,7 @@ this software without specific prior written permission.
                         return (
                             (typeof v === 'undefined') ||
                             (typeof this.payloadOffsetType === 'undefined') ||
+                            // @ts-ignore
                             RED.validators.typedInput('payloadOffsetType')(v)
                         );
                     }
@@ -148,6 +160,7 @@ this software without specific prior written permission.
                 },
                 payloadDefaultOffsetMultiplier: {
                     value: 60000,
+                    // @ts-ignore
                     validate : RED.validators.number()
                 }
                 // #endregion time settings
@@ -291,10 +304,12 @@ this software without specific prior written permission.
                 const node = this;
 
                 const $nodeInputContextStore = $('#node-input-contextStore');
+                // @ts-ignore
                 RED.settings.context.stores.forEach(store => {
                     $nodeInputContextStore.append('<option value="' + store + '"' + (this.contextStore === store ? ' selected' : '') + '>' + store + '</option>');
                 });
 
+                // @ts-ignore
                 const tabs = RED.tabs.create({
                     id: 'node-config-clock-timer-tabs',
                     onchange(tab) {
@@ -310,7 +325,7 @@ this software without specific prior written permission.
                 const setup = function(node) {
                     /* global getTypes getSelectFields setupTInput appendOptions getBackendData bdDateToTime initCombobox initCheckboxesBlock autocomplete getCheckboxesStr setTInputValue */
                     // #region initialize
-                    const types = getTypes(node, () => $nodeConfig.val());
+                    const types = /** @type {Object} */ getTypes(node, () => $nodeConfig.val());
                     types.OutputPayload = {
                         value: 'payload',
                         label: node._('node-red-contrib-sun-position/position-config:common.types.payload'),
@@ -866,7 +881,8 @@ this software without specific prior written permission.
                                 result += '</div>';
                             }
                             result += '<div>';
-                            if (data.payload && data.payload.type && data.payload.type !== 'none') {
+                            if (data.payload) {
+                                if (data.payload.type && data.payload.type !== 'none') {
                                     result += '<div class="indent-payload-text"><i class="fa fa-step-backward" aria-hidden="true"></i> <span>';
                                     result += node._('node-red-contrib-sun-position/position-config:ruleCtrl.label.rulePayload');
                                     result += '</span> <var>';
@@ -959,7 +975,7 @@ this software without specific prior written permission.
                                 delete data.valid2OperandBValue;
                                 delete data.valid2OperandBType;
                             }
-                            if(data.timeBType) {
+                            if (data.timeBType) {
                                 if (data.timeBType === types.TimeSun.value ||
                                     data.timeBType === types.TimeSunCustom.value ||
                                     data.timeBType === types.TimeMoon.value) {
@@ -1177,6 +1193,7 @@ this software without specific prior written permission.
                             const $div = $('<div/>', {
                                 class: 'rdgtimer-rule-mainblock'
                             }).appendTo($row0);
+
                             $('<span />', {
                                 id: 'rule-name-'+containerIndex,
                                 class: 'rdgtimer-rule-name-span'
@@ -1739,7 +1756,7 @@ this software without specific prior written permission.
                                         'num',
                                         types.numAzimuth,
                                         types.numAltitude,
-                                        types.preDefAzimuth,
+                                        types.numAnglePreDef,
                                         'str',
                                         'bool',
                                         'flow',
@@ -1874,6 +1891,7 @@ this software without specific prior written permission.
                             types.UndefinedTimeFrom,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeMoon,
                             'msg',
                             'flow',
@@ -2026,6 +2044,7 @@ this software without specific prior written permission.
                             types.UndefinedTimeUntil,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -2133,6 +2152,7 @@ this software without specific prior written permission.
                             types.Undefined,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             'msg',
@@ -2398,6 +2418,7 @@ this software without specific prior written permission.
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
+                                       opType === types.TimeSunCustom.value ||
                                        opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeStartMin').show();
                             } else {
@@ -2455,6 +2476,7 @@ this software without specific prior written permission.
                                 return;
                             } else if (opType === types.TimeEntered.value ||
                                        opType === types.TimeSun.value ||
+                                       opType === types.TimeSunCustom.value ||
                                        opType === types.TimeMoon.value) {
                                 $('#dialog-row-offset-timeStartMax').show();
                             } else {
@@ -2524,6 +2546,7 @@ this software without specific prior written permission.
                         }
                         if (opType === types.TimeEntered.value ||
                            opType === types.TimeSun.value ||
+                           opType === types.TimeSunCustom.value ||
                            opType === types.TimeMoon.value) {
                             $('#dialog-row-timeEndReg-offset').show();
                         } else {
@@ -3818,6 +3841,8 @@ this software without specific prior written permission.
     }
     .dialog-element-clickable {
         user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
         cursor: pointer;
         touch-action: manipulation;
         display: inline-block;

@@ -25,7 +25,6 @@
  * blind-control:
  *********************************************/
 'use strict';
-/// <reference path="./types/typedefs.js" />
 /** --- Type Defs ---
  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
@@ -1577,9 +1576,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         });
 
         node.on('close', () => {
-            if (node.autoTriggerObj) {
-                clearTimeout(node.autoTriggerObj);
-                delete node.autoTriggerObj;
+            if (node.autoTrigger && node.autoTrigger.timer) {
+                clearTimeout(node.autoTrigger.timer);
+                delete node.autoTrigger.timer;
             }
             if (node.startDelayTimeOutObj) {
                 clearTimeout(node.startDelayTimeOutObj);

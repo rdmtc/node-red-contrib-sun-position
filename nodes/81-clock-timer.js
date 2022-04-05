@@ -628,9 +628,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         });
 
         node.on('close', () => {
-            if (node.autoTriggerObj) {
-                clearTimeout(node.autoTriggerObj);
-                delete node.autoTriggerObj;
+            if (node.autoTrigger && node.autoTrigger.timer) {
+                clearTimeout(node.autoTrigger.timer);
+                delete node.autoTrigger.timer;
             }
             if (node.startDelayTimeOutObj) {
                 clearTimeout(node.startDelayTimeOutObj);

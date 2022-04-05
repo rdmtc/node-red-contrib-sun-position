@@ -381,7 +381,7 @@
 			"ruleTimeMaxOffset": "spätester (max) offset",
             "ruleTimeOffset": "zeit offset",
             "ruleOff": "✋ nichts senden",
-			"ruleLevelND": "standard level (e.g. sun control)",
+			"ruleLevelND": "standard Level (e.g. sun control)",
             "ruleState": "aktiviert oder deaktiviert die Regel",
             "ruleExec":"Reihenfolge der Auswertung",
             "ruleExecAuto": "auto - Regeln nur mit '↧ von', letzte gültige; alle anderen erste gültige",

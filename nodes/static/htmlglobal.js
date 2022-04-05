@@ -22,28 +22,13 @@
  */
 
 'use strict';
+
 /** --- Type Defs ---
  * @typedef {import('./../types/typedefs.js').runtimeRED} runtimeRED
+ * @typedef {import('jquery')} $
  */
+// @typedef {import('jquery-ui')}
 /************************************************************************/
-/// <reference path="../../node_modules/@types/jquery/index.d.ts" />
-
-/** editorRED
- * @typedef {Object} editorRED The Node-RED core object available to a custom node's .html file
- * @property {function} registerType Register a new type of node to Node-myRED.
- * @property {function} createNode Create a node instance (called from within registerType function).
- * @property {function} getNode Get a reference to another node instance in the current flows. Can then access its properties.
- * @property {function} eachNode: [Function: eachNode],
- * @property {function} addCredentials: [Function: add],
- * @property {function} getCredentials: [Function: get],
- * @property {function} deleteCredentials: [Function: delete],
- * @property {Object} validators
- */
-
-/** @type {editorRED} */
-// @ts-ignore
-const myRED = RED;
-
 /**
  * get selection firlds
  * @returns {Object} Object for selection fields
@@ -285,7 +270,7 @@ function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeNumberPercent.svg',
             hasValue: true,
             // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
+            validate: RED.validators.number() // ^[1-9]\d*(\.\d+)?\s?%?$
         },
         nodeId: {
             value: 'nodeId',
@@ -529,7 +514,7 @@ function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
             validate(v) {
                 const n = parseFloat(v);
                 // @ts-ignore
-                return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n >= -360) && (n <= 720));
+                return ( RED.validators.number()(v) && (n >= -360) && (n <= 720));
             }
         },
         numAnglePreDef: {
@@ -562,7 +547,7 @@ function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
             validate(v) {
                 const n = parseFloat(v);
                 // @ts-ignore
-                return (/** @type {runtimeRED} */ RED.validators.number()(v) && (n >= -90) && (n <= 90));
+                return ( RED.validators.number()(v) && (n >= -90) && (n <= 90));
             }
         },
         SunAzimuth: {
@@ -583,7 +568,7 @@ function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeAzimuth.svg',
             hasValue: true,
             // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
+            validate: RED.validators.number()
         },
         SunTimeByElevationObj: {
             value: 'pdsTimeByElevation',
@@ -591,7 +576,7 @@ function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
             hasValue: true,
             // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
+            validate: RED.validators.number()
         },
         SunTimeByElevationNext: {
             value: 'pdsTimeByElevationNext',
@@ -599,7 +584,7 @@ function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevation.svg',
             hasValue: true,
             // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
+            validate: RED.validators.number()
         },
         SunTimeByElevationRise: {
             value: 'pdsTimeByElevationRise',
@@ -607,7 +592,7 @@ function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationRise.svg',
             hasValue: true,
             // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
+            validate: RED.validators.number()
         },
         SunTimeByElevationSet: {
             value: 'pdsTimeByElevationSet',
@@ -615,7 +600,7 @@ function getTypes(node, getConfig) { // eslint-disable-line no-unused-vars
             icon: 'icons/node-red-contrib-sun-position/inputTypeSunTimeElevationSet.svg',
             hasValue: true,
             // @ts-ignore
-            validate: /** @type {runtimeRED} */ RED.validators.number()
+            validate: RED.validators.number()
         },
         isDST: {
             value: 'pdbIsDST',
@@ -863,13 +848,14 @@ function initializeValue(data, id, newVal) { // eslint-disable-line no-unused-va
 
 /**
  * initializes an inputbos with autocomplete
- * @param {object} inputBox - jsQuery selector of the input box
+ * @param {JQuery<HTMLElement>} $inputBox - jsQuery selector of the input box
  * @param {string} dataListID - id of the datalist from getAutocompleteFormats()
  */
-function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-vars
+function autocomplete($inputBox, dataListID) { // eslint-disable-line no-unused-vars
     const dataList = getAutocompleteFormats()[dataListID];
     // don't navigate away from the field on tab when selecting an item
-    inputBox.on('keydown', function (event) {
+
+    $inputBox.on('keydown', function (event) {
         // @ts-ignore
         if (event.keyCode === $.ui.keyCode.TAB && $(this).autocomplete('instance') && $(this).autocomplete('instance').menu.active) {
             event.preventDefault();
@@ -877,7 +863,8 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
     }).autocomplete({
         minLength: 0,
         source(request, response) {
-            if (inputBox.getCursorPosition() < request.term.length) {
+            // @ts-ignore
+            if ($inputBox.getCursorPosition() < request.term.length) {
                 return;
             }
 
@@ -891,6 +878,7 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
             return false;
         },
         select(event, ui) {
+            // @ts-ignore
             const terms = this.value.split(/\W+/);
             // remove the current input
             terms.pop();
@@ -898,6 +886,7 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
             terms.push(ui.item.value);
             // add placeholder to get the comma-and-space at the end
             terms.push('');
+            // @ts-ignore
             this.value = terms.join(' ');
             return false;
         }
@@ -907,7 +896,7 @@ function autocomplete(inputBox, dataListID) { // eslint-disable-line no-unused-v
 /**
  * append options to a select field
  * @param {*} node - node representation for access to i18N function (node._())
- * @param {object} parent - jQuery selector of the parent element (<select> - field)
+ * @param {JQuery<HTMLElement>} parent - jQuery selector of the parent element (<select> - field)
  * @param {string} elementName - name of the element from getSelectFields()
  * @param {Function} [filter] - function for filter the elements
  */
@@ -965,12 +954,10 @@ function appendOptions(node, parent, elementName, filter) { // eslint-disable-li
  * setup a typedInput for node-red
  * @param {*} node - node representation for access to i18N function (node._())
  * @param {tiData} data - data of the typed input
- * @returns {object} jQuery selector of the typeInput field - ideal for chaining
+ * @returns {JQuery<HTMLElement>} jQuery selector of the typeInput field - ideal for chaining
  */
 function setupTInput(node, data) { // eslint-disable-line no-unused-vars
-    // @ts-ignore
     const $inputField = $('#node-input-' + data.valueProp);
-    // @ts-ignore
     const $typeField = $('#node-input-' + data.typeProp);
     let type='';
     if (typeof node[data.typeProp] === 'undefined' || node[data.typeProp] === null) {
@@ -1072,8 +1059,8 @@ function initCheckboxesBlock(element, val) { // eslint-disable-line no-unused-va
 /**
  * initializes a combobox (combination of input and select box)
  * @param {*} node - node representation for access to i18N function (node._())
- * @param {object} $inputSelect - jQuery selector of the select element
- * @param {object} $inputBox - jQuery selector of the input element
+ * @param {JQuery<HTMLElement>} $inputSelect - jQuery selector of the select element
+ * @param {JQuery<HTMLElement>} $inputBox - jQuery selector of the input element
  * @param {string} dataListID - id of the datalist from getAutocompleteFormats()
  * @param {string} optionElementName - name of the element from getSelectFields()
  * @param {string} value - value of the input/select field
@@ -1099,7 +1086,7 @@ function initCombobox(node, $inputSelect, $inputBox, dataListID, optionElementNa
             const width = (205 + baseWidth);
             $inputBox.css({ width: 'calc(100% - ' + width + 'px)' });
             $inputBox.show();
-            if (!isNaN($inputBox.val())) {
+            if (!isNaN(Number($inputBox.val()))) {
                 $inputBox.val(node._('node-red-contrib-sun-position/position-config:common.timeFormat.' + timeFormat));
             }
         } else {
@@ -1116,12 +1103,12 @@ function initCombobox(node, $inputSelect, $inputBox, dataListID, optionElementNa
 
 /**
  * add a label to a html element
- * @param {object} parent - element (row) to append the label
+ * @param {JQuery<HTMLElement>} parent - element (row) to append the label
  * @param {string} forEl - name of the element to what the label is
  * @param {string} [symb] - class name of the symbol e.g. 'fa fa-clock'
  * @param {string} [text] - text of the label
  * @param {string} [width] - width of the label
- * @returns {object} jQuery selector of the new label
+ * @returns {JQuery<HTMLElement>} jQuery selector of the new label
  */
 function addLabel(parent, forEl, symb, text, width) { // eslint-disable-line no-unused-vars
     // @ts-ignore
@@ -1171,7 +1158,7 @@ function getMultiselectText(val, length, types) { // eslint-disable-line no-unus
 /**
  * set the checkboxes in a multiselect combo box to a value
  * @param {string} value - value of the array
- * @param {object} field - parent jquery selector element
+ * @param {JQuery<HTMLElement>} field - parent jquery selector element
  * @param {Array.<multiselectTypes>} types - array of types
  */
 function setMultiselect(value, field, types) { // eslint-disable-line no-unused-vars
@@ -1191,11 +1178,11 @@ function setMultiselect(value, field, types) { // eslint-disable-line no-unused-
 /**
  * adds a multiselect combo box to the form
  * @param {*} node - Node Red Source Node
- * @param {object} parent - parent jQuery selector to add multiselect
+ * @param {JQuery<HTMLElement>} parent - parent jQuery selector to add multiselect
  * @param {string} elementName - Name of the element in the node, e.g. 'operatorTypes'
  * @param {string} i18N - i18N element name, e.g. 'time-comp.operatorTypes'
  * @param {string} id - element id, e.g. 'node-input-rule-operatorType-1'
- * @returns {object} jQuery selector of the multiselect
+ * @returns {JQuery<HTMLElement>} jQuery selector of the multiselect
  */
 function multiselect(node, parent, elementName, i18N, id) { // eslint-disable-line no-unused-vars
     const types = getSelectFields()[elementName + 'Short'];
@@ -1389,7 +1376,7 @@ function bdDateToTime(d, add) { // eslint-disable-line no-unused-vars
 
 /**
  * get the value for the day checkbox array
- * @param {object} value - the checkbox array
+ * @param {JQuery<HTMLElement>} value - the checkbox array
  * * @param {number} max - the maximum count of elements
  * @returns {string} the value of the checkboxes
  */
