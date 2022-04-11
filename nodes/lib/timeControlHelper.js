@@ -558,13 +558,13 @@ function getRuleTimeData(node, msg, rule, timep, dNow, def) {
         // @ts-ignore
         if (!rule.timeResultMin) rule.timeResultMin = { start:{}, end:{} };
         rule.timeResultMin[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].min);
-        rule.timeResultMin[timep].ts = rule.timeResultMin[timep].value.getTime();
         rule.timeResultMin[timep].source = 'min';
         if (rule.timeResultMin[timep].error) {
             hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeResultMin[timep].error }), undefined, rule.timeResultMin[timep].error);
         } else if (!rule.timeResultMin[timep].value) {
-            throw new Error('Error can not calc Alt time!');
+            throw new Error('Error can not calc minimum time!');
         } else {
+            rule.timeResultMin[timep].ts = rule.timeResultMin[timep].value.getTime();
             if (rule.timeResultMin[timep].ts > rule.timeResult[timep].ts) {
                 [rule.timeResult[timep], rule.timeResultMin[timep]] = [rule.timeResultMin[timep], rule.timeResult[timep]];
             }
@@ -575,13 +575,13 @@ function getRuleTimeData(node, msg, rule, timep, dNow, def) {
         // @ts-ignore
         if (!rule.timeResultMax) rule.timeResultMax = { start:{}, end:{} };
         rule.timeResultMax[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].max);
-        rule.timeResultMax[timep].ts = rule.timeResultMax[timep].value.getTime();
         rule.timeResultMax[timep].source = 'max';
         if (rule.timeResultMax[timep].error) {
             hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeResultMax[timep].error }), undefined, rule.timeResultMin[timep].error);
         } else if (!rule.timeResultMax[timep].value) {
-            throw new Error('Error can not calc Alt time!');
+            throw new Error('Error can not calc maximum time!');
         } else {
+            rule.timeResultMax[timep].ts = rule.timeResultMax[timep].value.getTime();
             if (rule.timeResultMax[timep].ts < rule.timeResult[timep].ts) {
                 [rule.timeResult[timep], rule.timeResultMax[timep]] = [rule.timeResultMax[timep], rule.timeResult[timep]];
             }
