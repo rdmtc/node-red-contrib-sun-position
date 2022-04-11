@@ -509,34 +509,32 @@ function getRuleTimeData(node, msg, rule, dNow) {
     if (rule.timeMin) {
         rule.timeMin.now = dNow;
         rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.timeMin);
-        const numMin = rule.timeDataMin.value.getTime();
         rule.timeDataMin.source = 'min';
         if (rule.timeDataMin.error) {
             hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataMin.error);
         } else if (!rule.timeDataMin.value) {
             throw new Error('Error can not calc Alt time!');
         } else {
-            if (numMin > rule.timeData.ts) {
+            rule.timeDataMin.ts = rule.timeDataMin.value.getTime();
+            rule.timeDataMin.dayId = hlp.getDayId(rule.timeDataMin.value);
+            if (rule.timeDataMin.ts > rule.timeData.ts) {
                 [rule.timeData, rule.timeDataMin] = [rule.timeDataMin, rule.timeData];
-                rule.timeData.ts = numMin;
-                rule.timeData.dayId = hlp.getDayId(rule.timeDataMin.value);
             }
         }
     }
     if (rule.timeMax) {
         rule.timeMax.now = dNow;
         rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.timeMax);
-        const numMax = rule.timeDataMax.value.getTime();
         rule.timeDataMax.source = 'max';
         if (rule.timeDataMax.error) {
             hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataMax.error);
         } else if (!rule.timeDataMax.value) {
             throw new Error('Error can not calc Alt time!');
         } else {
-            if (numMax < rule.timeData.ts) {
+            rule.timeDataMax.ts = rule.timeDataMax.value.getTime();
+            rule.timeDataMax.dayId = hlp.getDayId(rule.timeDataMax.value);
+            if (rule.timeDataMax.ts < rule.timeData.ts) {
                 [rule.timeData, rule.timeDataMax] = [rule.timeDataMax, rule.timeData];
-                rule.timeData.ts = numMax;
-                rule.timeData.dayId = hlp.getDayId(rule.timeDataMax.value);
             }
         }
     }
