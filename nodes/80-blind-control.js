@@ -1322,6 +1322,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             if (result !== null && typeof result !== 'undefined') {
                                 tempData[_obj.type + '.' + _obj.value] = result;
                             }
+                            return result;
                         }
                     }, true, oNow.now);
                 }
@@ -1421,6 +1422,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                                 if (result !== null && typeof result !== 'undefined') {
                                     tempData[_obj.type + '.' + _obj.value] = result;
                                 }
+                                return result;
                             },
                             operator: el.operator
                         }, false, oNow.now);
