@@ -909,6 +909,15 @@ this software without specific prior written permission.
                         types: ['num', types.MsgValue, types.MsgPayloadByTopic, 'msg', 'flow', 'global', 'env']
                     });
 
+                    $('#node-input-windowSetMode').on('change focus focusout', () => {
+                        $('#node-input-sunControlMode').change();
+                    });
+
+                    if (node.windowSetMode !== 'orientation' && node.windowSetMode !== 'startEnd') {
+                        node.windowSetMode = 'startEnd';
+                        $('#node-input-windowSetMode').val('startEnd');
+                    }
+
                     setupTInput(node, {
                         typeProp: 'windowAzimuthStartType',
                         valueProp: 'windowAzimuthStart',
@@ -944,14 +953,6 @@ this software without specific prior written permission.
                         defaultValue: '',
                         types: [types.Undefined, 'str', 'flow', 'global', 'env'] // types.MsgPayload, types.MsgTopic, types.MsgPayloadByTopic, types.MsgValue, 'msg',
                     });
-
-                    $('#node-input-windowSetMode').on('change focus focusout', () => {
-                        $('#node-input-sunControlMode').change();
-                    });
-                    if (!node.windowSetMode) {
-                        node.windowSetMode = 'startEnd';
-                        $('#node-input-windowSetMode').val('startEnd');
-                    }
                     // #endregion blind
                     // #region rules
                     const ruleVersion = 4;
@@ -2896,7 +2897,7 @@ this software without specific prior written permission.
                     // #region dialogTimeReg Start
                     const $dialogTimeStartRegInput = $dialog.find('#dlg-ip-btctl-rule-timeStartReg');
                     $dialogTimeStartRegInput.typedInput({
-                        default: types.Undefined.value,
+                        default: types.UndefinedTimeFrom.value,
                         types: [
                             types.UndefinedTimeFrom,
                             types.TimeEntered,
@@ -2909,7 +2910,8 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad
+                            types.SunTimeByElevationRise,
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeStartRegInput.typedInput('width', '40%');
@@ -3049,7 +3051,7 @@ this software without specific prior written permission.
                     // #region dialogTimeReg End
                     const $dialogTimeEndRegInput = $dialog.find('#dlg-ip-btctl-rule-timeEndReg');
                     $dialogTimeEndRegInput.typedInput({
-                        default: types.Undefined.value,
+                        default: types.UndefinedTimeUntil.value,
                         types: [
                             types.UndefinedTimeUntil,
                             types.TimeEntered,
@@ -3063,13 +3065,9 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
                             types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
                             types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeEndRegInput.typedInput('width', '40%');
@@ -3171,13 +3169,9 @@ this software without specific prior written permission.
                             'env',
                             'jsonata',
                             types.SunTimeByAzimuth,
-                            types.SunTimeByAzimuthRad,
                             types.SunTimeByElevationNext,
-                            types.SunTimeByElevationNextRad,
                             types.SunTimeByElevationRise,
-                            types.SunTimeByElevationRiseRad,
-                            types.SunTimeByElevationSet,
-                            types.SunTimeByElevationSetRad
+                            types.SunTimeByElevationSet
                         ]
                     });
                     $dialogTimeEndMaxInput.typedInput('width', '40%');
@@ -4586,7 +4580,7 @@ this software without specific prior written permission.
             <div class="form-row form-row-sunControlActive block-noindent" data-i18n="[title]blind-control.placeholder.windowSetMode">
                 <label for="node-input-windowSetMode"><i class="fa fa-compass"></i> <span data-i18n="blind-control.label.windowSetMode"></span></label>
                 <select id="node-input-windowSetMode" class="row-full-width">
-                    <option value="azimuth" data-i18n="[html]blind-control.label.windowSetModeAzimuthStartEnd"></option>
+                    <option value="startEnd" data-i18n="[html]blind-control.label.windowSetModeAzimuthStartEnd"></option>
                     <option value="orientation" data-i18n="[html]blind-control.label.windowSetModeOrientation"></option>
                 </select>
             </div>
