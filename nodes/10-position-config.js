@@ -1303,44 +1303,25 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * @public
          */
         getFloatProp(_srcNode, msg, data) {
-            // _srcNode.debug(`getFloatProp type=${data.type} value=${value} def=${def} callback=${callback} noError=${noError}`);
+            // _srcNode.debug(`getFloatProp type=${data.type} value=${data.value} def=${data.def} noError=${data.noError}`);
             let result; // 'msg', 'flow', 'global', 'num', 'bin', 'env', 'jsonata'
-            if (data.type === 'num') {
-                result = Number(data.value); // extra conversation to handle empty string as 0
-            } else if (data.type === '' || (typeof data.type === 'undefined') || data.type === null) {
+            if (data.type === '' || (typeof data.type === 'undefined') || data.type === null) {
                 if (isNaN(data.value)) {
                     return data.def || NaN;
                 }
                 result = data.value;
-            } else if (data.type === 'numAzimuth' || data.type === 'numAltitude') {
-                if (this.angleType === 'rad') {
-                    result = hlp.angleNorm(Number(data.value));
-                } else {
-                    result = hlp.angleNormRad(Number(data.value));
-                }
-            } else if (data.type === 'numAnglePreDef') {
-                const val = this.customAngles.find( el => el.name === data.value);
-                if (typeof val === 'undefined') {
-                    if (data.noError) { return NaN; }
-                    throw new Error(RED._('errors.notEvaluableCustomAngle', data));
-                }
-                if (this.angleType === 'rad') {
-                    result = hlp.angleNormRad(Number(val.angle));
-                } else {
-                    result = hlp.angleNorm(Number(val.angle));
-                }
             } else if (data.type === 'none') {
                 return data.def || NaN;
             } else {
                 result = this.getPropValue(_srcNode, msg, data);
             }
             if (result === null || typeof result === 'undefined') {
-                if (data.noError) { return NaN; }
+                if (data.noError) { return data.def || NaN; }
                 throw new Error(RED._('errors.notEvaluableProperty', data));
             }
             result = parseFloat(result);
             if (isNaN(result)) {
-                if (data.noError) { return NaN; }
+                if (data.noError) { return data.def || NaN; }
                 throw new Error('the value of ' + data.type + '.' + data.value + ' is not a valid Number!');
             }
             return result;
@@ -1754,7 +1735,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * @public
         */
         getPropValue(_srcNode, msg, data, noError, dNow) {
-            // _srcNode.debug(`getPropValue ${data.type}.${data.value} (${data.addID}) - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // _srcNode.debug(`getPropValue ${data.type}.${data.value} - data= ${util.inspect(data, { colors: true, compact: 10, breakLength: Infinity })}`);
             noError = noError || data.noError;
             dNow = dNow || data.now;
             let result = null;
@@ -1766,7 +1747,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
                 return undefined;
             } else if (data.type === 'num') {
-                result = Number(data.value);
+                result = Number(data.value); // extra conversation to handle empty string as 0
             } else if (data.type === 'numAzimuth' || data.type === 'numAltitude') {
                 if (this.angleType === 'rad') {
                     result = hlp.angleNormRad(Number(data.value));
@@ -1908,7 +1889,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
             }
             if (typeof data.callback === 'function') {
-                // _srcNode.debug('getPropValue result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
+                // _srcNode.debug('getPropValue callback result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
                 return data.callback(result, data);
             } else if (result === null || typeof result === 'undefined') {
                 if (noError !== true) {

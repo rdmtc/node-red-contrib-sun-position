@@ -62,7 +62,7 @@
  * @property {string} topType               - type of the top of the window
  * @property {*} bottom                     - the bottom of the window
  * @property {string} bottomType            - type of the bottom of the window
- * @property {('setMode'|'orientation')} setMode   - mode of the start/end angles
+ * @property {('startEnd'|'orientation')} setMode   - mode of the start/end angles
  * @property {*} azimuthStart               - the start position angle to the geographical north
  * @property {string} azimuthStartType      - type of the start position angle to the geographical north
  * @property {*} azimuthEnd                 - the end position angle to the geographical north
@@ -434,6 +434,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     if (result !== null && typeof result !== 'undefined') {
                         tempData[_obj.type + '.' + _obj.value] = result;
                     }
+                    return result;
                 },
                 noError: true,
                 now: oNow.now
@@ -449,6 +450,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     if (result !== null && typeof result !== 'undefined') {
                         tempData[_obj.type + '.' + _obj.value] = result;
                     }
+                    return result;
                 },
                 noError: true,
                 now: oNow.now
@@ -462,6 +464,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     if (result !== null && typeof result !== 'undefined') {
                         tempData[_obj.type + '.' + _obj.value] = result;
                     }
+                    return result;
                 },
                 noError: true,
                 now: oNow.now
@@ -565,6 +568,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (result !== null && typeof result !== 'undefined') {
                     tempData[_obj.type + '.' + _obj.value] = result;
                 }
+                return result;
             },
             noError: true,
             now: oNow.now
@@ -577,6 +581,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (result !== null && typeof result !== 'undefined') {
                     tempData[_obj.type + '.' + _obj.value] = result;
                 }
+                return result;
             },
             noError: true,
             now: oNow.now
@@ -589,6 +594,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (result !== null && typeof result !== 'undefined') {
                     tempData[_obj.type + '.' + _obj.value] = result;
                 }
+                return result;
             },
             noError: true,
             now: oNow.now
@@ -952,13 +958,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             setMode: config.windowSetMode || 'startEnd',
             /** the orientation angle to the geographical north */
             azimuthStart: config.windowAzimuthStart,
-            azimuthStartType: config.windowAzimuthStartType || 'num',
+            azimuthStartType: config.windowAzimuthStartType || 'numAzimuth',
             /** an offset for the angle clockwise offset */
             azimuthEnd: config.windowAzimuthEnd,
-            azimuthEndType: config.windowAzimuthEndType || 'num',
+            azimuthEndType: config.windowAzimuthEndType || 'numAzimuth',
             /** the orientation angle to the geographical north */
             windowOrientation: config.windowOrientation,
-            windowOrientationType: config.windowOrientationType || 'num',
+            windowOrientationType: config.windowOrientationType || 'numAzimuth',
             /** an offset for the angle clockwise offset */
             windowOffsetP: config.windowOffsetP,
             /** an offset for the angle anti-clockwise offset */
@@ -1325,6 +1331,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             if (result !== null && typeof result !== 'undefined') {
                                 tempData[_obj.type + '.' + _obj.value] = result;
                             }
+                            return result;
                         }
                     }, true, oNow.now);
                 }
@@ -1424,6 +1431,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                                 if (result !== null && typeof result !== 'undefined') {
                                     tempData[_obj.type + '.' + _obj.value] = result;
                                 }
+                                return result;
                             },
                             operator: el.operator
                         }, false, oNow.now);
