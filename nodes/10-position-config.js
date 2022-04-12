@@ -87,8 +87,9 @@
 /**
  * This callback is displayed as a global member.
  * @callback IValuePropertyTypeCallback
- * @param {*} result - the result of the property value from a type input in Node-Red
- * @param {IValuePropertyType} data - the given data to the function
+ * @param {*} result                    - the result of the property value from a type input in Node-Red
+ * @param {IValuePropertyType} data     - the given data to the function
+ * @param {boolean} cachable            - boolean which is true if the value is cachable
  * @returns {*} value of the type input
  */
 
@@ -1739,11 +1740,12 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             noError = noError || data.noError;
             dNow = dNow || data.now;
             let result = null;
+            let /** @type {boolean} */ cachable = false;
             if (typeof data.type === 'undefined' || data.type === null || data.type === '') {
                 result = null;
             } else if (data.type === 'none') {
                 if (typeof data.callback === 'function') {
-                    return data.callback(undefined, data);
+                    return data.callback(undefined, data, false);
                 }
                 return undefined;
             } else if (data.type === 'num') {
@@ -1775,20 +1777,26 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     topic: ((!msg) ? '' : msg.topic)
                 };
                 result = hlp.textReplace(''+data.value, replaceAttrs, RED, msg);
+                cachable = true;
             } else if (data.type === 'bool') {
                 result = /^true$/i.test(data.value);
             } else if (data.type === 'date') {
                 result = Date.now();
             } else if (data.type === 'msgPayload') {
                 result = msg.payload;
+                cachable = true;
             } else if (data.type === 'msgTopic') {
                 result = msg.topic;
+                cachable = true;
             } else if (data.type === 'msgValue') {
                 result = msg.value;
+                cachable = true;
             } else if (data.type === 'msgTs') {
                 result =  msg.ts;
+                cachable = true;
             } else if (data.type === 'msgLc') {
                 result = msg.lc;
+                cachable = true;
             } else if (data.type === 'numPct') {
                 return parseFloat(data.value) / 100;
             } else if (data.type === 'nodeId') {
@@ -1820,6 +1828,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             } else if (data.type === 'PlT') {
                 if (msg.topic && data.value && msg.topic.includes(data.value)) {
                     result = msg.payload;
+                    cachable = true;
                 } else {
                     result = undefined;
                 }
@@ -1877,12 +1886,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     if (!data.expr) {
                         data.expr = this.getJSONataExpression(_srcNode, data.value);
                     }
+                    cachable = true;
                     result = RED.util.evaluateJSONataExpression(data.expr, msg);
                 } catch (err) {
                     _srcNode.debug(util.inspect(err));
                 }
             } else {
                 try {
+                    cachable = true;
+                    _srcNode.debug('getPropValue evaluateNodeProperty data=' + util.inspect(data, { colors: true, compact: 10, breakLength: Infinity }));
                     result = RED.util.evaluateNodeProperty(data.value, data.type, _srcNode, msg);
                 } catch (err) {
                     _srcNode.log(util.inspect(err));
@@ -1890,7 +1902,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             if (typeof data.callback === 'function') {
                 // _srcNode.debug('getPropValue callback result=' + util.inspect(result, { colors: true, compact: 10, breakLength: Infinity }) + ' - ' + typeof result);
-                return data.callback(result, data);
+                return data.callback(result, data, cachable);
             } else if (result === null || typeof result === 'undefined') {
                 if (noError !== true) {
                     _srcNode.error(RED._('errors.notEvaluableProperty', data));

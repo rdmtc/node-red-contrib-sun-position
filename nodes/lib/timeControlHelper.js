@@ -265,7 +265,7 @@ module.exports = {
     getRuleTimeData,
     validPosition,
     compareRules,
-    getActiveRules,
+    getActiveRule,
     initializeCtrl,
     cRuleType,
     cRuleDefault,
@@ -300,9 +300,13 @@ function isNullOrUndefined(object) {
  * @param {string} value  value of typeinput
  * @param {*} data  data to cache
  * @param {Object} tempData  object which holding the chached data
+ * @param {boolean} [cachable = false] defines if the value is cachable
  * @returns {*}  data which was cached
  */
-function evalTempData(node, type, value, data, tempData) {
+function evalTempData(node, type, value, data, tempData, cachable) {
+    if (!cachable) {
+        return data;
+    }
     // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
     const name = `${type}.${value}`;
     if (isNullOrUndefined(data)) {
@@ -488,9 +492,9 @@ function prepareRules(node, msg, tempData, dNow) {
                             type: el.valueType,
                             // @ts-ignore
                             expr: el.valueExpr,
-                            callback: (result, _obj) => { // opCallback
+                            callback: (result, _obj, cachable) => { // opCallback
                                 el.valueWorth = _obj.value;
-                                return evalTempData(node, _obj.type, _obj.value, result, tempData);
+                                return evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
                             },
                             noError:false,
                             now: dNow
@@ -499,9 +503,9 @@ function prepareRules(node, msg, tempData, dNow) {
                         {
                             value: el.threshold,
                             type: el.thresholdType,
-                            callback: (result, _obj) => { // opCallback
+                            callback: (result, _obj, cachable) => { // opCallback
                                 el.thresholdWorth = _obj.value;
-                                return evalTempData(node, _obj.type, _obj.value, result, tempData);
+                                return evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
                             },
                             noError:false,
                             now: dNow
@@ -708,10 +712,10 @@ function compareRules(node, msg, rule, tData) {
  * @param {Object} tempData the object storing the temporary caching data
  * @returns {IRuleResultData} the active rule or null
  */
-function getActiveRules(node, msg, oNow, tempData) {
-    // node.debug('getActiveRules --------------------');
+function getActiveRule(node, msg, oNow, tempData) {
+    // node.debug('getActiveRule --------------------');
     prepareRules(node, msg, tempData, oNow.now);
-    // node.debug(`getActiveRules rules.count=${node.rules.count}, rules.last1stRun=${node.rules.last1stRun}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
+    // node.debug(`getActiveRule rules.count=${node.rules.count}, rules.last1stRun=${node.rules.last1stRun}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
     /** @type {IRuleResultData} */
     const result = {
         ruleindex : -1,
@@ -720,13 +724,13 @@ function getActiveRules(node, msg, oNow, tempData) {
     const setRes = (i, res) => {
         if (res) {
             // node.debug('new 1. ruleSel ' + util.inspect(res, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
-            if (res.level.operator === cRuleType.slatOversteer) {
+            if (res.level && res.level.operator === cRuleType.slatOversteer) {
                 result.ruleSlatOvs = res;
-            } else if (res.level.operator === cRuleType.topicOversteer) {
+            } else if (res.level && res.level.operator === cRuleType.topicOversteer) {
                 result.ruleTopicOvs = res;
-            } else if (res.level.operator === cRuleType.levelMinOversteer) {
+            } else if (res.level && res.level.operator === cRuleType.levelMinOversteer) {
                 result.ruleSelMin = res;
-            } else if (res.level.operator === cRuleType.levelMaxOversteer) {
+            } else if (res.level && res.level.operator === cRuleType.levelMaxOversteer) {
                 result.ruleSelMax = res;
             } else {
                 result.ruleSel = res;

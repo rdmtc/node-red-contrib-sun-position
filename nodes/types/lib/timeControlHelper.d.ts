@@ -667,7 +667,7 @@ export function compareRules(node: ITimeControlNode, msg: any, rule: IRuleData, 
  * @param {Object} tempData the object storing the temporary caching data
  * @returns {IRuleResultData} the active rule or null
  */
-export function getActiveRules(node: ITimeControlNode, msg: any, oNow: ITimeObject, tempData: any): IRuleResultData;
+export function getActiveRule(node: ITimeControlNode, msg: any, oNow: ITimeObject, tempData: any): IRuleResultData;
 /**
  * initializes the node
  * @param {runtimeRED} REDLib the level to check

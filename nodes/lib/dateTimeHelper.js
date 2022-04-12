@@ -69,6 +69,7 @@ const TIME_36h = 129600000;
 const TIME_24h = 86400000;
 const TIME_12h = 43200000;
 const TIME_1h = 3600000;
+const TIME_20min = 1200000;
 const TIME_1min = 60000;
 const TIME_1s = 1000;
 
@@ -81,6 +82,7 @@ module.exports = {
     TIME_24h,
     TIME_12h,
     TIME_1h,
+    TIME_20min,
     TIME_1min,
     TIME_1s,
     isBool,

@@ -198,7 +198,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
         ctrlLib.prepareRules(node, msg, tempData, oNow.now);
-        const rule = ctrlLib.getActiveRules(node, msg, oNow, tempData);
+        const rule = ctrlLib.getActiveRule(node, msg, oNow, tempData);
         const livingRuleData = {};
 
         if (rule.ruleSel) {
@@ -327,7 +327,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         if (config.autoTrigger) {
             node.autoTrigger = {
-                defaultTime : parseInt(config.autoTriggerTime) || 20 * 60000, // 20min
+                defaultTime : parseInt(config.autoTriggerTime) || hlp.TIME_20min,
                 time : NaN,
                 type : 0 // default time
             };
@@ -456,12 +456,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     node.addId = node.positionConfig.getPropValue(node, msg, {
                         type: node.nodeData.addIdType,
                         value: node.nodeData.addId,
-                        callback: (result, _obj) => {
+                        callback: (result, _obj, cachable) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                        }
+                        /* callback: (result, _obj) => {
                             if (result !== null && typeof result !== 'undefined') {
                                 tempData[_obj.type + '.' + _obj.value] = result;
                             }
                             return result;
-                        }
+                        } */
                     }, true, oNow.now);
                 }
                 const timeCtrl = {

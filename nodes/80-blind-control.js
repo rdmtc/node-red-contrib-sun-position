@@ -229,8 +229,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         value: el.value,
                         type: el.valueType,
                         expr: el.valueExpr,
-                        callback: (result, _obj) => {
-                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
+                        callback: (result, _obj, cachable) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
                         },
                         noError:false,
                         now:oNow.now
@@ -239,8 +239,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     {
                         value: el.threshold,
                         type: el.thresholdType,
-                        callback: (result, _obj) => {
-                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
+                        callback: (result, _obj, cachable) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
                         },
                         noError:false,
                         now:oNow.now
@@ -255,12 +255,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * get the blind level from a typed input
-     * @param {IBlindControlNode} node node data
-     * @param {string} type type field
-     * @param {string} value value field
-     * @returns blind level as number or NaN if not defined
+     * @param {IBlindControlNode} node  - node data
+     * @param {*} msg                   - message object
+     * @param {string} type             - type field
+     * @param {string} value            - value field
+     * @param {number|NaN} def          - default value
+     * @param {Object} tempData         - the temporary data holder object
+     * @returns {number|NaN} blind level as number or NaN if not defined
      */
-    function getBlindPosFromTI(node, msg, type, value, def) {
+    function getBlindPosFromTI(node, msg, type, value, def, tempData) {
         // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} nodeData=${ util.inspect(node.nodeData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }) }`);
         def = def || NaN;
         if (type === 'none' || type === ''|| type === 'levelND') {
@@ -287,7 +290,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
                 throw new Error(`unknown value "${value}" of type "${type}"` );
             }
-            const res = node.positionConfig.getFloatProp(node, msg, { type, value, def });
+            const res = node.positionConfig.getFloatProp(node, msg,
+                {
+                    type,
+                    value,
+                    def,
+                    callback: (result, _obj, cachable) => {
+                        return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                    }
+                });
             if (node.levelReverse) {
                 return getInversePos_(node, res);
             }
@@ -412,12 +423,12 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * calculates for the blind the new level
-     * @param {IBlindControlNode} node the node data
-     * @param {Object} msg the message object
-     * @param {ITimeObject} oNow the now Object
-     * @param {Object} tempData the temporary data holder object
-     * @param {Object} prevData the nodes previous data
-     * @returns the sun position object
+     * @param {IBlindControlNode} node  - the node data
+     * @param {Object} msg              - the message object
+     * @param {ITimeObject} oNow        - the now Object
+     * @param {Object} tempData         - the temporary data holder object
+     * @param {Object} prevData         - the nodes previous data
+     * @returns {Object} the sun position object
      */
     function calcBlindSunPosition(node, msg, oNow, tempData, prevData) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
@@ -430,12 +441,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 type: node.windowSettings.windowOrientationType,
                 value: node.windowSettings.windowOrientation,
                 def: NaN,
-                callback: (result, _obj) => {
+                callback: (result, _obj, cachable) => {
+                    return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                },
+                /* callback: (result, _obj) => {
                     if (result !== null && typeof result !== 'undefined') {
                         tempData[_obj.type + '.' + _obj.value] = result;
                     }
                     return result;
-                },
+                }, */
                 noError: true,
                 now: oNow.now
             });
@@ -446,12 +460,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 type: node.windowSettings.azimuthStartType,
                 value: node.windowSettings.azimuthStart,
                 def: NaN,
+                callback: (result, _obj, cachable) => {
+                    return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                },
+                /*
                 callback: (result, _obj) => {
                     if (result !== null && typeof result !== 'undefined') {
                         tempData[_obj.type + '.' + _obj.value] = result;
                     }
                     return result;
-                },
+                }, */
                 noError: true,
                 now: oNow.now
             });
@@ -460,12 +478,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 type: node.windowSettings.azimuthEndType,
                 value: node.windowSettings.azimuthEnd,
                 def: NaN,
+                callback: (result, _obj, cachable) => {
+                    return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                },
+                /*
                 callback: (result, _obj) => {
                     if (result !== null && typeof result !== 'undefined') {
                         tempData[_obj.type + '.' + _obj.value] = result;
                     }
                     return result;
-                },
+                }, */
                 noError: true,
                 now: oNow.now
             });
@@ -564,12 +586,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             type: node.sunData.floorLengthType,
             value: node.sunData.floorLength,
             def: NaN,
+            callback: (result, _obj, cachable) => {
+                return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+            },
+            /*
             callback: (result, _obj) => {
                 if (result !== null && typeof result !== 'undefined') {
                     tempData[_obj.type + '.' + _obj.value] = result;
                 }
                 return result;
-            },
+            }, */
             noError: true,
             now: oNow.now
         });
@@ -577,12 +603,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             type: node.windowSettings.topType,
             value: node.windowSettings.top,
             def: NaN,
+            callback: (result, _obj, cachable) => {
+                return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+            },
+            /*
             callback: (result, _obj) => {
                 if (result !== null && typeof result !== 'undefined') {
                     tempData[_obj.type + '.' + _obj.value] = result;
                 }
                 return result;
-            },
+            }, */
             noError: true,
             now: oNow.now
         });
@@ -590,12 +620,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             type: node.windowSettings.bottomType,
             value: node.windowSettings.bottom,
             def: NaN,
+            callback: (result, _obj, cachable) => {
+                return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+            },
+            /*
             callback: (result, _obj) => {
                 if (result !== null && typeof result !== 'undefined') {
                     tempData[_obj.type + '.' + _obj.value] = result;
                 }
                 return result;
-            },
+            }, */
             noError: true,
             now: oNow.now
         });
@@ -690,12 +724,12 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      * @param {Object} msg the message object
      * @param {ITimeObject} oNow the *current* date Object
      * @param {Object} tempData the object storing the temporary caching data
-     * @returns the active rule or null
+     * @returns {Object} the active rule or null
      */
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
         ctrlLib.prepareRules(node, msg, tempData, oNow.now);
-        const rule = ctrlLib.getActiveRules(node, msg, oNow, tempData);
+        const rule = ctrlLib.getActiveRule(node, msg, oNow, tempData);
         const livingRuleData = {};
 
         livingRuleData.importance = 0;
@@ -781,6 +815,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             livingRuleData.code = 4;
             livingRuleData.topic = rule.ruleSel.topic;
 
+            livingRuleData.active = true;
             livingRuleData.conditional = rule.ruleSel.conditional;
             livingRuleData.timeLimited = (!!rule.ruleSel.time);
 
@@ -904,7 +939,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         if (config.autoTrigger) {
             node.autoTrigger = {
-                defaultTime : parseInt(config.autoTriggerTime) || hlp.TIME_24h, // 1h
+                defaultTime : parseInt(config.autoTriggerTime) || hlp.TIME_20min,
                 time : NaN,
                 type : 0 // default time
             };
@@ -1327,12 +1362,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     node.addId = node.positionConfig.getPropValue(node, msg, {
                         type: node.nodeData.addId.type,
                         value: node.nodeData.addId.value,
+                        callback: (result, _obj, cachable) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                        }
+                        /*
                         callback: (result, _obj) => {
                             if (result !== null && typeof result !== 'undefined') {
                                 tempData[_obj.type + '.' + _obj.value] = result;
                             }
                             return result;
-                        }
+                        } */
                     }, true, oNow.now);
                 }
                 const blindCtrl = {
@@ -1427,12 +1466,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         node.positionConfig.getPropValue(node, msg, {
                             type: el.valueType,
                             value: el.value,
+                            callback: (result, _obj, cachable) => {
+                                return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                            },
+                            /*
                             callback: (result, _obj) => {
                                 if (result !== null && typeof result !== 'undefined') {
                                     tempData[_obj.type + '.' + _obj.value] = result;
                                 }
                                 return result;
-                            },
+                            }, */
                             operator: el.operator
                         }, false, oNow.now);
                     });

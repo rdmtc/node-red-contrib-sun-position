@@ -19,6 +19,8 @@
 
 - go to the Supervisor
 - go to the Node-Red AddOn
+- stop the Node-Red AddOn
+- edit `config/node-red/package.json` and remove the line with `node-red-contrib-sun-position`
 - add unter the `Configuration` in the Node-Red options as `npm_packages`:
 
 ```yaml
@@ -28,18 +30,14 @@ npm_packages:
 
 This can be also used to go back to an older Version.
 
-### 3.0.0-beta: enhancement
+### 3.0.0-alpha: enhancement
 
-Breaking changes: removed all "Radiant" angle selection from typed input. The standard selection (which was previous the decimal degree output) gives now an angle based on the type selection (degree or radiant) of the configuration node. Version number is changed to 3 to reflect these API changes.
+Breaking changes:
 
-This is still a beta
+- removed all "Radiant" angle selection from typed input. The standard selection (which was previous the decimal degree output) gives now an angle based on the type selection (degree or radiant) of the configuration node. Version number is changed to 3 to reflect these API changes.
 
-- TODO:
 
-  - implement minimal tests for moon-position
-  - maybe
-    - implement minimal tests for blind-controller
-    - implement minimal tests for clock-timer
+This is still a non stable development version!!
 
 Changes:
 
@@ -74,17 +72,18 @@ Changes:
 
 - new Node `delay-until` which allows to delay messages until defined time
 
+- blind-control and clock-timer
+  - implement start and end time for rules #357
+  - show rule edit dialog no longer modal to allow usage of JSON and JSONATA editor #432
+  - separated renamed earliest/latest naming to make it clearer #441
+  - reworked value caching mechanism; fixed bug #434
+
 - blind-control
   - fix #421
   - added for oversteer blind position the possibility to select msg property, flow or global context #423
     - This has some limitations. Changes would only have effect if the oversteer are evaluated.
   - fix not working oversteer mode limitation #431
-  - show rule edit dialog no longer modal to allow usage of JSON and JSONATA editor #432
-  - implemented optional alternative alternative azimuth input like node-red-contrib-blindcontroller #430
-  - implement start and end time for rules  and clock timer for rules #357
-
-- clock-timer
-  - implement start and end time for rules  and clock timer for rules #357
+  - implemented optional alternative azimuth input like node-red-contrib-blindcontroller #430
 
 - time-comp
   - better adjustable of next time, fixes #420
