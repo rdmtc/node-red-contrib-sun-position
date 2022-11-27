@@ -40,6 +40,7 @@
  * @property {number} defaultTime   - default next autotriggering time
  * @property {(0|1|2|3|4|5|6|7|8|9)} type         - type of next autotriggering
  * @property {number} time          - next autotrigger in milliseconds
+ * @property {NodeJS.Timeout} [timer] - autotrigger TimeOut Object
  */
 
 /**
@@ -98,16 +99,19 @@
  * @property {number} multiplier            - time offset value
  * @property {boolean} next                 - time offset value
  * @property {Date} [now]                   - start time definition
- *
- * @property {(0|1)} [operator]             - time operator
- * @property {(0|1)} [operatorText]         - time operator text
- *
  * @property {IRuleTimeDefSingle} [min]     - minimum limitation to the time
  * @property {IRuleTimeDefSingle} [max]     - maximum limitation to the time
   */
 
 /**
- * @typedef {ILimitationsObj & IRuleTimeDef} IRuleTimesDef object for a rule time definition
+ * @typedef {Object} IRuleTimesDefInt object for a rule time definition
+ *
+ * @property {IRuleTimeDef} [start]     - start time definition
+ * @property {IRuleTimeDef} [end]       - end time definition
+ */
+
+/**
+ * @typedef {ILimitationsObj & IRuleTimesDefInt} IRuleTimesDef object for a rule time definition
  */
 
 /**
@@ -120,11 +124,25 @@
  * @property {string} [dateISO]         - time representation
  * @property {string} [dateUTC]         - time representation
  * @property {('default'|'min'|'max')} [source]    - source of the data if it comes from minimum or maximum limitation
- * @property {number} [now]                 - start time definition
  */
 
 /**
  * @typedef {ITimePropertyResultInt & ITimePropertyResult} ITimePropResult object for a rule time definition
+ */
+
+/**
+ * @typedef {Object} IRuleTimeDataDef object for a rule time definition
+ *
+ * @property {ITimePropResult} [start]      - start time definition
+ * @property {ITimePropResult} [end]        - end time definition
+ * @property {number} [now]                 - start time definition
+ */
+
+/**
+ * @typedef {Object} IRuleTimeDataMinMaxDef object for a rule time definition
+ *
+ * @property {ITimePropResult} [start]      - start time definition
+ * @property {ITimePropResult} [end]        - end time definition
  */
 
 /**
@@ -138,13 +156,11 @@
  * @property {number} importance                    - importance of the rule
  * @property {boolean} conditional                  - defines if the rule has conditions
  * @property {Array.<IRuleCondition>} conditions    - conditions for a rule
- * @property {IRuleConditionResult} conditon        - condition resule
+ * @property {IRuleConditionResult} conditonResult        - condition resule
  * @property {IRuleTimesDef} [time]                 - rule time Data
- * @property {IRuleTimesDef} [timeMin]              - rule time Data
- * @property {IRuleTimesDef} [timeMax]              - rule time Data
- * @property {ITimePropResult} [timeData]           - object for storing time Data
- * @property {ITimePropResult} [timeDataMin]        - object for storing time Data
- * @property {ITimePropResult} [timeDataMax]        - object for storing time Data
+ * @property {IRuleTimeDataDef} [timeResult]          - object for storing time Data
+ * @property {IRuleTimeDataMinMaxDef} [timeResultMin]          - object for storing time Data
+ * @property {IRuleTimeDataMinMaxDef} [timeResultMax]          - object for storing time Data
  * @property {Object} [payload]                     - rule time Data
  * @property {Object} [level]                       - rule time Data
  * @property {Object} [slat]                        - rule time Data
@@ -161,18 +177,16 @@
  * @property {IRuleData} [ruleTopicOvs]                  - selected rule
  * @property {IRuleData} [ruleSelMin]                  - selected rule
  * @property {IRuleData} [ruleSelMax]                  - selected rule
- * @property {IRuleTimesDef} [timeResult]          - object for storing time Data
- * @property {IRuleTimesDef} [timeResultMin]          - object for storing time Data
- * @property {IRuleTimesDef} [timeResultMax]          - object for storing time Data
+ * @property {IRuleTimeDataDef} [timeResult]          - object for storing time Data
+ * @property {IRuleTimeDataDef} [timeResultMin]          - object for storing time Data
+ * @property {IRuleTimeDataDef} [timeResultMax]          - object for storing time Data
  */
 
 /**
  * @typedef {Object} IRulesData object for a rule
  * @property {Array.<IRuleData>} data       - the rules itself
  * @property {number} count                 - executuion type of a rule which is defined
- * @property {number} lastUntil             - last rule for first evaluation loop
- * @property {number} firstFrom             - first from rule
- * @property {number} firstTimeLimited      - first from rule with time limitation
+ * @property {number} last1stRun            - last rule for first evaluation loop
  * @property {number} maxImportance         - maximum inportance of all rules
  * @property {boolean} canResetOverwrite    - __true__ if any rule can overwrite reset
  */
@@ -206,7 +220,6 @@
  * @property {Array.<Object>} results    -   tbd
  *
  * @property {IAutoTrigger} autoTrigger autotrigger options
- * @property {NodeJS.Timeout} [autoTriggerObj] - autotrigger TimeOut Object
  *
  * @property {Object} startDelayTimeOut    -   tbd
  * @property {NodeJS.Timeout} startDelayTimeOutObj    -   tbd
@@ -221,6 +234,26 @@
 const util = require('util');
 const hlp = require( './dateTimeHelper.js' );
 
+const cRuleType = {
+    absolute : 0,
+    levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
+    levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
+    slatOversteer : 5,
+    topicOversteer : 8,
+    off : 9
+};
+
+const cRuleDefault = -1;
+const cRuleLogOperatorAnd = 2;
+const cRuleLogOperatorOr = 1;
+const cNBC_RULE_TYPE_UNTIL = 0;
+const cNBC_RULE_TYPE_FROM = 1;
+const cNBC_RULE_EXEC = {
+    auto: 0,
+    first:1,
+    last:2
+};
+
 module.exports = {
     isNullOrUndefined,
     evalTempData,
@@ -232,17 +265,14 @@ module.exports = {
     getRuleTimeData,
     validPosition,
     compareRules,
-    initializeCtrl
+    getActiveRule,
+    initializeCtrl,
+    cRuleType,
+    cRuleDefault,
+    cRuleLogOperatorAnd,
+    cRuleLogOperatorOr
 };
 
-const cRuleUntil = 0;
-const cRuleFrom = 1;
-const cRuleAbsolute = 0;
-// const cRuleNone = 0;
-// const cRuleMinOversteer = 1; // ⭳❗ minimum (oversteer)
-// const cRuleMaxOversteer = 2; // ⭱️❗ maximum (oversteer)
-const cRuleLogOperatorAnd = 2;
-const cRuleLogOperatorOr = 1;
 let RED = null;
 /******************************************************************************************/
 /**
@@ -270,9 +300,13 @@ function isNullOrUndefined(object) {
  * @param {string} value  value of typeinput
  * @param {*} data  data to cache
  * @param {Object} tempData  object which holding the chached data
+ * @param {boolean} [cachable = false] defines if the value is cachable
  * @returns {*}  data which was cached
  */
-function evalTempData(node, type, value, data, tempData) {
+function evalTempData(node, type, value, data, tempData, cachable) {
+    if (!cachable) {
+        return data;
+    }
     // node.debug(`evalTempData type=${type} value=${value} data=${data}`);
     const name = `${type}.${value}`;
     if (isNullOrUndefined(data)) {
@@ -432,16 +466,19 @@ function setOverwriteReason(node) {
 function prepareRules(node, msg, tempData, dNow) {
     for (let i = 0; i < node.rules.count; ++i) {
         const rule = node.rules.data[i];
+        if (rule.time) {
+            delete rule.timeResult;
+        }
         if (rule.conditional) {
-            rule.conditon = {
+            rule.conditonResult = {
                 index : -1,
                 result : false
             };
             for (let i = 0; i < rule.conditions.length; i++) {
                 const el = rule.conditions[i];
-                if (rule.conditon.result === true && el.condition === cRuleLogOperatorOr) {
+                if (rule.conditonResult.result === true && el.condition === cRuleLogOperatorOr) {
                     break; // not nessesary, becaue already tue
-                } else if (rule.conditon.result === false && el.condition === cRuleLogOperatorAnd) {
+                } else if (rule.conditonResult.result === false && el.condition === cRuleLogOperatorAnd) {
                     break; // should never bekome true
                 }
                 delete el.valueWorth;
@@ -455,31 +492,35 @@ function prepareRules(node, msg, tempData, dNow) {
                             type: el.valueType,
                             // @ts-ignore
                             expr: el.valueExpr,
-                            callback: (result, _obj) => { // opCallback
+                            callback: (result, _obj, cachable) => { // opCallback
                                 el.valueWorth = _obj.value;
-                                return evalTempData(node, _obj.type, _obj.value, result, tempData);
-                            }
+                                return evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                            },
+                            noError:false,
+                            now: dNow
                         },
                         el.operator,
                         {
                             value: el.threshold,
                             type: el.thresholdType,
-                            callback: (result, _obj) => { // opCallback
+                            callback: (result, _obj, cachable) => { // opCallback
                                 el.thresholdWorth = _obj.value;
-                                return evalTempData(node, _obj.type, _obj.value, result, tempData);
-                            }
-                        }, false, dNow
+                                return evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                            },
+                            noError:false,
+                            now: dNow
+                        }
                     );
                 }
-                rule.conditon = {
+                rule.conditonResult = {
                     index : i,
                     result : el.result,
                     text : el.text,
                     textShort : el.textShort
                 };
                 if (typeof el.thresholdWorth !== 'undefined') {
-                    rule.conditon.text += ' ' + el.thresholdWorth;
-                    rule.conditon.textShort += ' ' + hlp.clipStrLength(el.thresholdWorth, 10);
+                    rule.conditonResult.text += ' ' + el.thresholdWorth;
+                    rule.conditonResult.textShort += ' ' + hlp.clipStrLength(el.thresholdWorth, 10);
                 }
             }
         }
@@ -491,54 +532,67 @@ function prepareRules(node, msg, tempData, dNow) {
  * @param {ITimeControlNode} node node data
  * @param {Object} msg the message object
  * @param {IRuleData} rule the rule data
+ * @param {('start'|'end')} timep rule type
  * @param {Date} dNow base timestamp
+ * @param {number} def default value
  */
-function getRuleTimeData(node, msg, rule, dNow) {
-    rule.time.now = dNow;
-    rule.timeData = node.positionConfig.getTimeProp(node, msg, rule.time);
-    if (rule.timeData.error) {
-        hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeData.error }), undefined, rule.timeData.error);
-        return -1;
-    } else if (!rule.timeData.value) {
+function getRuleTimeData(node, msg, rule, timep, dNow, def) {
+    if (!rule.timeResult) { rule.timeResult = {}; }
+    if (!rule.time || !rule.time[timep]) {
+        Object.assign(rule.timeResult, { [timep]: { ts: def } });
+        return;
+    }
+    rule.time[timep].now = dNow;
+    Object.assign(rule, { timeResult: { [timep]: node.positionConfig.getTimeProp(node, msg, rule.time[timep]) } });
+
+    if (rule.timeResult[timep].error) {
+        hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeResult[timep].error }), undefined, rule.timeResult[timep].error);
+        Object.assign(rule.timeResult, { [timep]: { ts: def } });
+        // node.debug('rule data complete');
+        // node.debug(util.inspect(rule, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
+        return;
+    } else if (!rule.timeResult[timep].value) {
         throw new Error('Error can not calc time!');
     }
-    rule.timeData.source = 'default';
-    rule.timeData.ts = rule.timeData.value.getTime();
-    // node.debug(`time=${rule.timeData.value} -> ${new Date(rule.timeData.value)}`);
-    rule.timeData.dayId = hlp.getDayId(rule.timeData.value);
-    if (rule.timeMin) {
-        rule.timeMin.now = dNow;
-        rule.timeDataMin = node.positionConfig.getTimeProp(node, msg, rule.timeMin);
-        rule.timeDataMin.source = 'min';
-        if (rule.timeDataMin.error) {
-            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMin.error }), undefined, rule.timeDataMin.error);
-        } else if (!rule.timeDataMin.value) {
-            throw new Error('Error can not calc Alt time!');
+    rule.timeResult[timep].source = 'default';
+    rule.timeResult[timep].ts = rule.timeResult[timep].value.getTime();
+    // node.debug(`time=${rule.timeResult[timep].value} -> ${new Date(rule.timeResult[timep].value)}`);
+    if (rule.time[timep].min) {
+        rule.time[timep].min.now = dNow;
+        // @ts-ignore
+        if (!rule.timeResultMin) rule.timeResultMin = { start:{}, end:{} };
+        rule.timeResultMin[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].min);
+        rule.timeResultMin[timep].source = 'min';
+        if (rule.timeResultMin[timep].error) {
+            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeResultMin[timep].error }), undefined, rule.timeResultMin[timep].error);
+        } else if (!rule.timeResultMin[timep].value) {
+            throw new Error('Error can not calc minimum time!');
         } else {
-            rule.timeDataMin.ts = rule.timeDataMin.value.getTime();
-            rule.timeDataMin.dayId = hlp.getDayId(rule.timeDataMin.value);
-            if (rule.timeDataMin.ts > rule.timeData.ts) {
-                [rule.timeData, rule.timeDataMin] = [rule.timeDataMin, rule.timeData];
+            rule.timeResultMin[timep].ts = rule.timeResultMin[timep].value.getTime();
+            if (rule.timeResultMin[timep].ts > rule.timeResult[timep].ts) {
+                [rule.timeResult[timep], rule.timeResultMin[timep]] = [rule.timeResultMin[timep], rule.timeResult[timep]];
             }
         }
     }
-    if (rule.timeMax) {
-        rule.timeMax.now = dNow;
-        rule.timeDataMax = node.positionConfig.getTimeProp(node, msg, rule.timeMax);
-        rule.timeDataMax.source = 'max';
-        if (rule.timeDataMax.error) {
-            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeDataMax.error }), undefined, rule.timeDataMax.error);
-        } else if (!rule.timeDataMax.value) {
-            throw new Error('Error can not calc Alt time!');
+    if (rule.time[timep].max) {
+        rule.time[timep].max.now = dNow;
+        // @ts-ignore
+        if (!rule.timeResultMax) rule.timeResultMax = { start:{}, end:{} };
+        rule.timeResultMax[timep] = node.positionConfig.getTimeProp(node, msg, rule.time[timep].max);
+        rule.timeResultMax[timep].source = 'max';
+        if (rule.timeResultMax[timep].error) {
+            hlp.handleError(node, RED._('node-red-contrib-sun-position/position-config:errors.error-time', { message: rule.timeResultMax[timep].error }), undefined, rule.timeResultMin[timep].error);
+        } else if (!rule.timeResultMax[timep].value) {
+            throw new Error('Error can not calc maximum time!');
         } else {
-            rule.timeDataMax.ts = rule.timeDataMax.value.getTime();
-            rule.timeDataMax.dayId = hlp.getDayId(rule.timeDataMax.value);
-            if (rule.timeDataMax.ts < rule.timeData.ts) {
-                [rule.timeData, rule.timeDataMax] = [rule.timeDataMax, rule.timeData];
+            rule.timeResultMax[timep].ts = rule.timeResultMax[timep].value.getTime();
+            if (rule.timeResultMax[timep].ts < rule.timeResult[timep].ts) {
+                [rule.timeResult[timep], rule.timeResultMax[timep]] = [rule.timeResultMax[timep], rule.timeResult[timep]];
             }
         }
     }
-    return rule.timeData.ts;
+    rule.timeResult[timep].dayId = hlp.getDayId(rule.timeResult[timep].value);
+    return;
 }
 
 /*************************************************************************************************************************/
@@ -547,15 +601,14 @@ function getRuleTimeData(node, msg, rule, dNow) {
  * @param {ITimeControlNode} node the node object
  * @param {Object} msg the message object
  * @param {IRuleData} rule a rule object to test
- * @param {ICompareTimeStamp} cmp a function to compare two timestamps.
  * @param {ITimeObject} tData Now time object
  * @returns {IRuleData|null} returns the rule if rule is valid, otherwhise null
  */
-function compareRules(node, msg, rule, cmp, tData) {
+function compareRules(node, msg, rule, tData) {
     // node.debug(`compareRules rule ${rule.name} (${rule.pos}) rule=${util.inspect(rule, {colors:true, compact:10})}`);
     if (rule.conditional) {
         try {
-            if (!rule.conditon.result) {
+            if (!rule.conditonResult.result) {
                 node.debug(`compareRules rule ${rule.name} (${rule.pos}) conditon does not match`);
                 return null;
             }
@@ -612,13 +665,144 @@ function compareRules(node, msg, rule, cmp, tData) {
             }
         }
     }
-    const num = getRuleTimeData(node, msg, rule, tData.now);
-    // node.debug(`compareRules ${rule.name} (${rule.pos}) type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
-    if (tData.dayId === rule.timeData.dayId && num >=0 && (cmp(num) === true)) {
-        return rule;
+
+    rule.timeResult = {
+        now: tData.now
+    };
+    if (rule.time.start) {
+        getRuleTimeData(node, msg, rule, 'start', tData.now, Number.MIN_VALUE);
+        if (rule.time.end) {
+            getRuleTimeData(node, msg, rule, 'end', tData.now, Number.MAX_VALUE);
+            if (rule.timeResult.start.ts > rule.timeResult.end.ts) {
+                if ((tData.dayId === rule.timeResult.start.dayId &&
+                        rule.timeResult.start.ts <= tData.nowNr) ||
+                    (tData.dayId === rule.timeResult.end.dayId &&
+                        rule.timeResult.end.ts > tData.nowNr)) {
+                    return rule;
+                }
+                return null;
+            }
+            if (rule.timeResult.start.ts <= tData.nowNr &&
+                tData.dayId === rule.timeResult.start.dayId &&
+                rule.timeResult.end.ts > tData.nowNr &&
+                tData.dayId === rule.timeResult.end.dayId) {
+                return rule;
+            }
+        }
+        if (rule.timeResult.start.ts <= tData.nowNr &&
+            tData.dayId === rule.timeResult.start.dayId) {
+            return rule;
+        }
+    } else if (rule.time.end) {
+        getRuleTimeData(node, msg, rule, 'end', tData.now, Number.MAX_VALUE);
+        if (rule.timeResult.end.ts > tData.nowNr &&
+            tData.dayId === rule.timeResult.end.dayId) {
+            return rule;
+        }
     }
-    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${tData.dayId} rule-DayID=${rule.timeData.dayId} num=${num} cmp=${cmp(num)} invalid time`);
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${tData.dayId} rule-DayID=${rule.timeResult[timep].dayId} num=${num} invalid time`);
     return null;
+}
+/******************************************************************************************/
+/**
+ * check all rules and determinate the active rule
+ * @param {ITimeControlNode} node node data
+ * @param {Object} msg the message object
+ * @param {ITimeObject} oNow the *current* date Object
+ * @param {Object} tempData the object storing the temporary caching data
+ * @returns {IRuleResultData} the active rule or null
+ */
+function getActiveRule(node, msg, oNow, tempData) {
+    // node.debug('getActiveRule --------------------');
+    prepareRules(node, msg, tempData, oNow.now);
+    // node.debug(`getActiveRule rules.count=${node.rules.count}, rules.last1stRun=${node.rules.last1stRun}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
+    /** @type {IRuleResultData} */
+    const result = {
+        ruleindex : -1,
+        ruleSel : null
+    };
+    const setRes = (i, res) => {
+        if (res) {
+            // node.debug('new 1. ruleSel ' + util.inspect(res, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
+            if (res.level && res.level.operator === cRuleType.slatOversteer) {
+                result.ruleSlatOvs = res;
+            } else if (res.level && res.level.operator === cRuleType.topicOversteer) {
+                result.ruleTopicOvs = res;
+            } else if (res.level && res.level.operator === cRuleType.levelMinOversteer) {
+                result.ruleSelMin = res;
+            } else if (res.level && res.level.operator === cRuleType.levelMaxOversteer) {
+                result.ruleSelMax = res;
+            } else {
+                result.ruleSel = res;
+                result.ruleindex = i;
+                return true;
+            }
+        }
+        return false;
+    };
+
+    for (let i = 0; i <= node.rules.last1stRun; ++i) {
+        const rule = node.rules.data[i];
+        // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+        if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.last) { continue; }
+        if (setRes(i, compareRules(node, msg, rule, oNow))) break;
+    }
+
+    if (!result.ruleSel) {
+        // node.debug('--------- starting second loop ' + node.rules.count);
+        for (let i = (node.rules.count - 1); i >= 0; --i) {
+            const rule = node.rules.data[i];
+            // node.debug('rule ' + util.inspect(rule, {colors:true, compact:10, breakLength: Infinity }));
+            if (!rule.enabled || rule.execUse === cNBC_RULE_EXEC.first) { continue; }
+            if (setRes(i, compareRules(node, msg, rule, oNow))) break;
+        }
+    }
+
+    if (node.autoTrigger) {
+        const setAutoTrigger = (ts, type) => {
+            const d = new Date();
+            d.setHours(24,0,0,1); // next midnight
+            const diff = ts - oNow.nowNr;
+            node.autoTrigger.time = Math.min(node.autoTrigger.time, diff, d.getTime());
+            node.autoTrigger.type = type; // current rule end
+        };
+        if (result.ruleSel && result.ruleSel.time && result.timeResult && result.timeResult.end && result.ruleSel.timeResult.end.ts > oNow.nowNr) {
+            node.debug('autoTrigger set to current rule ' + result.ruleSel.pos + ' end');
+            setAutoTrigger(result.ruleSel.timeResult.end.ts, 1);
+        } else {
+            const times = [];
+            for (let i = (result.ruleindex+1); i < node.rules.count; ++i) {
+                const rule = node.rules.data[i];
+                if (!rule.time) { continue; }
+                rule.timeResult = { now: oNow };
+                if (rule.time.start) {
+                    getRuleTimeData(node, msg, rule, 'start', oNow, Number.MIN_VALUE);
+                    if (rule.timeResult.start.ts > oNow.nowNr) {
+                        times.push(rule.timeResult.start.ts);
+                    }
+                }
+                if (rule.time.end) {
+                    getRuleTimeData(node, msg, rule, 'end', oNow, Number.MAX_VALUE);
+                    if (rule.timeResult.end.ts > oNow.nowNr) {
+                        times.push(rule.timeResult.end.ts);
+                    }
+                }
+            }
+            if (times.length > 0) {
+                times.sort();
+                node.debug('autoTrigger set to next rule time ' + times[0]);
+                setAutoTrigger(times[0], 2);
+            } else {
+                // check maybe next day
+                const d = new Date();
+                d.setHours(24,0,0,1); // after next midnight
+                node.autoTrigger.time = Math.min(node.autoTrigger.time, d.getTime());
+                node.autoTrigger.type = 9; // no rule based autotrigger
+            }
+        }
+    }
+
+    return result;
 }
 /*************************************************************************************************************************/
 /**
@@ -732,15 +916,15 @@ function initializeCtrl(REDLib, node, config) {
 
     // Prepare Rules
     node.rules.count = node.rules.data.length;
-    node.rules.lastUntil = node.rules.count -1;
-    node.rules.firstFrom = node.rules.lastUntil;
-    node.rules.firstTimeLimited = node.rules.count;
+    node.rules.last1stRun = node.rules.count -1;
     node.rules.maxImportance = 0;
     node.rules.canResetOverwrite = false;
-
+    // node.debug('all node.rules before convert');
+    // node.debug(util.inspect(node.rules, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
     for (let i = 0; i < node.rules.count; ++i) {
         const rule = node.rules.data[i];
         rule.pos = i + 1;
+        rule.exec = rule.exec || cNBC_RULE_EXEC.auto;
         // Backward compatibility
         if (!rule.conditions) {
             rule.conditions = [];
@@ -809,60 +993,65 @@ function initializeCtrl(REDLib, node, config) {
             // @ts-ignore
             if (!rule.time && rule.timeType !== 'none') {
                 // @ts-ignore
-                rule.time = {
+                const operator = (parseInt(rule.timeOp) || cNBC_RULE_TYPE_UNTIL);
+                rule.time = { };
+                /** @type {('start'|'end')} */
+                let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
+                if (operator === cNBC_RULE_TYPE_FROM) {
+                    // @ts-ignore
+                    rule.time.start = {};
+                    ttype = 'start';
+                }
+                rule.time[ttype] = {
                     // @ts-ignore
                     type            : rule.timeType,
                     // @ts-ignore
                     value           : (rule.timeValue || ''),
                     // @ts-ignore
-                    operator        : (parseInt(rule.timeOp) || cRuleUntil),
-                    // @ts-ignore
                     offsetType      : (rule.offsetType || 'none'),
                     // @ts-ignore
                     offset          : (rule.offsetValue || 1),
                     // @ts-ignore
-                    multiplier      : (parseInt(rule.multiplier) || 60000),
+                    multiplier      : (parseInt(rule.multiplier) || hlp.TIME_1min),
+                    next            : false,
                     // @ts-ignore
                     days            : (rule.timeDays || '*'),
                     // @ts-ignore
                     months          : (rule.timeMonths || '*')
                 };
                 // @ts-ignore
-                if (rule.timeOnlyOddDays) rule.time.onlyOddDays = rule.timeOnlyOddDays; // @ts-ignore
-                if (rule.timeOnlyEvenDays) rule.time.onlyEvenDays = rule.timeOnlyEvenDays; // @ts-ignore
-                if (rule.timeDateStart) rule.time.dateStart = rule.timeDateStart; // @ts-ignore
-                if (rule.timeDateEnd) rule.time.dateEnd = rule.timeDateEnd; // @ts-ignore
-                if (rule.timeOpText) rule.time.operatorText = rule.timeOpText; // @ts-ignore
-                if (rule.timeMinType) {
-                    // @ts-ignore
-                    if (!rule.timeMin && rule.timeMinType !== 'none') {
-                        rule.timeMin = {
-                            // @ts-ignore
-                            type            : rule.timeMinType, // @ts-ignore
-                            value           : (rule.timeMinValue || ''), // @ts-ignore
-                            offsetType      : (rule.offsetMinType || 'none'), // @ts-ignore
-                            offset          : (rule.offsetMinValue || 1), // @ts-ignore
-                            multiplier      : (parseInt(rule.multiplierMin) || 60000),
-                            next            : false
-                        };
-                    }
+                if (rule.timeMinType && rule.timeMinType !== 'none') {
+                    rule.time[ttype].min = {
+                        // @ts-ignore
+                        type            : rule.timeMinType, // @ts-ignore
+                        value           : (rule.timeMinValue || ''), // @ts-ignore
+                        offsetType      : (rule.offsetMinType || 'none'), // @ts-ignore
+                        offset          : (rule.offsetMinValue || 1), // @ts-ignore
+                        multiplier      : (parseInt(rule.multiplierMin) || 60000),
+                        next            : false
+                    };
                 }
                 // @ts-ignore
-                if (rule.timeMaxType) {
-                    // @ts-ignore
-                    if (!rule.timeMax && rule.timeMaxType !== 'none') {
-                        rule.timeMax = {
-                            // @ts-ignore
-                            type            : rule.timeMaxType, // @ts-ignore
-                            value           : (rule.timeMaxValue || ''), // @ts-ignore
-                            offsetType      : (rule.offsetMaxType || 'none'), // @ts-ignore
-                            offset          : (rule.offsetMaxValue || 1), // @ts-ignore
-                            multiplier      : (parseInt(rule.multiplierMax) || 60000),
-                            next            : false
-                        };
-                    }
+                if (rule.timeMaxType && rule.timeMaxType !== 'none') {
+                    rule.time[ttype].max = {
+                        // @ts-ignore
+                        type            : rule.timeMaxType, // @ts-ignore
+                        value           : (rule.timeMaxValue || ''), // @ts-ignore
+                        offsetType      : (rule.offsetMaxType || 'none'), // @ts-ignore
+                        offset          : (rule.offsetMaxValue || 1), // @ts-ignore
+                        multiplier      : (parseInt(rule.multiplierMax) || 60000),
+                        next            : false
+                    };
                 }
             }
+            // @ts-ignore
+            if (rule.timeDays && rule.timeDays !== '*') rule.time.days = rule.timeDays; // @ts-ignore
+            if (rule.timeMonths && rule.timeMonths !== '*') rule.time.months = rule.timeMonths; // @ts-ignore
+            if (rule.timeOnlyOddDays) rule.time.onlyOddDays = rule.timeOnlyOddDays; // @ts-ignore
+            if (rule.timeOnlyEvenDays) rule.time.onlyEvenDays = rule.timeOnlyEvenDays; // @ts-ignore
+            if (rule.timeDateStart) rule.time.dateStart = rule.timeDateStart; // @ts-ignore
+            if (rule.timeDateEnd) rule.time.dateEnd = rule.timeDateEnd;
+
             // @ts-ignore
             delete rule.timeType; // @ts-ignore
             delete rule.timeValue; // @ts-ignore
@@ -891,6 +1080,70 @@ function initializeCtrl(REDLib, node, config) {
             delete rule.timeMaxOp;
         }
         // @ts-ignore
+        if (rule.time && (typeof rule.time.operator !== 'undefined')) {
+            /** @type {('start'|'end')} */
+            let ttype = 'end'; // cNBC_RULE_TYPE_UNTIL
+            // @ts-ignore
+            if (rule.time.operator === cNBC_RULE_TYPE_FROM) {
+                ttype = 'start';
+            }
+            rule.time[ttype] = Object.assign({
+                // @ts-ignore
+                type            : rule.time.type,
+                // @ts-ignore
+                value           : rule.time.value,
+                // @ts-ignore
+                offsetType      : rule.time.offsetType,
+                // @ts-ignore
+                offset          : rule.time.offset,
+                // @ts-ignore
+                multiplier      : rule.time.multiplier,
+                next            : false
+            }, rule.time[ttype]);
+            // @ts-ignore
+            if (rule.timeMin && rule.timeMin.type !== 'none' ) {
+                rule.time[ttype].min = Object.assign({
+                    // @ts-ignore
+                    type            : rule.timeMin.type,
+                    // @ts-ignore
+                    value           : (rule.timeMin.value || ''),
+                    // @ts-ignore
+                    offsetType      : (rule.timeMin.offsetType || 'none'),
+                    // @ts-ignore
+                    offset          : (rule.timeMin.offset || 1),
+                    // @ts-ignore
+                    multiplier      : (parseInt(rule.timeMin.multiplier) || 60000),
+                    next            : false
+                }, rule.time[ttype].min);
+            }
+            // @ts-ignore
+            if (rule.timeMax && rule.timeMax.type !== 'none' ) {
+                rule.time[ttype].max = Object.assign({
+                    // @ts-ignore
+                    type            : rule.timeMax.type,
+                    // @ts-ignore
+                    value           : (rule.timeMax.value || ''),
+                    // @ts-ignore
+                    offsetType      : (rule.timeMax.offsetType || 'none'),
+                    // @ts-ignore
+                    offset          : (rule.timeMax.offset || 1),
+                    // @ts-ignore
+                    multiplier      : (parseInt(rule.timeMax.multiplier) || 60000),
+                    next            : false
+                }, rule.time[ttype].max);
+            }
+            // @ts-ignore
+            delete rule.time.operator; // @ts-ignore
+            delete rule.time.operatorText; // @ts-ignore
+            delete rule.time.type; // @ts-ignore
+            delete rule.time.value; // @ts-ignore
+            delete rule.time.offsetType; // @ts-ignore
+            delete rule.time.offset; // @ts-ignore
+            delete rule.time.multiplier; // @ts-ignore
+            delete rule.timeMin; // @ts-ignore
+            delete rule.timeMax;
+        }
+        // @ts-ignore
         if (rule.levelType) {
             if (!rule.level) {
                 rule.level = {
@@ -899,21 +1152,15 @@ function initializeCtrl(REDLib, node, config) {
                     // @ts-ignore
                     value           : (rule.levelValue || 'closed (min)'),
                     // @ts-ignore
-                    operator        : (parseInt(rule.levelOp) || cRuleAbsolute),
+                    operator        : (parseInt(rule.levelOp) || cRuleType.absolute),
                     // @ts-ignore
                     operatorText    : rule.levelOpText || RED._('node-red-contrib-sun-position/position-config:ruleCtrl.label.ruleLevelAbs')
-                };
-            }
-            if (!rule.slat) {
-                rule.slat = {
-                    type            : 'str',
-                    value           : ''
                 };
             }
             if ((rule.level.operator === 3) || (rule.level.operator === 4)) { // 3 -> ⭳✋ reset minimum; 4 -> ⭱️✋ reset maximum
                 rule.level.type = 'levelND';
                 rule.level.value = '';
-                rule.level.operator = rule.level.operator - 2;
+                rule.level.operator = rule.level.operator - 2; // cRuleType.absolute;
             }
             // @ts-ignore
             delete rule.levelType; // @ts-ignore
@@ -935,7 +1182,7 @@ function initializeCtrl(REDLib, node, config) {
                     // @ts-ignore
                     offset          : (rule.payloadOffsetValue || '1'),
                     // @ts-ignore
-                    multiplier      : (parseInt(rule.payloadOffsetMultiplier) || 60000),
+                    multiplier      : (parseInt(rule.payloadOffsetMultiplier) || hlp.TIME_1min),
                     // @ts-ignore
                     format          : (parseInt(rule.payloadFormat) || 99)
                 };
@@ -951,27 +1198,51 @@ function initializeCtrl(REDLib, node, config) {
         if (rule.payload && !('next' in rule)) {
             rule.payload.next = true;
         }
+        /**
+         * non time rules will be executed if auto in order to first/last, so the will be let as auto
+         */
+        rule.execUse = rule.exec;
+        if (rule.exec === cNBC_RULE_EXEC.first || (rule.time && !rule.time.start && rule.time.end)) {
+            rule.execUse = cNBC_RULE_EXEC.first;
+            node.rules.last1stRun = i;
+        } else if (rule.exec === cNBC_RULE_EXEC.last || (rule.time && rule.time.start && !rule.time.end)) {
+            rule.execUse = cNBC_RULE_EXEC.last;
+        }
+
         /// check generic rule settings
         rule.name = rule.name || 'rule ' + rule.pos;
         // @ts-ignore
         rule.enabled = !(rule.enabled === false || rule.enabled === 'false');
         rule.resetOverwrite = hlp.isTrue(rule.resetOverwrite === true) ? true : false;
-        if (rule.payload || (rule.level && (rule.level.operator === cRuleAbsolute))) {
+
+        if (rule.level) {
+            if (!rule.slat) {
+                rule.slat = {
+                    type            : 'none',
+                    value           : ''
+                };
+            }
+            if (rule.level.type === 'levelND') {
+                rule.level.operator = cRuleType.absolute;
+            }
+        }
+        if (rule.payload || (rule.level && (rule.level.operator === cRuleType.absolute))) {
             rule.importance = Number(rule.importance) || 0;
             node.rules.maxImportance = Math.max(node.rules.maxImportance, rule.importance);
             node.rules.canResetOverwrite = node.rules.canResetOverwrite || rule.resetOverwrite;
         }
         /// readout timesettings
         if (rule.time) {
-            rule.time.next = false;
-            if (rule.timeMax) { rule.timeMax.next = false; }
-            if (rule.timeMin) { rule.timeMin.next = false; }
-            node.rules.firstTimeLimited = Math.min(i, node.rules.firstTimeLimited);
-            if (rule.time.operator === cRuleUntil) {
-                node.rules.lastUntil = i;
+            const checkTimeR = id => {
+                if (rule.time[id].max) { rule.time[id].max.next = false; }
+                if (rule.time[id].min) { rule.time[id].min.next = false; }
+                rule.time[id].next = false;
+            };
+            if (rule.time.start) { // cNBC_RULE_TYPE_FROM
+                checkTimeR('start');
             }
-            if (rule.time.operator === cRuleFrom) {
-                node.rules.firstFrom = Math.min(i,node.rules.firstFrom);
+            if (rule.time.end) { // cNBC_RULE_TYPE_UNTIL
+                checkTimeR('end');
             }
             if (!rule.time.days || rule.time.days === '*') {
                 delete rule.time.days;
@@ -1047,6 +1318,8 @@ function initializeCtrl(REDLib, node, config) {
         });
         rule.conditional = rule.conditions.length > 0;
     }
+    // node.debug('all node.rules after convert');
+    // node.debug(util.inspect(node.rules, { colors: true, compact: 10, depth: 10, breakLength: Infinity }));
 
     if (node.autoTrigger || (parseFloat(config.startDelayTime) > 9)) {
         let delay = parseFloat(config.startDelayTime) || (300 + Math.floor(Math.random() * 700)); // default = 300ms - 1s

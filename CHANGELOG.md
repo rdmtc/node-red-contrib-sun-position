@@ -2,21 +2,27 @@
 
 ## Installation
 
-### Install of a specific Version in Node-Red:
- - change to the installation directory of Node-Red
- - enter the command `npm install node-red-contrib-sun-position@2.0.0`
+### Install of a specific Version in Node-Red
 
-### Install of a specific Version in Redmatic (on a Homematic):
+- change to the installation directory of Node-Red
+- enter the command `npm install node-red-contrib-sun-position@2.0.0`
+
+### Install of a specific Version in Redmatic (on a Homematic)
+
 - logon per ssh
 - enter the commands in the order:
   - `source /usr/local/addons/redmatic/home/.profile`
   - `cd /usr/local/addons/redmatic/var`
   - `npm install --save --no-package-lock --global-style --save-prefix="~" --production node-red-contrib-sun-position@2.0.0`
 
-### Install of a specific Version in HomeAssistant:
- - go to the Supervisor
- - go to the Node-Red AddOn
- - add unter the `Configuration` in the Node-Red options as `npm_packages`:
+### Install of a specific Version in HomeAssistant
+
+- go to the Supervisor
+- go to the Node-Red AddOn
+- stop the Node-Red AddOn
+- edit `config/node-red/package.json` and remove the line with `node-red-contrib-sun-position`
+- add unter the `Configuration` in the Node-Red options as `npm_packages`:
+
 ```yaml
 npm_packages:
   - node-red-contrib-sun-position@2.0.0
@@ -24,12 +30,30 @@ npm_packages:
 
 This can be also used to go back to an older Version.
 
-### 2.2.0-beta: enhancement
+### 3.0.0-alpha: enhancement
+
+Breaking changes:
+
+- removed all "Radiant" angle selection from typed input. The standard selection (which was previous the decimal degree output) gives now an angle based on the type selection (degree or radiant) of the configuration node. Version number is changed to 3 to reflect these API changes.
+
+
+This is still a non stable development version!!
+
+Changes:
 
 - general
   - first implementation of tests with `mocha` and some changes due to the test implementation (inject enhance and delay-until)
     - revised error handling and output messages if the configuration of nodes is not correct (missing config node, missing latitude/longitude).
   - added type checking
+  - allow of custom sun position set and rise angles in the configuration node
+  - allow of custom angles in the configuration node
+  - removed the following angle selections (replaced by existing ones without rad):
+    - time by azimuth (rad)
+    - time by elevation (set or rise in rad)
+    - next time by elevation (set or rise in rad)
+    - next rise time by elevation (rad)
+    - next set time by elevation (rad)
+  - sun-times and moon-times have now every angle in Radians and Degree
 
 - inject enhance (time-inject)
   - added repletely inject with CRON expression
@@ -43,14 +67,23 @@ This can be also used to go back to an older Version.
     - basic test for configuration
     - test for message passing is for later
 
+- sun-position + moon-position
+  - smaller rework
+
 - new Node `delay-until` which allows to delay messages until defined time
+
+- blind-control and clock-timer
+  - implement start and end time for rules #357
+  - show rule edit dialog no longer modal to allow usage of JSON and JSONATA editor #432
+  - separated renamed earliest/latest naming to make it clearer #441
+  - reworked value caching mechanism; fixed bug #434
 
 - blind-control
   - fix #421
   - added for oversteer blind position the possibility to select msg property, flow or global context #423
     - This has some limitations. Changes would only have effect if the oversteer are evaluated.
   - fix not working oversteer mode limitation #431
-  - show rule edit dialog no longer modal to allow usage of JSON and JSONATA editor #432
+  - implemented optional alternative azimuth input like node-red-contrib-blindcontroller #430
 
 - time-comp
   - better adjustable of next time, fixes #420
@@ -77,11 +110,12 @@ This can be also used to go back to an older Version.
 
 - general
   - Fixed bug with wrong default values for Input type in blind-control and within-time-switch node, added console error in case it occurs again.
-  -  additional check for missing position configuration
+  - additional check for missing position configuration
 
 ### 2.0.10: maintenance release
 
 - rerelease, no changed
+
 ### 2.0.9: maintenance release
 
 - general
@@ -159,7 +193,7 @@ This can be also used to go back to an older Version.
 
 - blind-control
   - allow to setup a rule which will only overwrite slat #345 or topic
-  - enhanced overwrite possibilities for slat. Additional `msg.blindSlat` as message property allowed or if the topic contains __slatOverwrite __ the payload as slat position will be used - partly #346
+  - enhanced overwrite possibilities for slat. Additional `msg.blindSlat` as message property allowed or if the topic contains __slatOverwrite__ the payload as slat position will be used - partly #346
   - for slat value make a deep clone as this could be any object and an object comparison
 
 - clock-time
@@ -173,7 +207,7 @@ This can be also used to go back to an older Version.
 
 ⚠ Warning: This Version could break existing flows. Please check your configuration!
 
-🛑 Nodes (especially blind, time-control nodes) that were created or saved with this version do not work in older versions of the package. This affects the export / import of flows and when switching to an older version. It is therefore **essential** to create a **backup** before upgrading to this version!
+🛑 Nodes (especially blind, time-control nodes) that were created or saved with this version do not work in older versions of the package. This affects the export / import of flows and when switching to an older version. It is therefore __essential__ to create a __backup__ before upgrading to this version!
 
 - general
   - added only even and only odd weeks
@@ -371,7 +405,7 @@ This can be also used to go back to an older Version.
 
 - moon-position
   - moon-times now available #161
-  - has now a `isUp` _Boolean_ property which gives the state if the moon is Up #162
+  - has now a `isUp` *Boolean* property which gives the state if the moon is Up #162
   - additional properties are `positionAtRise` and `positionAtSet` with position information on rise and set
 
 - clock-time
@@ -678,7 +712,7 @@ With this for example the time-inject could distinguish between using standard o
 - implemented #52 as height of the sun in the sky in percent (0~100 with 100% being at solarnoon and 0% being completely down) - altithudePercent
 - fixed bug for #53, no longer send blind position in override mode
 - updated dependencies
-- more changes for node-red 1.0 (https://nodered.org/blog/2019/09/20/node-done)
+- more changes for node-red 1.0 <https://nodered.org/blog/2019/09/20/node-done>
 - added node-red 0.19.0 as required version
 
 ### 0.4.8: Maintenance Release

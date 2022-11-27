@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "2.2.0-beta4",
+  "version": "3.0.0-alpha1",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -50,7 +50,7 @@
   ],
   "main": "none",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=12"
   },
   "scripts": {
     "test": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate && mocha \"test/**/*_spec.js\"",
@@ -95,7 +95,7 @@
   },
   "homepage": "https://github.com/rdmtc/node-red-contrib-sun-position#readme",
   "node-red": {
-    "version": ">=1.0.0",
+    "version": ">=1.2.9",
     "nodes": {
       "position-config": "nodes/10-position-config.js",
       "time-inject": "nodes/20-time-inject.js",
@@ -110,22 +110,23 @@
     }
   },
   "dependencies": {
-    "suncalc3": "^2.0.1",
+    "suncalc3": "^2.0.5",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
     "cronosjs": "^1.7.1"
   },
   "devDependencies": {
-    "eslint": ">=8.11.0",
+    "eslint": ">=8.13.0",
     "eslint-plugin-html": ">=6.2.0",
     "eslint-plugin-json": ">=3.1.0",
     "eslint-plugin-node": ">=11.1.0",
     "@types/express": "^4.17.13",
     "@types/jquery": "^3.5.14",
-    "@types/node-red": "^1.2.0",
+    "@types/jqueryui": "^1.12.16",
+    "@types/node-red": "^1.2.1",
     "jsonata": "^1.8.6",
     "mocha": "^10.0.0",
-    "node-red": ">=2.0.0",
+    "node-red": ">=2.1.0",
     "node-red-dev": "^0.1.5",
     "node-red-node-test-helper": "^0.3.0",
     "should": "^13.2.3",

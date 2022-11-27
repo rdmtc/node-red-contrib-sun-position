@@ -50,7 +50,7 @@
   * @property {string} endOffsetType type of the end offset value
   * @property {number} endOffsetMultiplier end offset multipier
   *
-  * @property {*} azimuthPos end offset multipier
+  * @property {*} azimuthPos ??
   */
 
 /**
@@ -61,11 +61,10 @@
   * @type {runtimeRED} */
 module.exports = function (/** @type {runtimeRED} */ RED) {
     'use strict';
-    const path = require('path');
-
-    const hlp = require(path.join(__dirname, '/lib/dateTimeHelper.js'));
+    const hlp = require('./lib/dateTimeHelper.js');
     const util = require('util');
 
+    /******************************************************************************************/
     /**
      * standard Node-Red Node handler for the moonPositionNode
      * @param {*} config the Node-Red Configuration property of the Node
@@ -78,36 +77,79 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         // @ts-ignore
         const node = this;
         // Retrieve the config node
+        /** @type {IPositionConfigNode} */
         node.positionConfig = RED.nodes.getNode(config.positionConfig);
-        node.topic = config.topic || '';
-        node.rules = config.rules || [];
-        node.azimuthPos = {};
+        node.positionConfigValid = true;
         if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
+        } else if (node.positionConfig.checkNode(
+            error => {
+                const text = RED._('node-red-contrib-sun-position/position-config:errors.config-error', { error });
+                node.warn(text);
+                node.status({fill: 'red', shape: 'dot', text });
+                return true;
+            }, false)) {
+            node.positionConfigValid = false;
+        } else {
+            node.status({});
         }
 
+        // Retrieve the config node
+        node.topic = config.topic || '';
+        node.rules = config.rules || [];
+        node.azimuthPos = {};
         node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
             done = done || function (text, msg) { if (text) { return node.error(text, msg); } return null; };
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                const errorStatus = '';
-                const dNow = hlp.getNowTimeStamp(this, msg);
+                const data = {
+                    now : hlp.getNowTimeStamp(this, msg),
+                    latitude: parseFloat(msg.latitude) || parseFloat(msg.lat),
+                    longitude: parseFloat(msg.longitude) || parseFloat(msg.lon),
+                    height: parseFloat(msg.height)
+                };
+                if (isNaN(data.latitude)) {
+                    delete data.latitude;
+                } else if ((data.latitude < -90) || (data.latitude > 90)) {
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.latitude-wrong', data));
+                    delete data.latitude;
+                }
+                if (isNaN(data.longitude)) {
+                    delete data.longitude;
+                } else if ((data.longitude < -180) || (data.longitude > 180)) {
+                    node.error(RED._('position-config.errors.longitude-missing', data));
+                    delete data.longitude;
+                }
+                if (isNaN(data.height)) { delete data.height; }
 
                 if (!node.positionConfig) {
-                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
                     node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
                     return null;
+                } else if (!node.positionConfigValid) {
+                    let text = '';
+                    if (isNaN(this.latitude) || (this.latitude < -90) || (this.latitude > 90)) {
+                        text = RED._('node-red-contrib-sun-position/errors.latitude-missing');
+                    }
+                    if (isNaN(this.longitude) || (this.longitude < -180) || (this.longitude > 180)) {
+                        text = RED._('node-red-contrib-sun-position/errors.longitude-missing');
+                    }
+                    if (text) {
+                        node.status({fill: 'red', shape: 'dot', text });
+                        done(text, msg);
+                        return null;
+                    }
                 }
+                const errorStatus = '';
                 const ports = new Array(node.rules.length);
 
                 ports[0] = RED.util.cloneMessage(msg);
-                ports[0].payload = node.positionConfig.getMoonCalc(dNow, true, true, msg.latitude || msg.lat,  msg.longitude || msg.lon);
-
+                ports[0].payload = node.positionConfig.getMoonCalc(data.now, true, true, data.latitude,  data.longitude);
                 ports[0].topic = node.topic;
                 if (!ports[0].payload.azimuth) {
                     // node.error('Azimuth could not calculated!');
@@ -188,7 +230,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (vType === 'none') {
                     return undefined;
                 }
-                return node.positionConfig.getFloatProp(node, msg, vType, value, 0);
+                return node.positionConfig.getFloatProp(node, msg, { type: vType, value, def: 0 });
             } catch (err) {
                 return undefined;
             }

@@ -83,9 +83,10 @@ this software without specific prior written permission.
             paletteLabel: 'moon-position',
             oneditprepare() {
                 const node = this;
+                const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
                     /* global getTypes */
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     // #region initialize
 
                     const outputCount = $('#node-input-outputs').val('{}');

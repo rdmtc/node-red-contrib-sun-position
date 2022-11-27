@@ -30,11 +30,10 @@
  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
  * @typedef {import('./types/typedefs.js').runtimeNodeConfig} runtimeNodeConfig
  * @typedef {import("./lib/dateTimeHelper").ITimeObject} ITimeObject
- * @typedef {import("./10-position-config.js").IPositionConfigNode} IPositionConfigNode
  * @typedef {import("./10-position-config.js").ITypedValue} ITypedValue
  * @typedef {import("./lib/timeControlHelper.js").ITimeControlNode} ITimeControlNode
+ * @typedef {import("./lib/timeControlHelper.js").IPositionConfigNode} IPositionConfigNode
  */
-
 
 /**
  * @typedef {Object} IBlindNodeData Node data object
@@ -63,10 +62,15 @@
  * @property {string} topType               - type of the top of the window
  * @property {*} bottom                     - the bottom of the window
  * @property {string} bottomType            - type of the bottom of the window
- * @property {*} azimuthStart               - the orientation angle to the geographical north
- * @property {string} azimuthStartType      - type of the orientation angle to the geographical north
- * @property {*} azimuthEnd                 - the offset for the angle clockwise offset
- * @property {string} azimuthEndType        - type of the offset for the angle clockwise offset
+ * @property {('startEnd'|'orientation')} setMode   - mode of the start/end angles
+ * @property {*} azimuthStart               - the start position angle to the geographical north
+ * @property {string} azimuthStartType      - type of the start position angle to the geographical north
+ * @property {*} azimuthEnd                 - the end position angle to the geographical north
+ * @property {string} azimuthEndType        - type of the end position angle to the geographical north
+ * @property {*} windowOrientation          - the orientation angle to the geographical north
+ * @property {string} windowOrientationType - type of the  the orientation angle to the geographical north
+ * @property {number} windowOffsetP         - an offset for the angle clockwise offset
+ * @property {number} windowOffsetN         - an offset for the angle anti-clockwise offset
  */
 
 /**
@@ -120,22 +124,11 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     const clonedeep = require('lodash.clonedeep');
     const isEqual = require('lodash.isequal');
 
-    const cRuleUntil = 0;
-    const cRuleFrom = 1;
-    const cRule = {
-        levelAbsolute : 0,
-        levelMinOversteer : 1,  // ⭳❗ minimum (oversteer)
-        levelMaxOversteer : 2, // ⭱️❗ maximum (oversteer)
-        slatOversteer : 5,
-        topicOversteer : 8,
-        off : 9
-    };
-    const cautoTriggerTimeBeforeSun = 10 * 60000; // 10 min
-    const cautoTriggerTimeSun = 5 * 60000; // 5 min
+    const cautoTriggerTimeBeforeSun = 10 * hlp.TIME_1min; // 10 min
+    const cautoTriggerTimeSun = 5 * hlp.TIME_1min; // 5 min
     const cWinterMode = 1;
     const cMinimizeMode = 3;
     const cSummerMode = 16;
-    const cRuleDefault = -1;
     /******************************************************************************************/
     /**
      * get the absolute level from percentage level
@@ -200,8 +193,19 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
     /**
      * check if angle is between start and end
+     * @param {number} angle    - angle in decimal degree
+     * @param {number} start    - angle in decimal degree or rad, based on angleType
+     * @param {number} end      - angle in decimal degree
+     * @param {('deg'|'rad')} angleType      - angle type
+     * @return {Boolean}
      */
-    function angleBetween_(angle, start, end) {
+    function angleBetween_(angle, start, end, angleType) {
+        if (angleType === 'rad') {
+            start = hlp.toDec(start);
+            end = hlp.toDec(end);
+        }
+        start = hlp.angleNorm(start);
+        end = hlp.angleNorm(end);
         if(start<end) return start<=angle && angle<=end;
         return               start<=angle || angle<=end;
     }
@@ -225,18 +229,22 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         value: el.value,
                         type: el.valueType,
                         expr: el.valueExpr,
-                        callback: (result, _obj) => {
-                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
-                        }
+                        callback: (result, _obj, cachable) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                        },
+                        noError:false,
+                        now:oNow.now
                     },
                     el.operator,
                     {
                         value: el.threshold,
                         type: el.thresholdType,
-                        callback: (result, _obj) => {
-                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData);
-                        }
-                    }, false, oNow.now)));
+                        callback: (result, _obj, cachable) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                        },
+                        noError:false,
+                        now:oNow.now
+                    })));
         } catch (err) {
             node.error(RED._('blind-control.errors.getOversteerData', err));
             node.log(util.inspect(err));
@@ -247,12 +255,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * get the blind level from a typed input
-     * @param {IBlindControlNode} node node data
-     * @param {string} type type field
-     * @param {string} value value field
-     * @returns blind level as number or NaN if not defined
+     * @param {IBlindControlNode} node  - node data
+     * @param {*} msg                   - message object
+     * @param {string} type             - type field
+     * @param {string} value            - value field
+     * @param {number|NaN} def          - default value
+     * @param {Object} tempData         - the temporary data holder object
+     * @returns {number|NaN} blind level as number or NaN if not defined
      */
-    function getBlindPosFromTI(node, msg, type, value, def) {
+    function getBlindPosFromTI(node, msg, type, value, def, tempData) {
         // node.debug(`getBlindPosFromTI - type=${type} value=${value} def=${def} nodeData=${ util.inspect(node.nodeData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }) }`);
         def = def || NaN;
         if (type === 'none' || type === ''|| type === 'levelND') {
@@ -279,7 +290,15 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
                 throw new Error(`unknown value "${value}" of type "${type}"` );
             }
-            const res = node.positionConfig.getFloatProp(node, msg, type, value, def);
+            const res = node.positionConfig.getFloatProp(node, msg,
+                {
+                    type,
+                    value,
+                    def,
+                    callback: (result, _obj, cachable) => {
+                        return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                    }
+                });
             if (node.levelReverse) {
                 return getInversePos_(node, res);
             }
@@ -404,31 +423,77 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     /******************************************************************************************/
     /**
      * calculates for the blind the new level
-     * @param {IBlindControlNode} node the node data
-     * @param {Object} msg the message object
-     * @param {ITimeObject} oNow the now Object
-     * @param {Object} tempData the temporary data holder object
-     * @param {Object} prevData the nodes previous data
-     * @returns the sun position object
+     * @param {IBlindControlNode} node  - the node data
+     * @param {Object} msg              - the message object
+     * @param {ITimeObject} oNow        - the now Object
+     * @param {Object} tempData         - the temporary data holder object
+     * @param {Object} prevData         - the nodes previous data
+     * @returns {Object} the sun position object
      */
     function calcBlindSunPosition(node, msg, oNow, tempData, prevData) {
         // node.debug('calcBlindSunPosition: calculate blind position by sun');
         // sun control is active
         const sunPosition = node.positionConfig.getSunCalc(oNow.now, false, false);
         // node.debug('sunPosition: ' + util.inspect(sunPosition, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
+        let /** @type {number} */ azimuthStart, /** @type {number} */ azimuthEnd;
+        if (node.windowSettings.setMode === 'orientation') {
+            const orientationValue = node.positionConfig.getFloatProp(node, msg, {
+                type: node.windowSettings.windowOrientationType,
+                value: node.windowSettings.windowOrientation,
+                def: NaN,
+                callback: (result, _obj, cachable) => {
+                    return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                },
+                /* callback: (result, _obj) => {
+                    if (result !== null && typeof result !== 'undefined') {
+                        tempData[_obj.type + '.' + _obj.value] = result;
+                    }
+                    return result;
+                }, */
+                noError: true,
+                now: oNow.now
+            });
+            azimuthStart = orientationValue - node.windowSettings.windowOffsetN;
+            azimuthEnd = orientationValue + node.windowSettings.windowOffsetP;
+        } else {
+            azimuthStart = node.positionConfig.getFloatProp(node, msg, {
+                type: node.windowSettings.azimuthStartType,
+                value: node.windowSettings.azimuthStart,
+                def: NaN,
+                callback: (result, _obj, cachable) => {
+                    return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                },
+                /*
+                callback: (result, _obj) => {
+                    if (result !== null && typeof result !== 'undefined') {
+                        tempData[_obj.type + '.' + _obj.value] = result;
+                    }
+                    return result;
+                }, */
+                noError: true,
+                now: oNow.now
+            });
 
-        const azimuthStart = node.positionConfig.getFloatProp(node, msg, node.windowSettings.azimuthStartType, node.windowSettings.azimuthStart, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
-        const azimuthEnd = node.positionConfig.getFloatProp(node, msg, node.windowSettings.azimuthEndType, node.windowSettings.azimuthEnd, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
+            azimuthEnd = node.positionConfig.getFloatProp(node, msg, {
+                type: node.windowSettings.azimuthEndType,
+                value: node.windowSettings.azimuthEnd,
+                def: NaN,
+                callback: (result, _obj, cachable) => {
+                    return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                },
+                /*
+                callback: (result, _obj) => {
+                    if (result !== null && typeof result !== 'undefined') {
+                        tempData[_obj.type + '.' + _obj.value] = result;
+                    }
+                    return result;
+                }, */
+                noError: true,
+                now: oNow.now
+            });
+        }
+        sunPosition.InWindow = angleBetween_(sunPosition.azimuthDegrees, azimuthStart, azimuthEnd, node.positionConfig.angleType);
 
-        sunPosition.InWindow = angleBetween_(sunPosition.azimuthDegrees, azimuthStart, azimuthEnd);
         // node.debug(`sunPosition: InWindow=${sunPosition.InWindow} azimuthDegrees=${sunPosition.azimuthDegrees} AzimuthStart=${azimuthStart} AzimuthEnd=${azimuthEnd}`);
         if (node.autoTrigger ) {
             if ((sunPosition.altitudeDegrees <= 0)) {
@@ -517,21 +582,57 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             return sunPosition;
         }
 
-        const floorLength = node.positionConfig.getFloatProp(node, msg, node.sunData.floorLengthType, node.sunData.floorLength, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
-        const wTop = node.positionConfig.getFloatProp(node, msg, node.windowSettings.topType, node.windowSettings.top, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
-        const wBottom = node.positionConfig.getFloatProp(node, msg, node.windowSettings.bottomType, node.windowSettings.bottom, NaN, (result, _obj) => {
-            if (result !== null && typeof result !== 'undefined') {
-                tempData[_obj.type + '.' + _obj.value] = result;
-            }
-        }, true, oNow.now);
+        const floorLength = node.positionConfig.getFloatProp(node, msg, {
+            type: node.sunData.floorLengthType,
+            value: node.sunData.floorLength,
+            def: NaN,
+            callback: (result, _obj, cachable) => {
+                return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+            },
+            /*
+            callback: (result, _obj) => {
+                if (result !== null && typeof result !== 'undefined') {
+                    tempData[_obj.type + '.' + _obj.value] = result;
+                }
+                return result;
+            }, */
+            noError: true,
+            now: oNow.now
+        });
+        const wTop = node.positionConfig.getFloatProp(node, msg, {
+            type: node.windowSettings.topType,
+            value: node.windowSettings.top,
+            def: NaN,
+            callback: (result, _obj, cachable) => {
+                return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+            },
+            /*
+            callback: (result, _obj) => {
+                if (result !== null && typeof result !== 'undefined') {
+                    tempData[_obj.type + '.' + _obj.value] = result;
+                }
+                return result;
+            }, */
+            noError: true,
+            now: oNow.now
+        });
+        const wBottom = node.positionConfig.getFloatProp(node, msg, {
+            type: node.windowSettings.bottomType,
+            value: node.windowSettings.bottom,
+            def: NaN,
+            callback: (result, _obj, cachable) => {
+                return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+            },
+            /*
+            callback: (result, _obj) => {
+                if (result !== null && typeof result !== 'undefined') {
+                    tempData[_obj.type + '.' + _obj.value] = result;
+                }
+                return result;
+            }, */
+            noError: true,
+            now: oNow.now
+        });
 
         const height = Math.tan(sunPosition.altitudeRadians) * floorLength;
         // node.debug(`height=${height} - altitude=${sunPosition.altitudeRadians} - floorLength=${floorLength}`);
@@ -623,212 +724,137 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      * @param {Object} msg the message object
      * @param {ITimeObject} oNow the *current* date Object
      * @param {Object} tempData the object storing the temporary caching data
-     * @returns the active rule or null
+     * @returns {Object} the active rule or null
      */
     function checkRules(node, msg, oNow, tempData) {
         // node.debug('checkRules --------------------');
-        const livingRuleData = {};
         ctrlLib.prepareRules(node, msg, tempData, oNow.now);
-        // node.debug(`checkRules rules.count=${node.rules.count}, rules.lastUntil=${node.rules.lastUntil}, oNow=${util.inspect(oNow, {colors:true, compact:10})}`);
-
-        let ruleSel = null;
-        let ruleSlatOvs = null;
-        let ruleTopicOvs = null;
-        let ruleSelMin = null;
-        let ruleSelMax = null;
-        let ruleindex = -1;
-        // node.debug(`first loop count:${ node.rules.count } lastuntil:${ node.rules.lastUntil}`);
-        for (let i = 0; i <= node.rules.lastUntil; ++i) {
-            const rule = node.rules.data[i];
-            if (!rule.enabled) { continue; }
-            if (rule.time && rule.time.operator === cRuleFrom) { continue; }
-            const res = ctrlLib.compareRules(node, msg, rule, r => (r >= oNow.nowNr), oNow);
-            if (res) {
-                // node.debug(`1. ruleSel ${rule.name} (${rule.pos}) level.operator=${ res.level.operator }`);
-                if (res.level.operator === cRule.slatOversteer) {
-                    ruleSlatOvs = res;
-                } else if (res.level.operator === cRule.topicOversteer) {
-                    ruleTopicOvs = res;
-                } else if (res.level.operator === cRule.levelMinOversteer) {
-                    ruleSelMin = res;
-                } else if (res.level.operator === cRule.levelMaxOversteer) {
-                    ruleSelMax = res;
-                } else {
-                    ruleSel = res;
-                    ruleindex = i;
-                    break;
-                }
-            }
-        }
-
-        if (!ruleSel || (ruleSel.time && ruleSel.time.operator === cRuleFrom) ) {
-            // node.debug('--------- starting second loop ' + node.rules.count);
-            for (let i = (node.rules.count - 1); i >= 0; --i) {
-                const rule = node.rules.data[i];
-                // node.debug(`rule ${rule.name} (${rule.pos}) enabled=${rule.enabled} operator=${rule.time.operator} noUntil=${rule.time.operator !== cRuleUntil} data=${util.inspect(rule, {colors:true, compact:10, breakLength: Infinity })}`);
-                if (!rule.enabled) { continue; }
-                if (rule.time && rule.time.operator === cRuleUntil) { continue; } // - From: timeOp === cRuleFrom
-                const res = ctrlLib.compareRules(node, msg, rule, r => (r <= oNow.nowNr), oNow);
-                if (res) {
-                    // node.debug(`2. ruleSel ${rule.name} (${rule.pos}) data=${ util.inspect(res, { colors: true, compact: 10, breakLength: Infinity }) }`);
-                    if (res.level.operator === cRule.slatOversteer) {
-                        ruleSlatOvs = res;
-                    } else if (res.level.operator === cRule.topicOversteer) {
-                        ruleTopicOvs = res;
-                    } else if (res.level.operator === cRule.levelMinOversteer) {
-                        ruleSelMin = res;
-                    } else if (res.level.operator === cRule.levelMaxOversteer) {
-                        ruleSelMax = res;
-                    } else {
-                        ruleSel = res;
-                        break;
-                    }
-                }
-            }
-        }
+        const rule = ctrlLib.getActiveRule(node, msg, oNow, tempData);
+        const livingRuleData = {};
 
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
-        if (ruleTopicOvs) {
+        if (rule.ruleTopicOvs) {
             livingRuleData.topicOversteer = {
-                id: ruleTopicOvs.pos,
-                name: ruleTopicOvs.name,
-                conditional: ruleTopicOvs.conditional,
-                timeLimited: (!!ruleTopicOvs.time),
-                conditon: ruleTopicOvs.conditon,
-                time: ruleTopicOvs.timeData,
-                importance: ruleTopicOvs.importance,
-                topic : ruleTopicOvs.topic || ''
+                id: rule.ruleTopicOvs.pos,
+                name: rule.ruleTopicOvs.name,
+                conditional: rule.ruleTopicOvs.conditional,
+                timeLimited: (!!rule.ruleTopicOvs.time),
+                conditon: rule.ruleTopicOvs.conditonResult,
+                time: rule.ruleTopicOvs.timeResult,
+                importance: rule.ruleTopicOvs.importance,
+                topic : rule.ruleTopicOvs.topic || ''
             };
+            delete rule.ruleTopicOvs;
         }
-        if (ruleSlatOvs) {
+        if (rule.ruleSlatOvs) {
             livingRuleData.slatOversteer = {
-                id: ruleSlatOvs.pos,
-                name: ruleSlatOvs.name,
-                conditional: ruleSlatOvs.conditional,
-                timeLimited: (!!ruleSlatOvs.time),
-                conditon: ruleSlatOvs.conditon,
-                time: ruleSlatOvs.timeData,
-                slat: node.positionConfig.getPropValue(node, msg, ruleSlatOvs.slat, false, oNow.now),
-                importance: ruleSlatOvs.importance
+                id: rule.ruleSlatOvs.pos,
+                name: rule.ruleSlatOvs.name,
+                conditional: rule.ruleSlatOvs.conditional,
+                timeLimited: (!!rule.ruleSlatOvs.time),
+                conditon: rule.ruleSlatOvs.conditonResult,
+                time: rule.ruleSlatOvs.timeResult,
+                slat: node.positionConfig.getPropValue(node, msg, rule.ruleSlatOvs.slat, false, oNow.now),
+                importance: rule.ruleSlatOvs.importance
             };
+            delete rule.ruleSlatOvs;
         }
         livingRuleData.hasMinimum = false;
-        if (ruleSelMin) {
-            const lev = getBlindPosFromTI(node, msg, ruleSelMin.level.type, ruleSelMin.level.value, -1);
-            // node.debug('ruleSelMin ' + lev + ' -- ' + util.inspect(ruleSelMin, { colors: true, compact: 10, breakLength: Infinity }));
+        if (rule.ruleSelMin) {
+            const lev = getBlindPosFromTI(node, msg, rule.ruleSelMin.level.type, rule.ruleSelMin.level.value, -1);
+            // node.debug('rule.ruleSelMin ' + lev + ' -- ' + util.inspect(rule.ruleSelMin, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }));
             if (lev > -1) {
                 livingRuleData.levelMinimum = lev;
                 livingRuleData.hasMinimum = true;
                 livingRuleData.minimum = {
-                    id: ruleSelMin.pos,
-                    name: ruleSelMin.name,
-                    conditional: ruleSelMin.conditional,
-                    timeLimited: (!!ruleSelMin.time),
-                    conditon: ruleSelMin.conditon,
-                    time: ruleSelMin.timeData
-                    // slat: node.positionConfig.getPropValue(node, msg, ruleSelMin.slat, false, oNow.now)
-                    // importance: ruleSelMin.importance,
-                    // resetOverwrite: ruleSelMin.resetOverwrite,
-                    // topic : ruleSelMin.topic
+                    id: rule.ruleSelMin.pos,
+                    name: rule.ruleSelMin.name,
+                    conditional: rule.ruleSelMin.conditional,
+                    timeLimited: (!!rule.ruleSelMin.time),
+                    conditon: rule.ruleSelMin.conditonResult,
+                    time: rule.ruleSelMin.timeResult
+                    // slat: node.positionConfig.getPropValue(node, msg, rule.ruleSelMin.slat, false, oNow.now)
+                    // importance: rule.ruleSelMin.importance,
+                    // resetOverwrite: rule.ruleSelMin.resetOverwrite,
+                    // topic : rule.ruleSelMin.topic
                 };
             }
+            delete rule.ruleSelMin;
         }
         livingRuleData.hasMaximum = false;
-        if (ruleSelMax) {
-            const lev = getBlindPosFromTI(node, msg, ruleSelMax.level.type, ruleSelMax.level.value, -1);
-            // node.debug('ruleSelMax ' + lev + ' -- ' + util.inspect(ruleSelMax, { colors: true, compact: 10, breakLength: Infinity }) );
+        if (rule.ruleSelMax) {
+            const lev = getBlindPosFromTI(node, msg, rule.ruleSelMax.level.type, rule.ruleSelMax.level.value, -1);
+            // node.debug('rule.ruleSelMax ' + lev + ' -- ' + util.inspect(rule.ruleSelMax, { colors: true, compact: 5, breakLength: Infinity, depth: 10 }) );
             if (lev > -1) {
                 livingRuleData.levelMaximum = lev;
                 livingRuleData.hasMaximum = true;
                 livingRuleData.maximum = {
-                    id: ruleSelMax.pos,
-                    name: ruleSelMax.name,
-                    conditional: ruleSelMax.conditional,
-                    timeLimited: (!!ruleSelMax.time),
-                    conditon: ruleSelMax.conditon,
-                    time: ruleSelMax.timeData
-                    // slat: node.positionConfig.getPropValue(node, msg, ruleSelMax.slat, false, oNow.now)
-                    // importance: ruleSelMax.importance,
-                    // resetOverwrite: ruleSelMax.resetOverwrite,
-                    // topic : ruleSelMax.topic
+                    id: rule.ruleSelMax.pos,
+                    name: rule.ruleSelMax.name,
+                    conditional: rule.ruleSelMax.conditional,
+                    timeLimited: (!!rule.ruleSelMax.time),
+                    conditon: rule.ruleSelMax.conditonResult,
+                    time: rule.ruleSelMax.timeResult
+                    // slat: node.positionConfig.getPropValue(node, msg, rule.ruleSelMax.slat, false, oNow.now)
+                    // importance: rule.ruleSelMax.importance,
+                    // resetOverwrite: rule.ruleSelMax.resetOverwrite,
+                    // topic : rule.ruleSelMax.topic
                 };
             }
+            delete rule.ruleSelMax;
         }
-        const checkRuleForAT = rule => {
-            if (!rule.time) {
-                return;
-            }
-            const num = ctrlLib.getRuleTimeData(node, msg, rule, oNow);
-            if (num > oNow.nowNr) {
-                node.debug('autoTrigger set to rule ' + rule.pos);
-                const diff = num - oNow.nowNr;
-                node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                node.autoTrigger.type = 2; // next rule
-            }
-        };
-        if (ruleSel) {
-            // ruleSel.text = '';
-            // node.debug('ruleSel ' + util.inspect(ruleSel, {colors:true, compact:10, breakLength: Infinity }));
-            livingRuleData.id = ruleSel.pos;
-            livingRuleData.name = ruleSel.name;
-            livingRuleData.importance = ruleSel.importance;
-            livingRuleData.resetOverwrite = ruleSel.resetOverwrite;
+
+        if (rule.ruleSel) {
+            // rule.ruleSel.text = '';
+            // node.debug('rule.ruleSel ' + util.inspect(rule.ruleSel, {colors:true, compact:10, breakLength: Infinity }));
+            livingRuleData.id = rule.ruleSel.pos;
+            livingRuleData.name = rule.ruleSel.name;
+            livingRuleData.importance = rule.ruleSel.importance;
+            livingRuleData.resetOverwrite = rule.ruleSel.resetOverwrite;
             livingRuleData.code = 4;
-            livingRuleData.topic = ruleSel.topic;
+            livingRuleData.topic = rule.ruleSel.topic;
 
-            if (node.autoTrigger) {
-                if (ruleSel.time && ruleSel.timeData.ts > oNow.nowNr) {
-                    node.debug('autoTrigger set to rule ' + ruleSel.pos + ' (current)');
-                    const diff = ruleSel.timeData.ts - oNow.nowNr;
-                    node.autoTrigger.time = Math.min(node.autoTrigger.time, diff);
-                    node.autoTrigger.type = 1; // current rule end
-                } else {
-                    for (let i = (ruleindex+1); i < node.rules.count; ++i) {
-                        const rule = node.rules.data[i];
-                        if (!rule.time) {
-                            continue;
-                        }
-                        checkRuleForAT(rule);
-                    }
-                    // check first rule, maybe next day
-                    if ((node.autoTrigger.type !== 2) && (node.rules.firstTimeLimited < node.rules.count)) {
-                        checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
-                    }
-                }
-            }
+            livingRuleData.active = true;
+            livingRuleData.conditional = rule.ruleSel.conditional;
+            livingRuleData.timeLimited = (!!rule.ruleSel.time);
 
-            livingRuleData.conditional = ruleSel.conditional;
-            livingRuleData.timeLimited = (!!ruleSel.time);
-
-            const data = { number: ruleSel.pos, name: ruleSel.name };
+            const data = { number: rule.ruleSel.pos, name: rule.ruleSel.name };
             let name = 'rule';
-            if (ruleSel.conditional) {
-                livingRuleData.conditon = ruleSel.conditon;
-                data.text = ruleSel.conditon.text;
-                data.textShort = ruleSel.conditon.textShort;
+            if (rule.ruleSel.conditional) {
+                livingRuleData.conditon = rule.ruleSel.conditonResult;
+                data.text = rule.ruleSel.conditonResult.text;
+                data.textShort = rule.ruleSel.conditonResult.textShort;
                 name = 'ruleCond';
             }
-            if (ruleSel.time && ruleSel.timeData) {
-                livingRuleData.time = ruleSel.timeData;
-                livingRuleData.time.timeLocal = node.positionConfig.toTimeString(ruleSel.timeData.value);
-                livingRuleData.time.timeLocalDate = node.positionConfig.toDateString(ruleSel.timeData.value);
-                livingRuleData.time.dateISO= ruleSel.timeData.value.toISOString();
-                livingRuleData.time.dateUTC= ruleSel.timeData.value.toUTCString();
-                data.timeOp = ruleSel.time.operatorText;
-                data.timeLocal = livingRuleData.time.timeLocal;
-                data.time = livingRuleData.time.dateISO;
-                name = (ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
+            if (rule.ruleSel.time && rule.ruleSel.timeResult) {
+                livingRuleData.time = rule.ruleSel.timeResult;
+                if (livingRuleData.time.start) {
+                    livingRuleData.time.start.timeLocal = node.positionConfig.toTimeString(rule.ruleSel.timeResult.start.value);
+                    livingRuleData.time.start.timeLocalDate = node.positionConfig.toDateString(rule.ruleSel.timeResult.start.value);
+                    livingRuleData.time.start.dateISO= rule.ruleSel.timeResult.start.value.toISOString();
+                    livingRuleData.time.start.dateUTC= rule.ruleSel.timeResult.start.value.toUTCString();
+                }
+                if (livingRuleData.time.end) {
+                    livingRuleData.time.end.timeLocal = node.positionConfig.toTimeString(rule.ruleSel.timeResult.end.value);
+                    livingRuleData.time.end.timeLocalDate = node.positionConfig.toDateString(rule.ruleSel.timeResult.end.value);
+                    livingRuleData.time.end.dateISO= rule.ruleSel.timeResult.end.value.toISOString();
+                    livingRuleData.time.end.dateUTC= rule.ruleSel.timeResult.end.value.toUTCString();
+                }
+                // data.timeOp = rule.ruleSel.time.operatorText;
+                // data.timeLocal = livingRuleData.time.timeLocal;
+                // data.time = livingRuleData.time.dateISO;
+                name = (rule.ruleSel.conditional) ? 'ruleTimeCond' : 'ruleTime';
             }
             livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.'+name, data);
             livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.'+name, data);
-            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+            // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);
 
-            if (ruleSel.level.operator === cRule.off) {
+            if (rule.ruleSel.level.operator === ctrlLib.cRuleType.off) {
                 livingRuleData.isOff = true;
-            } else if (ruleSel.level.operator === cRule.levelAbsolute) { // absolute rule
-                livingRuleData.level = getBlindPosFromTI(node, msg, ruleSel.level.type, ruleSel.level.value, -1);
-                livingRuleData.slat = node.positionConfig.getPropValue(node, msg, ruleSel.slat, false, oNow.now);
+            } else if (rule.ruleSel.level.operator === ctrlLib.cRuleType.absolute) { // absolute rule
+                livingRuleData.level = getBlindPosFromTI(node, msg, rule.ruleSel.level.type, rule.ruleSel.level.value, -1);
+                livingRuleData.slat = node.positionConfig.getPropValue(node, msg, rule.ruleSel.slat, false, oNow.now);
                 livingRuleData.active = (livingRuleData.level > -1);
             } else {
                 livingRuleData.active = false;
@@ -838,7 +864,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             return livingRuleData;
         }
         livingRuleData.active = false;
-        livingRuleData.id = cRuleDefault;
+        livingRuleData.id = ctrlLib.cRuleDefault;
         livingRuleData.importance = 0;
         livingRuleData.resetOverwrite = false;
         livingRuleData.level = getBlindPosFromTI(node, msg, node.nodeData.levelDefault.type, node.nodeData.levelDefault.value, node.nodeData.levelTop);
@@ -848,16 +874,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         livingRuleData.state = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.states.default');
         livingRuleData.description = RED._('node-red-contrib-sun-position/position-config:ruleCtrl.reasons.default');
 
-        if (node.autoTrigger && node.rules && node.rules.count > 0) {
-            // check first rule, maybe next day
-            if (node.rules.firstTimeLimited < node.rules.count) {
-                checkRuleForAT(node.rules.data[node.rules.firstTimeLimited]);
-            }
-            if (node.rules.firstTimeLimited !== node.rules.firstFrom) {
-                checkRuleForAT(node.rules.data[node.rules.firstFrom]);
-            }
-        }
-        // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 10, breakLength: Infinity })}`);
+        // node.debug(`checkRules end livingRuleData=${util.inspect(livingRuleData, { colors: true, compact: 5, breakLength: Infinity, depth: 10 })}`);
         return livingRuleData;
     }
     /******************************************************************************************/
@@ -868,22 +885,27 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
      */
     function sunBlindControlNode(config) {
         RED.nodes.createNode(this, config);
-        this.positionConfig = RED.nodes.getNode(config.positionConfig);
         /** Copy 'this' object in case we need it in context of callbacks of other functions.
          * @type {IBlindControlNode}
          */
         // @ts-ignore
         const node = this;
-        if (!this.positionConfig) {
+
+        /** @type {IPositionConfigNode} */
+        node.positionConfig = RED.nodes.getNode(config.positionConfig);
+
+        if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
-            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing') });
+            node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
         }
 
-        if (this.positionConfig.checkNode(
+        if (node.positionConfig.checkNode(
             error => {
-                node.error(error);
-                node.status({fill: 'red', shape: 'dot', text: error });
+                const text = RED._('node-red-contrib-sun-position/position-config:errors.config-error', { error });
+                node.error(text);
+                node.status({fill: 'red', shape: 'dot', text });
+                return true;
             }, false)) {
             return;
         }
@@ -917,7 +939,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         if (config.autoTrigger) {
             node.autoTrigger = {
-                defaultTime : parseInt(config.autoTriggerTime) || 3600000, // 1h
+                defaultTime : parseInt(config.autoTriggerTime) || hlp.TIME_20min,
                 time : NaN,
                 type : 0 // default time
             };
@@ -936,7 +958,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         };
         // temporary node Data
         node.levelReverse = false;
-        node.contextStore = config.contextStore || this.positionConfig.contextStore;
+        node.contextStore = config.contextStore || node.positionConfig.contextStore;
         // Retrieve the config node
         node.sunData = {
             /** Defines if the sun control is active or not */
@@ -959,7 +981,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         if (node.sunData.mode === 2) { node.sunData.mode = cSummerMode; } // backwards compatibility
         node.sunData.modeMax = node.sunData.mode;
 
-        /** type {IBlindWindowSettings} */
+        /** @type {IBlindWindowSettings} */
         node.windowSettings = {
             /** The top of the window */
             top: config.windowTop,
@@ -967,13 +989,23 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             /** The bottom of the window */
             bottom: config.windowBottom,
             bottomType: config.windowBottomType || 'num',
+
+            setMode: config.windowSetMode || 'startEnd',
             /** the orientation angle to the geographical north */
             azimuthStart: config.windowAzimuthStart,
-            azimuthStartType: config.windowAzimuthStartType || 'num',
+            azimuthStartType: config.windowAzimuthStartType || 'numAzimuth',
             /** an offset for the angle clockwise offset */
             azimuthEnd: config.windowAzimuthEnd,
-            azimuthEndType: config.windowAzimuthEndType || 'num'
+            azimuthEndType: config.windowAzimuthEndType || 'numAzimuth',
+            /** the orientation angle to the geographical north */
+            windowOrientation: config.windowOrientation,
+            windowOrientationType: config.windowOrientationType || 'numAzimuth',
+            /** an offset for the angle clockwise offset */
+            windowOffsetP: config.windowOffsetP,
+            /** an offset for the angle anti-clockwise offset */
+            windowOffsetN: config.windowOffsetN
         };
+        // startEnd
 
         /** @type {IBlindNodeData} */
         node.nodeData = {
@@ -1158,7 +1190,11 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         // @ts-ignore
         node.rules = {
-            data: config.rules || []
+            data: config.rules || [],
+            count: 0,
+            maxImportance : 0,
+            last1stRun : -1,
+            canResetOverwrite : false
         };
         node.level = {
             current: NaN, // unknown
@@ -1175,7 +1211,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
             try {
                 node.debug(`--------- blind-control - input msg.topic=${msg.topic} msg.payload=${msg.payload} msg.ts=${msg.ts}`);
-                if (!this.positionConfig) {
+                if (!node.positionConfig) {
                     node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
                     node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
@@ -1183,10 +1219,18 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
 
                 // allow to overwrite settings by incomming message
-                const newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
+                let newMode = hlp.getMsgNumberValue(msg, ['mode'], ['setMode']);
                 if (Number.isFinite(newMode) && newMode >= 0 && newMode <= node.sunData.modeMax) {
                     node.debug(`set mode from ${node.sunData.mode} to ${newMode}`);
-                    node.sunData.mode = newMode;
+                    if (newMode === 2) { newMode = cSummerMode; } // backwards compatibility
+                    if (newMode !== 0 &&
+                        newMode !== cSummerMode &&
+                        newMode !== cWinterMode &&
+                        newMode !== cMinimizeMode) {
+                        node.error('Mode "' + newMode + '" is not a valid value!');
+                    } else {
+                        node.sunData.mode = newMode;
+                    }
                     node.context().set('mode', newMode, node.contextStore);
                 }
 
@@ -1240,7 +1284,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             break;
                         /* advanced Settings */
                         case 'setAutoTriggerTime':
-                            node.autoTrigger.defaultTime = parseInt(msg.payload) || node.autoTrigger.defaultTime; // payload of 0 makes no sense, use then default
+                            node.autoTrigger = Object.assign(node.autoTrigger ,{ defaultTime : parseInt(msg.payload) || node.autoTrigger.defaultTime }); // payload of 0 makes no sense, use then default
                             break;
                         case 'setContextStore':
                             node.contextStore = msg.payload || node.contextStore;
@@ -1318,12 +1362,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     node.addId = node.positionConfig.getPropValue(node, msg, {
                         type: node.nodeData.addId.type,
                         value: node.nodeData.addId.value,
+                        callback: (result, _obj, cachable) => {
+                            return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                        }
+                        /*
                         callback: (result, _obj) => {
                             if (result !== null && typeof result !== 'undefined') {
                                 tempData[_obj.type + '.' + _obj.value] = result;
                             }
                             return result;
-                        }
+                        } */
                     }, true, oNow.now);
                 }
                 const blindCtrl = {
@@ -1418,12 +1466,16 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         node.positionConfig.getPropValue(node, msg, {
                             type: el.valueType,
                             value: el.value,
+                            callback: (result, _obj, cachable) => {
+                                return ctrlLib.evalTempData(node, _obj.type, _obj.value, result, tempData, cachable);
+                            },
+                            /*
                             callback: (result, _obj) => {
                                 if (result !== null && typeof result !== 'undefined') {
                                     tempData[_obj.type + '.' + _obj.value] = result;
                                 }
                                 return result;
-                            },
+                            }, */
                             operator: el.operator
                         }, false, oNow.now);
                     });
@@ -1492,7 +1544,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         }
                         if (typeof resultObj !== 'undefined') {
                             if (resultObj.error) {
-                                this.error('error on getting result: "' + resultObj.error + '"');
+                                node.error('error on getting result: "' + resultObj.error + '"');
                             } else {
                                 node.positionConfig.setMessageProp(this, msgOut, prop.outType, prop.outValue, resultObj);
                             }
@@ -1510,13 +1562,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 node.context().set('lastData', previousData, node.contextStore);
                 if (node.autoTrigger) {
                     node.debug('next autoTrigger will set to ' + node.autoTrigger.time + ' - ' + node.autoTrigger.type);
-                    if (node.autoTriggerObj) {
-                        clearTimeout(node.autoTriggerObj);
-                        delete node.autoTriggerObj;
+                    if (node.autoTrigger.timer) {
+                        clearTimeout(node.autoTrigger.timer);
+                        delete node.autoTrigger.timer;
                     }
-                    node.autoTriggerObj = setTimeout(() => {
-                        clearTimeout(node.autoTriggerObj);
-                        delete node.autoTriggerObj;
+                    node.autoTrigger.timer = setTimeout(() => {
+                        clearTimeout(node.autoTrigger.timer);
+                        delete node.autoTrigger.timer;
                         node.emit('input', {
                             topic: 'autoTrigger/triggerOnly',
                             payload: 'triggerOnly',
@@ -1577,9 +1629,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         });
 
         node.on('close', () => {
-            if (node.autoTriggerObj) {
-                clearTimeout(node.autoTriggerObj);
-                delete node.autoTriggerObj;
+            if (node.autoTrigger && node.autoTrigger.timer) {
+                clearTimeout(node.autoTrigger.timer);
+                delete node.autoTrigger.timer;
             }
             if (node.startDelayTimeOutObj) {
                 clearTimeout(node.startDelayTimeOutObj);
