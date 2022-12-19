@@ -130,7 +130,7 @@
     "node-red-node-test-helper": "^0.3.0",
     "should": "^13.2.3",
     "should-sinon": "^0.0.6",
-    "sinon": "^14.0.0"
+    "sinon": "^15.0.1"
   },
   "eslintConfig": {
     "env": {
