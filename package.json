@@ -123,7 +123,7 @@
     "@types/express": "^4.17.13",
     "@types/jquery": "^3.5.14",
     "@types/node-red": "^1.2.0",
-    "jsonata": "^1.8.6",
+    "jsonata": "^2.0.1",
     "mocha": "^10.0.0",
     "node-red": ">=2.0.0",
     "node-red-dev": "^0.1.5",
