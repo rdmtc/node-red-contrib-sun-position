@@ -576,7 +576,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} nowNr=` + oNow.nowNr);
         }
         const levelMin = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
-        const levelMax = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
+        const levelMax = getBlindPosFromTI(node, msg, node.nodeData.levelMax.type, node.nodeData.levelMax.value, node.nodeData.levelTop);    
         if (node.level.current < levelMin)  {
             // min
             node.debug(`${node.level.current} is below ${levelMin} (min)`);
