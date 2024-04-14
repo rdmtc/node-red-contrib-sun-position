@@ -25,6 +25,9 @@
  * blind-control:
  *********************************************/
 'use strict';
+
+const { debug } = require('console');
+
 /** --- Type Defs ---
  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
@@ -1231,6 +1234,12 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             }
                             break;
                         }
+                        case 'setSunDataMinAltitude': {
+                            node.sunData.sunMinAltitude = parseFloat(msg.payload) || node.sunData.sunMinAltitude; //TFR TODO see if it works
+                           node.warn(`SunDataMinAltitude set to ${ node.sunData.sunMinAltitude}`);
+                           
+                        }
+                            break;
                         /* minimum changes Settings */
                         case 'setSunDataMinDelta':
                             node.sunData.minDelta = parseFloat(msg.payload) || node.sunData.minDelta; // payload of 0 makes no sense, use then default
