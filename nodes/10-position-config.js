@@ -1348,7 +1348,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }, '<(osn)?:(ol)>');
             return expr;
         }
-
+		
+		
         /**
          * get a property value from a type input in Node-Red
          * @param {runtimeNode} _srcNode - source node information
@@ -1496,7 +1497,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     if (!data.expr) {
                         data.expr = this.getJSONataExpression(_srcNode, data.value);
                     }
-                    result = RED.util.evaluateJSONataExpression(data.expr, msg);
+                    //result = RED.util.evaluateJSONataExpression(data.expr, msg);
+					result = this.evaluateJSONataExpression(data.expr, msg);
                 } catch (err) {
                     _srcNode.debug(util.inspect(err));
                 }
@@ -1881,7 +1883,22 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
         }
     }
-
+	
+	/**
+		2024-06-05 - jonferreira
+		quick hack - Change evaluateJSONataExpression  to use callback
+	**/
+	function evaluateJSONataExpression( expr, message ) {
+		return new Promise<any>((resolve, reject) => {
+			RED.util.evaluateJSONataExpression(expr, message, (err, res) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(res);
+				}
+			});
+		});
+	}
     /**************************************************************************************************************/
     RED.nodes.registerType('position-config', positionConfigurationNode, {
         credentials: {

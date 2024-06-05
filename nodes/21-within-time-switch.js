@@ -168,6 +168,22 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         return false;
     }
+	
+	/**
+		2024-06-05 - jonferreira
+		quick hack - Change evaluateJSONataExpression  to use callback
+	**/
+	function evaluateJSONataExpression( expr, message ) {
+		return new Promise<any>((resolve, reject) => {
+			RED.util.evaluateJSONataExpression(expr, message, (err, res) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(res);
+				}
+			});
+		});
+	}
 
     /**
      * calc the start and end times
@@ -195,7 +211,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     if (!node.timeRestrictions.expr) {
                         node.timeRestrictions.expr = this.getJSONataExpression(node, node.timeRestrictions.value);
                     }
-                    node.timeRestrictions.data = RED.util.evaluateJSONataExpression(node.timeRestrictions.expr, msg);
+                    node.timeRestrictions.data = this.evaluateJSONataExpression(node.timeRestrictions.expr, msg);
                 } else {
                     node.timeRestrictions.data = RED.util.evaluateNodeProperty(node.timeRestrictions.value, node.timeRestrictions.type, node, msg);
                 }
