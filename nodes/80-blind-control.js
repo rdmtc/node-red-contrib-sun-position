@@ -25,6 +25,9 @@
  * blind-control:
  *********************************************/
 'use strict';
+
+const { debug } = require('console');
+
 /** --- Type Defs ---
  * @typedef {import('./types/typedefs.js').runtimeRED} runtimeRED
  * @typedef {import('./types/typedefs.js').runtimeNode} runtimeNode
@@ -576,7 +579,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} nowNr=` + oNow.nowNr);
         }
         const levelMin = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
-        const levelMax = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
+        const levelMax = getBlindPosFromTI(node, msg, node.nodeData.levelMax.type, node.nodeData.levelMax.value, node.nodeData.levelTop);    
         if (node.level.current < levelMin)  {
             // min
             node.debug(`${node.level.current} is below ${levelMin} (min)`);
@@ -1231,6 +1234,12 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             }
                             break;
                         }
+                        case 'setSunDataMinAltitude': {
+                            node.sunData.sunMinAltitude = parseFloat(msg.payload) || node.sunData.sunMinAltitude; //TFR TODO see if it works
+                           node.warn(`SunDataMinAltitude set to ${ node.sunData.sunMinAltitude}`);
+                           
+                        }
+                            break;
                         /* minimum changes Settings */
                         case 'setSunDataMinDelta':
                             node.sunData.minDelta = parseFloat(msg.payload) || node.sunData.minDelta; // payload of 0 makes no sense, use then default
