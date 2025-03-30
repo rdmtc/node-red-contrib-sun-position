@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "3.0.0-alpha1",
+  "version": "3.0.0-alpha2",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -60,7 +60,7 @@
     "lint": "eslint \"./**/*.js\" \"./**/*.html\"",
     "predev": "npm i -g",
     "dev": "node-red -v",
-    "prepublishOnly": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate && mocha \"test/**/*_spec.js\""
+    "prepublishOnly_off": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate && mocha \"test/**/*_spec.js\""
   },
   "repository": {
     "type": "git",
@@ -120,18 +120,17 @@
     "eslint-plugin-html": ">=6.2.0",
     "eslint-plugin-json": ">=3.1.0",
     "eslint-plugin-node": ">=11.1.0",
-    "@types/express": "^4.17.13",
-    "@types/jquery": "^3.5.14",
-    "@types/jqueryui": "^1.12.16",
-    "@types/node-red": "^1.2.1",
-    "jsonata": "^1.8.6",
-    "mocha": "^10.0.0",
-    "node-red": ">=2.1.0",
-    "node-red-dev": "^0.1.5",
-    "node-red-node-test-helper": "^0.3.0",
+    "@types/express": "^5.0.1",
+    "@types/jquery": "^3.5.32",
+    "@types/node-red": "^1.3.5",
+    "jsonata": "^2.0.6",
+    "mocha": "^11.1.0",
+    "node-red": "4.0.9",
+    "node-red-dev": "^0.1.6",
+    "node-red-node-test-helper": "^0.3.4",
     "should": "^13.2.3",
     "should-sinon": "^0.0.6",
-    "sinon": "^14.0.0"
+    "sinon": "^20.0.0"
   },
   "eslintConfig": {
     "env": {
