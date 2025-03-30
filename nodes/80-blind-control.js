@@ -677,7 +677,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             // node.debug(`set next time - smoothTime= ${node.smoothTime}  changeAgain= ${node.sunData.changeAgain} nowNr=` + oNow.nowNr);
         }
         const levelMin = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
-        const levelMax = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
+        // const levelMax = getBlindPosFromTI(node, msg, node.nodeData.levelMin.type, node.nodeData.levelMin.value, node.nodeData.levelBottom);
+        const levelMax = getBlindPosFromTI(node, msg, node.nodeData.levelMax.type, node.nodeData.levelMax.value, node.nodeData.levelTop);
         if (node.level.current < levelMin)  {
             // min
             node.debug(`${node.level.current} is below ${levelMin} (min)`);
@@ -1246,76 +1247,112 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                         return val;
                     };
                     switch (msg.topic) {
-                        /* Blind Settings */
-                        case 'setBlindSettingsTop':
-                            node.nodeData.levelTop = getFloatValue(node.nodeData.levelTop);
-                            break;
-                        case 'setBlindSettingsBottom':
-                            node.nodeData.levelBottom = getFloatValue(node.nodeData.levelBottom);
-                            break;
-                        case 'setBlindSettingsIncrement':
-                            node.nodeData.increment = getFloatValue(node.nodeData.increment);
-                            break;
-                        /* Default Settings */
-                        case 'setBlindSettingsLevel':
-                            node.nodeData.levelDefault = getFloatValue(node.nodeData.levelDefault);
-                            break;
-                        case 'setSettingsTopic':
-                            node.nodeData.topic = msg.payload || node.nodeData.topic;
-                            break;
-                        /* sun Control Settings */
-                        case 'setSunDataTopic':
-                            node.sunData.topic = msg.payload || node.sunData.topic;
-                            break;
-                        case 'setSunDataFloorLength': {
-                            const val = getFloatValue(node.sunData.floorLength);
-                            if (val !== node.sunData.floorLength) {
-                                node.sunData.floorLengthType = 'num';
-                                node.sunData.floorLength = val;
-                            }
-                            break;
+                      /* Blind Settings */
+                      case "setBlindSettingsTop":
+                        node.nodeData.levelTop = getFloatValue(
+                          node.nodeData.levelTop
+                        );
+                        break;
+                      case "setBlindSettingsBottom":
+                        node.nodeData.levelBottom = getFloatValue(
+                          node.nodeData.levelBottom
+                        );
+                        break;
+                      case "setBlindSettingsIncrement":
+                        node.nodeData.increment = getFloatValue(
+                          node.nodeData.increment
+                        );
+                        break;
+                      /* Default Settings */
+                      case "setBlindSettingsLevel":
+                        node.nodeData.levelDefault = getFloatValue(
+                          node.nodeData.levelDefault
+                        );
+                        break;
+                      case "setSettingsTopic":
+                        node.nodeData.topic =
+                          msg.payload || node.nodeData.topic;
+                        break;
+                      /* sun Control Settings */
+                      case "setSunDataTopic":
+                        node.sunData.topic = msg.payload || node.sunData.topic;
+                        break;
+                      case "setSunDataFloorLength": {
+                        const val = getFloatValue(node.sunData.floorLength);
+                        if (val !== node.sunData.floorLength) {
+                          node.sunData.floorLengthType = "num";
+                          node.sunData.floorLength = val;
                         }
-                        /* minimum changes Settings */
-                        case 'setSunDataMinDelta':
-                            node.sunData.minDelta = parseFloat(msg.payload) || node.sunData.minDelta; // payload of 0 makes no sense, use then default
-                            break;
-                        case 'setSmoothTime':
-                            node.smoothTime = parseFloat(msg.payload) || node.smoothTime; // payload of 0 makes no sense, use then default
-                            break;
-                        /* advanced Settings */
-                        case 'setAutoTriggerTime':
-                            node.autoTrigger = Object.assign(node.autoTrigger ,{ defaultTime : parseInt(msg.payload) || node.autoTrigger.defaultTime }); // payload of 0 makes no sense, use then default
-                            break;
-                        case 'setContextStore':
-                            node.contextStore = msg.payload || node.contextStore;
-                            break;
-                        case 'disableRule':
-                            changeRules(node, undefined, msg.payload, { enabled: false });
-                            break;
-                        case 'enableRule':
-                            changeRules(node, undefined, msg.payload, { enabled: true });
-                            break;
-                        case 'disableRuleByPos':
-                            changeRules(node, parseInt(msg.payload), undefined, { enabled: false });
-                            break;
-                        case 'enableRuleByPos':
-                            changeRules(node, parseInt(msg.payload), undefined, { enabled: true });
-                            break;
-                        case 'enableNode':
-                            node.nodeData.isDisabled = false;
-                            node.context().set('isDisabled', false, node.contextStore);
-                            break;
-                        case 'disableNode':
-                            node.nodeData.isDisabled = true;
-                            node.context().set('isDisabled', true, node.contextStore);
-                            node.status({
-                                fill: 'grey',
-                                shape: 'dot',
-                                text: (typeof msg.payload === 'string') ? msg.payload : 'disabled'
-                            });
-                            break;
-                        default:
-                            break;
+                        break;
+                      }
+                      case "setSunDataMinAltitude":
+                        {
+                          config.sunMinAltitude.threshold = parseFloat(msg.payload) || config.sunMinAltitude.threshold; //TFR TODO see if it works
+                          node.warn(`SunDataMinAltitude set to ${config.sunMinAltitude.threshold}`);
+                          break;
+                        }
+                      /* minimum changes Settings */
+                      case "setSunDataMinDelta":
+                        node.sunData.minDelta =
+                          parseFloat(msg.payload) || node.sunData.minDelta; // payload of 0 makes no sense, use then default
+                        break;
+                      case "setSmoothTime":
+                        node.smoothTime =
+                          parseFloat(msg.payload) || node.smoothTime; // payload of 0 makes no sense, use then default
+                        break;
+                      /* advanced Settings */
+                      case "setAutoTriggerTime":
+                        node.autoTrigger = Object.assign(node.autoTrigger, {
+                          defaultTime:
+                            parseInt(msg.payload) ||
+                            node.autoTrigger.defaultTime,
+                        }); // payload of 0 makes no sense, use then default
+                        break;
+                      case "setContextStore":
+                        node.contextStore = msg.payload || node.contextStore;
+                        break;
+                      case "disableRule":
+                        changeRules(node, undefined, msg.payload, {
+                          enabled: false,
+                        });
+                        break;
+                      case "enableRule":
+                        changeRules(node, undefined, msg.payload, {
+                          enabled: true,
+                        });
+                        break;
+                      case "disableRuleByPos":
+                        changeRules(node, parseInt(msg.payload), undefined, {
+                          enabled: false,
+                        });
+                        break;
+                      case "enableRuleByPos":
+                        changeRules(node, parseInt(msg.payload), undefined, {
+                          enabled: true,
+                        });
+                        break;
+                      case "enableNode":
+                        node.nodeData.isDisabled = false;
+                        node
+                          .context()
+                          .set("isDisabled", false, node.contextStore);
+                        break;
+                      case "disableNode":
+                        node.nodeData.isDisabled = true;
+                        node
+                          .context()
+                          .set("isDisabled", true, node.contextStore);
+                        node.status({
+                          fill: "grey",
+                          shape: "dot",
+                          text:
+                            typeof msg.payload === "string"
+                              ? msg.payload
+                              : "disabled",
+                        });
+                        break;
+                      default:
+                        break;
                     }
                     if (node.nodeData.levelTop < node.nodeData.levelBottom) {
                         [node.nodeData.levelBottom, node.nodeData.levelTop] = [node.nodeData.levelTop, node.nodeData.levelBottom];

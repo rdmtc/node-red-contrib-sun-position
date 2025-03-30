@@ -10,3 +10,4 @@ backup/
 backup/*
 temp/
 temp/*
+*.bak
