@@ -601,10 +601,11 @@ function getRuleTimeData(node, msg, rule, timep, dNow, def) {
  * @param {ITimeControlNode} node the node object
  * @param {Object} msg the message object
  * @param {IRuleData} rule a rule object to test
- * @param {ITimeObject} tData Now time object
+ * @param {ITimeObject|function} tDataOrFilter Now time object or compatibility callback
+ * @param {ITimeObject} [tData] Now time object
  * @returns {IRuleData|null} returns the rule if rule is valid, otherwhise null
  */
-function compareRules(node, msg, rule, tData) {
+function compareRules(node, msg, rule, tDataOrFilter, tData) {
     // node.debug(`compareRules rule ${rule.name} (${rule.pos}) rule=${util.inspect(rule, {colors:true, compact:10})}`);
     if (rule.conditional) {
         try {
@@ -620,6 +621,25 @@ function compareRules(node, msg, rule, tData) {
     }
     if (!rule.time) {
         return rule;
+    }
+
+    if (rule.time && typeof rule.time.operator !== 'undefined' && !rule.time.start && !rule.time.end) {
+        const ttype = (rule.time.operator === cNBC_RULE_TYPE_FROM) ? 'start' : 'end';
+        rule.time[ttype] = Object.assign({
+            type: rule.time.type,
+            value: rule.time.value,
+            offsetType: rule.time.offsetType,
+            offset: rule.time.offset,
+            multiplier: rule.time.multiplier,
+            next: false
+        }, rule.time[ttype]);
+        delete rule.time.operator;
+        delete rule.time.operatorText;
+        delete rule.time.type;
+        delete rule.time.value;
+        delete rule.time.offsetType;
+        delete rule.time.offset;
+        delete rule.time.multiplier;
     }
 
     const evaluateRuleForDate = (candidateDate, candidateTs) => {
@@ -675,44 +695,49 @@ function compareRules(node, msg, rule, tData) {
         return false;
     };
 
+    const nowData = (typeof tDataOrFilter === 'function') ? tData : tDataOrFilter;
+    const nowNr = nowData.nowNr;
+    const dayId = nowData.dayId;
+
     rule.timeResult = {
-        now: tData.now
+        now: nowData.now
     };
     if (rule.time.start) {
-        getRuleTimeData(node, msg, rule, 'start', tData.now, Number.MIN_VALUE);
+        getRuleTimeData(node, msg, rule, 'start', nowData.now, Number.MIN_VALUE);
         if (rule.time.end) {
-            getRuleTimeData(node, msg, rule, 'end', tData.now, Number.MAX_VALUE);
+            getRuleTimeData(node, msg, rule, 'end', nowData.now, Number.MAX_VALUE);
             if (rule.timeResult.start.ts > rule.timeResult.end.ts) {
-                if ((tData.dayId === rule.timeResult.start.dayId &&
-                        rule.timeResult.start.ts <= tData.nowNr) ||
-                    (tData.dayId === rule.timeResult.end.dayId &&
-                        rule.timeResult.end.ts > tData.nowNr)) {
+                if ((dayId === rule.timeResult.start.dayId &&
+                        rule.timeResult.start.ts <= nowNr) ||
+                    (dayId === rule.timeResult.end.dayId &&
+                        rule.timeResult.end.ts > nowNr)) {
                     return rule;
                 }
                 return null;
             }
-            if (rule.timeResult.start.ts <= tData.nowNr &&
-                tData.dayId === rule.timeResult.start.dayId &&
-                rule.timeResult.end.ts > tData.nowNr &&
-                tData.dayId === rule.timeResult.end.dayId) {
+            if (rule.timeResult.start.ts <= nowNr &&
+                dayId === rule.timeResult.start.dayId &&
+                rule.timeResult.end.ts > nowNr &&
+                dayId === rule.timeResult.end.dayId) {
                 return rule;
             }
         }
-        if (rule.timeResult.start.ts <= tData.nowNr &&
-            tData.dayId === rule.timeResult.start.dayId) {
-            return rule;
-        }
-        if (!rule.time.end && rule.timeResult.start.ts <= tData.nowNr) {
-            return rule;
+        if (rule.timeResult.start.ts <= nowNr) {
+            if (!rule.time.end) {
+                return rule;
+            }
+            if (dayId === rule.timeResult.start.dayId) {
+                return rule;
+            }
         }
     } else if (rule.time.end) {
-        getRuleTimeData(node, msg, rule, 'end', tData.now, Number.MAX_VALUE);
-        if (rule.timeResult.end.ts > tData.nowNr &&
-            tData.dayId === rule.timeResult.end.dayId) {
+        getRuleTimeData(node, msg, rule, 'end', nowData.now, Number.MAX_VALUE);
+        if (rule.timeResult.end.ts > nowNr &&
+            dayId === rule.timeResult.end.dayId) {
             return rule;
         }
     }
-    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${tData.dayId} rule-DayID=${rule.timeResult[timep].dayId} num=${num} invalid time`);
+    // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${dayId} rule-DayID=${rule.timeResult[timep].dayId} num=${num} invalid time`);
     return null;
 }
 /******************************************************************************************/
