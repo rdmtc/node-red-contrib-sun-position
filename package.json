@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "3.0.0-alpha2",
+  "version": "3.0.0-alpha3",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -258,10 +258,10 @@
         "always"
       ],
       "comma-dangle": [
-        "error",
+        "warn",
         {
-          "arrays": "never",
-          "objects": "never",
+          "arrays": "ignore",
+          "objects": "ignore",
           "imports": "never",
           "exports": "never",
           "functions": "ignore"

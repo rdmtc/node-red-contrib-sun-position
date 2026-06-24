@@ -672,7 +672,8 @@ function compareRules(node, msg, rule, tData) {
                 }
             }
         }
-    }
+        return false;
+    };
 
     rule.timeResult = {
         now: tData.now
@@ -699,6 +700,9 @@ function compareRules(node, msg, rule, tData) {
         }
         if (rule.timeResult.start.ts <= tData.nowNr &&
             tData.dayId === rule.timeResult.start.dayId) {
+            return rule;
+        }
+        if (!rule.time.end && rule.timeResult.start.ts <= tData.nowNr) {
             return rule;
         }
     } else if (rule.time.end) {
