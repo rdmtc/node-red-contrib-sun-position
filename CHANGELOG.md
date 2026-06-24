@@ -2,6 +2,11 @@
 
 ## Installation
 
+### Compatibility update
+
+- Updated the package target to Node-RED 5.x and raised the minimum Node.js requirement to 22.9.0.
+
+
 ### Install of a specific Version in Node-Red
 
 - change to the installation directory of Node-Red

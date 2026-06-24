@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-sun-position",
-  "version": "3.0.0-alpha4",
+  "version": "3.0.1",
   "description": "NodeRED nodes to get sun and moon position",
   "keywords": [
     "node-red",
@@ -50,7 +50,7 @@
   ],
   "main": "none",
   "engines": {
-    "node": ">=12"
+    "node": ">=22.9.0"
   },
   "scripts": {
     "test": "eslint \"./**/*.js\" \"./**/*.html\" && node-red-dev validate && mocha \"test/**/*_spec.js\"",
@@ -95,7 +95,7 @@
   },
   "homepage": "https://github.com/rdmtc/node-red-contrib-sun-position#readme",
   "node-red": {
-    "version": ">=1.2.9",
+    "version": ">=5.0.0",
     "nodes": {
       "position-config": "nodes/10-position-config.js",
       "time-inject": "nodes/20-time-inject.js",
@@ -126,7 +126,7 @@
     "@types/node-red": "^1.3.5",
     "jsonata": "^2.0.6",
     "mocha": "^11.1.0",
-    "node-red": "4.0.9",
+    "node-red": "5.0.0",
     "node-red-dev": "^0.1.6",
     "node-red-node-test-helper": "^0.3.4",
     "should": "^13.2.3",

@@ -42,7 +42,7 @@ This is not an error, it hides only that the node needs to be opened, saved and 
 
 ## Preconditions
 
-These nodes need at least NodeJS Version __12.0__ and Node-Red with Version __1.2.9__! Any early Version of Node-Red will not work!
+These nodes need at least Node.js Version __22.9.0__ and Node-RED Version __5.0.0__ or newer. Earlier Node-RED releases are not supported by this package version.
 
 ## Installation
 
