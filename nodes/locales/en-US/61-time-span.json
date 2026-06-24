@@ -15,7 +15,8 @@
             "result1Value": "value",
             "result1TSFormat": "output format",
             "result1Format": "output format",
-            "result1Offset": "Offset"
+            "result1Offset": "Offset",
+            "resultContainer": "result"
         },
         "typeLabel":{
             "timespan": "timespan between Inputs",

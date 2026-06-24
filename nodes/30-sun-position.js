@@ -50,7 +50,7 @@
  * @property {string} endOffsetType type of the end offset value
  * @property {number} endOffsetMultiplier end offset multipier
  *
- * @property {*} azimuthPos end offset multipier
+ * @property {*} azimuthPos ??
  */
 
 
@@ -78,26 +78,45 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         // @ts-ignore
         const node = this;
         // Retrieve the config node
+        /** @type {IPositionConfigNode} */
         node.positionConfig = RED.nodes.getNode(config.positionConfig);
-        node.topic = config.topic || '';
-        node.rules = config.rules || [];
-        node.azimuthPos = {};
-        node.start = config.start;
-        node.startType = config.startType || 'none';
-        node.startOffset = config.startOffset || 0;
-        node.startOffsetType = config.startOffsetType || 'none';
-        node.startOffsetMultiplier = config.startOffsetMultiplier || 60;
-        node.end = config.end;
-        node.endType = config.endType || 'none';
-        node.endOffset = config.endOffset || 0;
-        node.endOffsetType = config.endOffsetType || 'none';
-        node.endOffsetMultiplier = config.endOffsetMultiplier || 60;
-
+        node.positionConfigValid = true;
         if (!node.positionConfig) {
             node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
             node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
             return;
+        } else if (node.positionConfig.checkNode(
+            error => {
+                const text = RED._('node-red-contrib-sun-position/position-config:errors.config-error', { error });
+                node.warn(text);
+                node.status({fill: 'red', shape: 'dot', text });
+                return true;
+            }, false)) {
+            node.positionConfigValid = false;
+        } else {
+            node.status({});
         }
+
+        // Retrieve the config node
+        node.topic = config.topic || '';
+        node.rules = config.rules || [];
+        node.azimuthPos = {};
+        node.start = {
+            type: config.startType || 'none',
+            value : config.start,
+            offsetType : config.startOffsetType || 'none',
+            offset : config.startOffset || 0,
+            multiplier : config.startOffsetMultiplier || 60,
+            next: false
+        };
+        node.end = {
+            type: config.endType || 'none',
+            value : config.end,
+            offsetType : config.endOffsetType || 'none',
+            offset : config.endOffset || 0,
+            multiplier : config.endOffsetMultiplier || 60,
+            next: false
+        };
 
         node.on('input', function (msg, send, done) {
             // If this is pre-1.0, 'done' will be undefined
@@ -105,19 +124,50 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             send = send || function (...args) { node.send.apply(node, args); };
 
             try {
-                let errorStatus = '';
-                const dNow = hlp.getNowTimeStamp(this, msg);
+                const data = {
+                    now : hlp.getNowTimeStamp(this, msg),
+                    latitude: parseFloat(msg.latitude) || parseFloat(msg.lat),
+                    longitude: parseFloat(msg.longitude) || parseFloat(msg.lon),
+                    height: parseFloat(msg.height)
+                };
+                if (isNaN(data.latitude)) {
+                    delete data.latitude;
+                } else if ((data.latitude < -90) || (data.latitude > 90)) {
+                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.latitude-wrong', data));
+                    delete data.latitude;
+                }
+                if (isNaN(data.longitude)) {
+                    delete data.longitude;
+                } else if ((data.longitude < -180) || (data.longitude > 180)) {
+                    node.error(RED._('position-config.errors.longitude-missing', data));
+                    delete data.longitude;
+                }
+                if (isNaN(data.height)) { delete data.height; }
 
                 if (!node.positionConfig) {
-                    node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
+                    // node.error(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'));
                     node.status({fill: 'red', shape: 'dot', text: RED._('node-red-contrib-sun-position/position-config:errors.config-missing-state') });
                     done(RED._('node-red-contrib-sun-position/position-config:errors.config-missing'), msg);
                     return null;
+                } else if (!node.positionConfigValid) {
+                    let text = '';
+                    if (isNaN(this.latitude) || (this.latitude < -90) || (this.latitude > 90)) {
+                        text = RED._('node-red-contrib-sun-position/errors.latitude-missing');
+                    }
+                    if (isNaN(this.longitude) || (this.longitude < -180) || (this.longitude > 180)) {
+                        text = RED._('node-red-contrib-sun-position/errors.longitude-missing');
+                    }
+                    if (text) {
+                        node.status({fill: 'red', shape: 'dot', text });
+                        done(text, msg);
+                        return null;
+                    }
                 }
+                let errorStatus = '';
                 const ports = new Array(node.rules.length);
 
                 ports[0] = RED.util.cloneMessage(msg);
-                ports[0].payload = node.positionConfig.getSunCalc(dNow, true, false, msg.latitude || msg.lat,  msg.longitude || msg.lon);
+                ports[0].payload = node.positionConfig.getSunCalc(data.now, true, false, data.latitude,  data.longitude);
                 ports[0].topic = node.topic;
                 if (!ports[0].payload.azimuth) {
                     // node.error('Azimuth could not calculated!');
@@ -128,19 +178,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
                 ports[0].payload.pos = [];
                 ports[0].payload.posChanged = false;
-                if (node.startType !== 'none') {
-                    // const startTime = node.positionConfig.getTimeProp(node, msg, node.startType, node.start, node.startOffsetType, node.startOffset, node.startOffsetMultiplier);
-                    const startTime = node.positionConfig.getTimeProp(node, msg, {
-                        type: node.startType,
-                        value : node.start,
-                        offsetType : node.startOffsetType,
-                        offset : node.startOffset,
-                        multiplier : node.startOffsetMultiplier,
-                        now: dNow,
-                        latitude: msg.latitude || msg.lat,
-                        longitude: msg.longitude || msg.lon
-                    });
 
+                if (node.start.type !== 'none') {
+                    const startTime = node.positionConfig.getTimeProp(node, msg, Object.assign({}, node.start, data));
                     node.debug('startTime: ' + util.inspect(startTime, { colors: true, compact: 10, breakLength: Infinity }));
                     if (startTime.error) {
                         errorStatus = 'could not evaluate start time';
@@ -151,18 +191,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     }
                 }
 
-                if (node.endType !== 'none') {
-                    // const endTime = node.positionConfig.getTimeProp(node, msg, node.endType, node.end, node.endOffsetType, node.endOffset, node.endOffsetMultiplier);
-                    const endTime = node.positionConfig.getTimeProp(node, msg, {
-                        type: node.endType,
-                        value : node.end,
-                        offsetType : node.endOffsetType,
-                        offset : node.endOffset,
-                        multiplier : node.endOffsetMultiplier,
-                        now: dNow,
-                        latitude: msg.latitude || msg.lat,
-                        longitude: msg.longitude || msg.lon
-                    });
+                if (node.end.type !== 'none') {
+                    const endTime = node.positionConfig.getTimeProp(node, msg,  Object.assign({}, node.end, data));
 
                     node.debug('endTime: ' + util.inspect(endTime, { colors: true, compact: 10, breakLength: Infinity }));
                     if (endTime.error) {
@@ -175,7 +205,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 }
 
                 if (ports[0].payload.startTime && ports[0].payload.endTime) {
-                    const nowMillis = dNow.getTime();
+                    const nowMillis = data.now.getTime();
                     ports[0].payload.sunInSky = nowMillis > ports[0].payload.startTime && nowMillis < ports[0].payload.endTime;
                 }
 
@@ -189,6 +219,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     ports[0].payload.posChanged = ports[0].payload.posChanged && chg;
                     if (chk) {
                         ports[i + 1] = RED.util.cloneMessage(msg);
+                        ports[i + 1].payload.sunPos = chk;
+                        ports[i + 1].payload.posChanged = chg;
                         ports[i + 1].sunPos = chk;
                         ports[i + 1].posChanged = chg;
                         ports[i + 1].azimuth = ports[0].payload.azimuth;
@@ -263,7 +295,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 if (vType === 'none') {
                     return undefined;
                 }
-                return node.positionConfig.getFloatProp(node, msg, vType, value, 0);
+                return node.positionConfig.getFloatProp(node, msg, { type: vType, value, def: 0 });
             } catch (err) {
                 return undefined;
             }

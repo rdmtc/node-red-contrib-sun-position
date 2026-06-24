@@ -10,4 +10,4 @@ backup/
 backup/*
 temp/
 temp/*
-.npmrc
+*.bak

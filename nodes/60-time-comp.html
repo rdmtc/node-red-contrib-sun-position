@@ -165,7 +165,7 @@ this software without specific prior written permission.
                 const $nodeConfig = $('#node-input-positionConfig');
                 const setup = function(node) {
                     /* global getTypes getSelectFields appendOptions setupTInput autocomplete addLabel initCombobox getBackendData bdDateToTime getCheckboxesStr setMultiselect multiselect setTInputValue */
-                    const types = getTypes(node);
+                    const types = getTypes(node, () => $nodeConfig.val());
                     const selFields = getSelectFields();
                     const operatorTypesShort = [
                         {selection: /(^\*$|^(11,)?12,13,14,15,16(,17)?(,18)?$)/, label: 'DT'},
@@ -191,6 +191,7 @@ this software without specific prior written permission.
                             types.DateEntered,
                             types.TimeEntered,
                             types.TimeSun,
+                            types.TimeSunCustom,
                             types.TimeSunNow,
                             types.TimeMoon,
                             types.DayOfMonth,
@@ -211,6 +212,7 @@ this software without specific prior written permission.
                                 $('.time-row-inputFormat').hide();
                                 $('.time-row-inputOffset').show();
                             } else if ( opType === types.TimeSun.value ||
+                                        opType === types.TimeSunCustom.value ||
                                         opType === types.TimeMoon.value) {
                                 $('.time-row-inputNext').show();
                                 $('.time-row-inputFormat').hide();
@@ -375,6 +377,7 @@ this software without specific prior written permission.
                                     types.DateEntered,
                                     types.TimeEntered,
                                     types.TimeSun,
+                                    types.TimeSunCustom,
                                     types.TimeSunNow,
                                     types.TimeMoon,
                                     types.DayOfMonth,
@@ -462,12 +465,15 @@ this software without specific prior written permission.
                                         $row3.show(); // next
                                         $row4.show(); // offset
                                         $row5.show(); // limit
-                                    } else if (opType === types.DateEntered.value  || opType === types.DateSpecific.value) {
+                                    } else if (opType === types.DateEntered.value  ||
+                                               opType === types.DateSpecific.value) {
                                         $row2.hide(); // format
                                         $row3.hide(); // next
                                         $row4.show(); // offset
                                         $row5.show(); // limit
-                                    } else if (opType === types.TimeSun.value || opType === types.TimeMoon.value ) {
+                                    } else if (opType === types.TimeSun.value ||
+                                               opType === types.TimeSunCustom.value ||
+                                               opType === types.TimeMoon.value ) {
                                         $row2.hide(); // format
                                         $row3.show(); // next
                                         $row4.show(); // offset
@@ -621,6 +627,7 @@ this software without specific prior written permission.
                                         types.TimeEntered,
                                         types.DateEntered,
                                         types.TimeSun,
+                                        types.TimeSunCustom,
                                         types.TimeSunNow,
                                         types.TimeMoon,
                                         types.DayOfMonth,
@@ -638,12 +645,11 @@ this software without specific prior written permission.
                                         types.MoonPhase,
                                         types.SunAzimuth,
                                         types.SunElevation,
-                                        types.SunAzimuthRad,
-                                        types.SunElevationRad,
                                         types.SunTimeByAzimuth,
                                         types.SunTimeByElevationObj,
-                                        types.SunTimeByAzimuthRad,
-                                        types.SunTimeByElevationObjRad,
+                                        types.SunTimeByElevationNext,
+                                        types.SunTimeByElevationRise,
+                                        types.SunTimeByElevationSet,
                                         types.isDST,
                                         types.WeekOfYear,
                                         types.WeekOfYearEven,
@@ -862,6 +868,7 @@ this software without specific prior written permission.
                                 const plVType = $propertyValue.typedInput('type');
                                 if (plVType === types.TimeEntered.value ||
                                     plVType === types.TimeSun.value ||
+                                    plVType === types.TimeSunCustom.value ||
                                     plVType === types.TimeMoon.value) {
                                     $row2.show(); // format
                                     $row3.show(); // offset

@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"baseUrl": "./",
 	 	"checkJs": true,
+		"allowJs": true,
 		"module": "commonJS",
 		"target": "es6",
 		"lib": [
@@ -9,12 +10,16 @@
 		],
 		"paths": {
 			"@types": ["nodes/types"],
-			"@nodes": ["nodes"]
+			"@nodes": ["nodes"],
+			"@static": ["nodes/static"]
 		},
 		"sourceMap": true,
 		"alwaysStrict": true,
 		"resolveJsonModule": true
 	},
-	"include": ["./nodes/types/typedefs.js"],
-	"exclude": ["node_modules", "**/node_modules/*", "temp", "**/temp/*", "backup", "**/backup/*", "examples", "**/examples/*"]
+	"include": ["./nodes/types/typedefs.js", "./nodes/static/htmlglobal.js"],
+	"exclude": ["node_modules", "**/node_modules/*", "temp", "**/temp/*", "backup", "**/backup/*", "examples", "**/examples/*"],
+	"typeAcquisition": {
+		"include": ["jquery", "jqueryui", "node-red"]
+	}
   }

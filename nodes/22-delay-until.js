@@ -100,8 +100,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         }
         if (node.positionConfig.checkNode(
             error => {
-                node.error(error);
-                node.status({fill: 'red', shape: 'dot', text: error });
+                const text = RED._('node-red-contrib-sun-position/position-config:errors.config-error', { error });
+                node.error(text);
+                node.status({fill: 'red', shape: 'dot', text });
+                return true;
             }, false)) {
             return null;
         }
@@ -305,25 +307,25 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             if (node.delayTimer) {
                 clearTimer();
             }
-            const dNow = getIntDate(node.tsCompare, qObj.msg, node);
+            node.timeData.now = getIntDate(node.tsCompare, qObj.msg, node);
 
-            node.nextTime = node.positionConfig.getTimeProp(node, qObj.msg, node.timeData, dNow);
+            node.nextTime = node.positionConfig.getTimeProp(node, qObj.msg, node.timeData);
             if (node.nextTime.error) {
                 node.debug('node.nextTime=' + util.inspect(node.nextTime, { colors: true, compact: 10, breakLength: Infinity }));
                 hlp.handleError(node, node.nextTime.error, null, 'could not evaluate time');
                 return;
 
             }
-            let millisec = hlp.getTimeOut(dNow, node.nextTime.value);
-            // let millisec = node.nextTime.value.valueOf() - dNow.valueOf();
-            node.debug(`set timeout to ${node.nextTime.value.valueOf()} - ${dNow.valueOf()}`);
+            let millisec = hlp.getTimeOut(node.timeData.now, node.nextTime.value);
+            // let millisec = node.nextTime.value.valueOf() - node.timeData.now.valueOf();
+            node.debug(`set timeout to ${node.nextTime.value.valueOf()} - ${node.timeData.now.valueOf()}`);
             // while (millisec < 1) {
-            //    millisec += 86400000; // 24h
+            //    millisec += hlp.TIME_24h; // 24h
             // }
-            if (millisec > 345600000) {
+            if (millisec > hlp.TIME_4d) {
                 // there is a limitation of nodejs that the maximum setTimeout time
                 // should not more then 2147483647 ms (24.8 days).
-                millisec = Math.min((millisec - 129600000), 2147483646);
+                millisec = Math.min((millisec - hlp.TIME_36h), 2147483646);
                 // node.debug('next inject is far far away, plan a inject time recalc in ' + millisec + ' ms');
                 node.delayTimer = setTimeout(() => {
                     delete node.delayTimer;

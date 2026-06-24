@@ -171,8 +171,10 @@ describe('time-comp node', function() {
                 const nc1 = helper.getNode('nc1');
                 try {
                     n1.status.should.be.called();
-                    n1.error.should.be.called().and.calledWith('position-config.errors.latitude-missing');
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
                     nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.latitude-missing');
                     done();
                 } catch(err) {
                     done(err);
@@ -225,8 +227,10 @@ describe('time-comp node', function() {
                 const nc1 = helper.getNode('nc1');
                 try {
                     n1.status.should.be.called();
-                    n1.error.should.be.called().and.calledWith('position-config.errors.longitude-missing');
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
                     nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.longitude-missing');
                     done();
                 } catch(err) {
                     done(err);
@@ -279,8 +283,10 @@ describe('time-comp node', function() {
                 const nc1 = helper.getNode('nc1');
                 try {
                     n1.status.should.be.called();
-                    n1.error.should.be.called().and.calledWith('position-config.errors.latitude-missing');
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
                     nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.latitude-missing');
                     done();
                 } catch(err) {
                     done(err);
@@ -333,8 +339,10 @@ describe('time-comp node', function() {
                 const nc1 = helper.getNode('nc1');
                 try {
                     n1.status.should.be.called();
-                    n1.error.should.be.called().and.calledWith('position-config.errors.longitude-missing');
+                    n1.error.should.be.called();
+                    n1.error.should.be.called().and.calledWith('node-red-contrib-sun-position/position-config:errors.config-error');
                     nc1.error.should.be.called();
+                    nc1.error.should.be.called().and.calledWith('position-config.errors.longitude-missing');
                     done();
                 } catch(err) {
                     done(err);
@@ -599,6 +607,7 @@ describe('time-comp node', function() {
                 });
             });
         });
+
         it('test needs to be implemented', function() {
             this.skip();
         });

@@ -156,7 +156,7 @@ this software without specific prior written permission.
             const setup = function(node) {
                 /* global getTypes setupTInput getBackendData bdDateToTime initializeValue appendOptions */
 
-                const types = getTypes(node);
+                const types = getTypes(node, () => $nodeConfig.val());
                 let onInit = true;
                 // #region initialize
                 /**
@@ -191,6 +191,7 @@ this software without specific prior written permission.
                     types: [
                         types.TimeEntered,
                         types.TimeSun,
+                        types.TimeSunCustom,
                         types.TimeMoon,
                         'msg',
                         'flow',
@@ -199,11 +200,7 @@ this software without specific prior written permission.
                         types.SunTimeByAzimuth,
                         types.SunTimeByElevationNext,
                         types.SunTimeByElevationRise,
-                        types.SunTimeByElevationSet,
-                        types.SunTimeByAzimuthRad,
-                        types.SunTimeByElevationNextRad,
-                        types.SunTimeByElevationRiseRad,
-                        types.SunTimeByElevationSetRad
+                        types.SunTimeByElevationSet
                     ],
                     onChange(_type, _value) {
                         if ( onInit) { return; }

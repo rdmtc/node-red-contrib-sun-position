@@ -195,7 +195,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             intervalAmount : 5,
             cron : 6
         };
-        const intervalMax = 24*60*60*1000 * 3; // 3 Tage
+        const intervalMax = hlp.TIME_3d;
 
         RED.nodes.createNode(this, config);
 
@@ -212,8 +212,10 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             return;
         } else if (node.positionConfig.checkNode(
             error => {
-                node.error(error);
-                node.status({fill: 'red', shape: 'dot', text: error });
+                const text = RED._('node-red-contrib-sun-position/position-config:errors.config-error', { error });
+                node.error(text);
+                node.status({fill: 'red', shape: 'dot', text });
+                return true;
             }, false)) {
             return;
         }
@@ -240,7 +242,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
         } else {
             node.intervalCountType = 'none';
         }
-        node.intervalCountMultiplier = config.intervalCountMultiplier ? config.intervalCountMultiplier : 60000;
+        node.intervalCountMultiplier = config.intervalCountMultiplier ? config.intervalCountMultiplier : hlp.TIME_1min;
 
         if (node.injType === tInj.interval) {
             if (config.intervalStart) {
@@ -393,7 +395,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 vt   : config.payloadType ? ((config.payloadType === 'string') ? 'str' : config.payloadType) : (config.payload ? 'str' : 'date'),
                 o    : config.payloadOffset ? config.payloadOffset : 1,
                 oT   : (config.payloadOffset === 0 || config.payloadOffset === '') ? 'none' : (config.payloadOffsetType ? config.payloadOffsetType : 'num'),
-                oM   : config.payloadOffsetMultiplier ? config.payloadOffsetMultiplier : 60000,
+                oM   : config.payloadOffsetMultiplier ? config.payloadOffsetMultiplier : hlp.TIME_1min,
                 f    : config.payloadTimeFormat ? config.payloadTimeFormat : 0,
                 next : true,
                 days : '*',
@@ -520,7 +522,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
 
         node.props = prepareProps(this, config.props);
 
-        node.recalcTime = (config.recalcTime || 2) * 3600000;
+        node.recalcTime = (config.recalcTime || 2) * hlp.TIME_1h;
 
         node.timeOutStartObj = null;
         node.timeOutEndObj = null;
@@ -654,7 +656,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 node.getIntervalTime();
                 node.doStartInterval(); // starte Interval
             } else if (node.injType === tInj.intervalAmount) {
-                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, {
+                    type: node.intervalCountType, value: node.intervalCount, def: 0
+                });
                 node.intervalTime = Math.floor((millisecEnd - millisecStart) / node.intervalCountMax);
                 node.intervalCountCurrent = 0;
                 node.doStartInterval(); // starte Interval
@@ -742,7 +746,7 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
             node.nextEndTime = nextEndTimeData.value;
 
-            let millisecEnd = 1000 * 60 * 60 * 24; // 24h
+            let millisecEnd = hlp.TIME_24h;
             if ((node.nextEndTime !== null) && (typeof node.nextEndTime !== 'undefined')) {
                 // node.debug('timeout ' + node.nextEndTime + ' is in ' + millisec + 'ms');
                 millisecEnd = hlp.getTimeOut(new Date(), node.nextEndTime);
@@ -761,8 +765,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                 return;
             }
 
-            if (millisecEnd > 345600000) {
-                millisecEnd = Math.min((millisecEnd - 129600000), 2147483646);
+            if (millisecEnd > hlp.TIME_5d) {
+                millisecEnd = Math.min((millisecEnd - hlp.TIME_36h), 2147483646);
                 node.timeOutEndObj = setTimeout(() => {
                     node.doCreateEndTimeout();
                 }, millisecEnd); // 1,5 days before
@@ -801,21 +805,21 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * @returns {string} the text of the interval
          */
         node.getIntervalText = (mstime, val) => {
-            if (mstime === 604800000) {
+            if (mstime === hlp.TIME_WEEK) {
                 if (val === 1) {
                     return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.week');
                 }
                 return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.weeks');
-            } else if (mstime === 86400000) {
+            } else if (mstime === hlp.TIME_24h) {
                 if (val === 1) {
                     return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.day');
                 }
                 return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.days');
-            } else if (mstime === 3600000) {
+            } else if (mstime === hlp.TIME_1h) {
                 return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.hour');
-            } else if (mstime === 60000) {
+            } else if (mstime === hlp.TIME_1min) {
                 return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.min');
-            } else if (mstime === 1000) {
+            } else if (mstime === hlp.TIME_1s) {
                 return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.sec');
             }
             return String(val) + RED._('node-red-contrib-sun-position/position-config:common.units.ms');
@@ -849,13 +853,13 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     node.intervalObj = setInterval(() => {
                         node.send(node.prepOutMsg({ _inject_type: 'interval' }));
                     }, node.intervalTime);
-                    if (node.intervalTime > 43200000) { // 12h
+                    if (node.intervalTime > hlp.TIME_12h) {
                         node.status({
-                            text: '↻' + (node.intervalTime / 3600000).toFixed(1) + 'h'
+                            text: '↻' + (node.intervalTime / hlp.TIME_1h).toFixed(1) + 'h'
                         });
-                    } else if (node.intervalTime > 3600000) { // 1h
+                    } else if (node.intervalTime > hlp.TIME_1h) {
                         node.status({
-                            text: '↻' + (node.intervalTime / 60000).toFixed(2) + 'min'
+                            text: '↻' + (node.intervalTime / hlp.TIME_1min).toFixed(2) + 'min'
                         });
                     } else {
                         node.status({
@@ -913,7 +917,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
          * get and validate a given interval
          */
         node.getIntervalTime = () => {
-            node.intervalTime = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+            node.intervalTime = node.positionConfig.getFloatProp(node, null, {
+                type: node.intervalCountType, value: node.intervalCount, def: 0
+            });
             if (node.intervalTime <= 0) {
                 throw new Error('Interval wrong!');
             } else {
@@ -979,7 +985,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
             }
 
             if (node.injType === tInj.intervalAmount) {
-                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, node.intervalCountType, node.intervalCount, 0);
+                node.intervalCountMax = node.positionConfig.getFloatProp(node, null, {
+                    type: node.intervalCountType, value: node.intervalCount, def: 0
+                });
                 delete node.intervalTime;
             }
 
@@ -1049,15 +1057,14 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     }
                 }
 
-                if (millisec > 345600000) {
-                    // > 4 Days
+                if (millisec > hlp.TIME_5d) {
                     if (node.intervalObj) {
                         clearInterval(node.intervalObj);
                         node.intervalObj = null;
                     }
                     // there is a limitation of nodejs that the maximum setTimeout time
                     // should not more then 2147483647 ms (24.8 days).
-                    millisec = Math.min((millisec - 129600000), 2147483646);
+                    millisec = Math.min((millisec - hlp.TIME_36h), 2147483646);
                     // node.debug('next inject is far far away, plan a inject time recalc in ' + millisec + ' ms');
                     node.timeOutStartObj = setTimeout(() => {
                         node.doRecalcStartTimeOut();
