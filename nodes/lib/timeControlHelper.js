@@ -569,53 +569,70 @@ function compareRules(node, msg, rule, cmp, tData) {
         return rule;
     }
 
-    // @ts-ignore
-    if (rule.time.days && !rule.time.days.includes(tData.dayNr)) {
-        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
-        return null;
-    }
-    // @ts-ignore
-    if (rule.time.months && !rule.time.months.includes(tData.monthNr)) {
-        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
-        return null;
-    }
-    if (rule.time.onlyOddDays && (tData.dateNr % 2 === 0)) { // even
-        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
-        return null;
-    }
-    if (rule.time.onlyEvenDays && (tData.dateNr % 2 !== 0)) { // odd
-        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
-        return null;
-    }
-    if (rule.time.onlyOddWeeks && (tData.weekNr % 2 === 0)) { // even
-        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
-        return null;
-    }
-    if (rule.time.onlyEvenWeeks && (tData.weekNr % 2 !== 0)) { // odd
-        node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
-        return null;
-    }
-    if (rule.time.dateStart || rule.time.dateEnd) {
-        rule.time.dateStart.setFullYear(tData.yearNr);
-        rule.time.dateEnd.setFullYear(tData.yearNr);
-        if (rule.time.dateEnd > rule.time.dateStart) {
-            // in the current year
-            if (tData.now < rule.time.dateStart || tData.now > rule.time.dateEnd) {
-                node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
-                return null;
-            }
-        } else {
-            // switch between year from end to start
-            if (tData.now < rule.time.dateStart && tData.now > rule.time.dateEnd) {
-                node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
-                return null;
+    const evaluateRuleForDate = (candidateDate, candidateTs) => {
+        const candidateDayNr = candidateDate.getDate();
+        const candidateMonthNr = candidateDate.getMonth();
+        const candidateWeekNr = hlp.getWeekOfYear(candidateDate)[1];
+        const candidateYearNr = candidateDate.getFullYear();
+        // @ts-ignore
+        if (rule.time.days && !rule.time.days.includes(candidateDayNr)) {
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid days`);
+            return false;
+        }
+        // @ts-ignore
+        if (rule.time.months && !rule.time.months.includes(candidateMonthNr)) {
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid month`);
+            return false;
+        }
+        if (rule.time.onlyOddDays && (candidateDayNr % 2 === 0)) { // even
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even days`);
+            return false;
+        }
+        if (rule.time.onlyEvenDays && (candidateDayNr % 2 !== 0)) { // odd
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd days`);
+            return false;
+        }
+        if (rule.time.onlyOddWeeks && (candidateWeekNr % 2 === 0)) { // even
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid even week`);
+            return false;
+        }
+        if (rule.time.onlyEvenWeeks && (candidateWeekNr % 2 !== 0)) { // odd
+            node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid odd week`);
+            return false;
+        }
+        if (rule.time.dateStart || rule.time.dateEnd) {
+            const dateStart = new Date(rule.time.dateStart);
+            const dateEnd = new Date(rule.time.dateEnd);
+            dateStart.setFullYear(candidateYearNr);
+            dateEnd.setFullYear(candidateYearNr);
+            if (dateEnd > dateStart) {
+                // in the current year
+                if (candidateDate < dateStart || candidateDate > dateEnd) {
+                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range within year`);
+                    return false;
+                }
+            } else {
+                // switch between year from end to start
+                if (candidateDate < dateStart && candidateDate > dateEnd) {
+                    node.debug(`compareRules rule ${rule.name} (${rule.pos}) invalid date range over year`);
+                    return false;
+                }
             }
         }
-    }
+        return (candidateTs >= 0) && (cmp(candidateTs) === true);
+    };
+
     const num = getRuleTimeData(node, msg, rule, tData.now);
     // node.debug(`compareRules ${rule.name} (${rule.pos}) type=${rule.time.operatorText} - ${rule.time.value} - num=${num} - rule.timeData = ${ util.inspect(rule.timeData, { colors: true, compact: 40, breakLength: Infinity }) }`);
-    if (tData.dayId === rule.timeData.dayId && num >=0 && (cmp(num) === true)) {
+    if (evaluateRuleForDate(rule.timeData.value || tData.now, num)) {
         return rule;
+    }
+    if (rule.time.operator === cRuleFrom) {
+        const prevDate = new Date((rule.timeData.value || tData.now).getTime() - (24 * 60 * 60 * 1000));
+        const prevTs = prevDate.getTime();
+        if (evaluateRuleForDate(prevDate, prevTs)) {
+            return rule;
+        }
     }
     // node.debug(`compareRules rule ${rule.name} (${rule.pos}) dayId=${tData.dayId} rule-DayID=${rule.timeData.dayId} num=${num} cmp=${cmp(num)} invalid time`);
     return null;

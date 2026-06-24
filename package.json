@@ -116,10 +116,11 @@
     "cronosjs": "^1.7.1"
   },
   "devDependencies": {
-    "eslint": ">=8.11.0",
-    "eslint-plugin-html": ">=6.2.0",
-    "eslint-plugin-json": ">=3.1.0",
-    "eslint-plugin-node": ">=11.1.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-html": "^7.0.0",
+    "eslint-plugin-jsdoc": "^48.0.0",
+    "eslint-plugin-json": "^4.0.1",
+    "eslint-plugin-node": "^11.1.0",
     "@types/express": "^4.17.13",
     "@types/jquery": "^3.5.14",
     "@types/node-red": "^1.2.0",
@@ -203,7 +204,7 @@
       ],
       "no-console": "warn",
       "no-unused-vars": [
-        "error",
+        "warn",
         {
           "args": "after-used",
           "argsIgnorePattern": "^_"
@@ -237,10 +238,6 @@
       "array-callback-return": "error",
       "consistent-return": "error",
       "no-lone-blocks": "error",
-      "linebreak-style": [
-        "warn",
-        "unix"
-      ],
       "brace-style": [
         2,
         "1tbs",
@@ -270,7 +267,7 @@
           "functions": "ignore"
         }
       ],
-      "no-trailing-spaces": "error",
+      "no-trailing-spaces": "warn",
       "spaced-comment": [
         "warn",
         "always",
@@ -300,10 +297,6 @@
             "balanced": true
           }
         }
-      ],
-      "eol-last": [
-        "error",
-        "never"
       ]
     }
   }

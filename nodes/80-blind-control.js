@@ -1234,11 +1234,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                             }
                             break;
                         }
-                        case 'setSunDataMinAltitude': {
+                        case 'setSunDataMinAltitude':
                             node.sunData.sunMinAltitude = parseFloat(msg.payload) || node.sunData.sunMinAltitude; //TFR TODO see if it works
-                           node.warn(`SunDataMinAltitude set to ${ node.sunData.sunMinAltitude}`);
-                           
-                        }
+                            node.warn(`SunDataMinAltitude set to ${ node.sunData.sunMinAltitude}`);
                             break;
                         /* minimum changes Settings */
                         case 'setSunDataMinDelta':
