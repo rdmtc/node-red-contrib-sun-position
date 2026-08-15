@@ -928,6 +928,38 @@ describe('time inject node', () => {
             });
         });
 
+        ['pdsTimeByElevationRise', 'pdsTimeByElevationSet', 'pdsTimeByElevationNext'].forEach(type => {
+            it('evaluate time by elevation (' + type + ', regression #466) ', function(done) {
+                // getTimeProp()'s generic fallback branch (used for pdsTimeByElevation*,
+                // which have no dedicated branch there) passed the ISunTimeSingle object
+                // returned by getPropValue() into getDateOfText(), which stringifies
+                // non-Date objects to "[object Object]" and fails to parse it, throwing
+                // "could not evaluate pdsTimeByElevationRise.6" (see #466).
+                const flow = [cfgNode, hlpNode];
+                helper.load([nodeConfig], flow, credentials, () => {
+                    const nc1 = helper.getNode('nc1');
+                    try {
+                        const result = nc1.getTimeProp(nc1, {}, {
+                            type,
+                            value: '6',
+                            offsetType: 'none',
+                            offset: 0,
+                            multiplier: 60000,
+                            next: true,
+                            days: '*',
+                            months: '*',
+                            now: new Date(1577851200000) // 1.1.2020 4:00 UTC
+                        });
+                        should.not.exist(result.error);
+                        result.value.should.be.instanceOf(Date);
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+            });
+        });
+
         it('inject value (dayOfMonth) ', function(done) {
             const flow1 = [
                 {
@@ -1065,9 +1097,6 @@ describe('time inject node', () => {
         types.SunAzimuth,
         types.SunElevation,
         types.SunTimeByElevationObj,
-        types.SunTimeByElevationNext,
-        types.SunTimeByElevationRise,
-        types.SunTimeByElevationSet,
         types.isDST,
         types.WeekOfYear,
         types.WeekOfYearEven,

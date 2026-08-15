@@ -1542,6 +1542,9 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
                     if (typeof res !== 'undefined' && res !== null) {
                         if (data.format) {
                             result.value = hlp.parseDateFromFormat(res, data.format, RED._('position-config.days'), RED._('position-config.month'), RED._('position-config.dayDiffNames'));
+                        } else if (hlp.isValidDate(res.value)) {
+                            // e.g. pdsTimeByElevation(Rise|Set|Next) return a ISunTimeSingle object
+                            result.value = res.value;
                         } else {
                             result.value = hlp.getDateOfText(res, true, (this.tzOffset === 0), this.tzOffset);
                         }
