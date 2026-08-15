@@ -901,6 +901,33 @@ describe('time inject node', () => {
             });
         });
 
+        it('evaluate time by azimuth (regression #561 / #557) ', function(done) {
+            // The "time by azimuth" field (used by the time-inject node's schedule
+            // and by the node editor's live preview, both of which call into
+            // getPropValue() the same way) crashed with
+            // "Cannot read properties of undefined (reading 'latitude')" because the
+            // tprop argument was silently dropped when calling _getSunTimeByAzimuth.
+            const flow = [cfgNode, hlpNode];
+            helper.load([nodeConfig], flow, credentials, () => {
+                const nc1 = helper.getNode('nc1');
+                try {
+                    const result = nc1.getPropValue(nc1, {}, {
+                        type: 'pdsTimeByAzimuth',
+                        value: '125.5',
+                        offsetType: 'none',
+                        offset: 0,
+                        multiplier: 60000,
+                        next: true
+                    }, false, new Date(1577851200000)); // 1.1.2020 4:00 UTC
+                    result.should.be.instanceOf(Date);
+                    result.getTime().should.equal(1577865600164); // Wed Jan 01 2020 08:00:00 GMT+0000 - next time sun reaches azimuth 125.5° after 1.1.2020 4:00
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+
         it('inject value (dayOfMonth) ', function(done) {
             const flow1 = [
                 {
@@ -1037,7 +1064,6 @@ describe('time inject node', () => {
         types.MoonPhase,
         types.SunAzimuth,
         types.SunElevation,
-        types.SunTimeByAzimuth,
         types.SunTimeByElevationObj,
         types.SunTimeByElevationNext,
         types.SunTimeByElevationRise,
