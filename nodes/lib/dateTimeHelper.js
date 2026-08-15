@@ -1239,6 +1239,13 @@ function getDateOfText(dt, preferMonthFirst, utc, timeZoneOffset, dNow) {
         return new Date();
     }
 
+    if (dt instanceof Date) {
+        if (isValidDate(dt)) {
+            return dt;
+        }
+        throw new Error('Could not evaluate as a valid Date or time. Value is not a valid Date object!');
+    }
+
     if (typeof dt === 'object') {
         dt = String(dt);
     }
