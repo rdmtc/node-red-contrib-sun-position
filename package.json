@@ -111,8 +111,6 @@
   },
   "dependencies": {
     "suncalc3": "^2.0.5",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.isequal": "^4.5.0",
     "cronosjs": "^1.7.1"
   },
   "devDependencies": {

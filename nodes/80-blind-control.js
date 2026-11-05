@@ -124,8 +124,8 @@ module.exports = function (/** @type {runtimeRED} */ RED) {
     const hlp = require('./lib/dateTimeHelper.js');
     const ctrlLib = require('./lib/timeControlHelper.js');
     const util = require('util');
-    const clonedeep = require('lodash.clonedeep');
-    const isEqual = require('lodash.isequal');
+    const clonedeep = obj => (typeof structuredClone === 'function' ? structuredClone(obj) : JSON.parse(JSON.stringify(obj)));
+    const isEqual = (a, b) => util.isDeepStrictEqual(a, b);
 
     const cautoTriggerTimeBeforeSun = 10 * hlp.TIME_1min; // 10 min
     const cautoTriggerTimeSun = 5 * hlp.TIME_1min; // 5 min
